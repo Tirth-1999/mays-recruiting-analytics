@@ -24,22 +24,22 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform. Choo
 <td width="50%" valign="top">
 
 ### 📖 Platform Pages
-- **[🏠 Home Dashboard](HOME_DASHBOARD.md)**  
+- **[Home Dashboard](HOME_DASHBOARD.md)**  
   Overview and key metrics
 
-- **[📊 Executive Deep Dive](EXECUTIVE_DEEP_DIVE.md)**  
+- **[Executive Deep Dive](EXECUTIVE_DEEP_DIVE.md)**  
   Comprehensive cohort analysis
 
-- **[🔄 Comparison Tool](COMPARISON_TOOL.md)**  
+- **[Comparison Tool](COMPARISON_TOOL.md)**  
   Year-over-year comparisons
 
-- **[📢 Marketing Analysis](MARKETING_ANALYSIS.md)**  
+- **[Marketing Analysis](MARKETING_ANALYSIS.md)**  
   Marketing spend and ROI
 
-- **[🗄️ Data Explorer](DATA_EXPLORER.md)**  
+- **[Data Explorer](DATA_EXPLORER.md)**  
   Raw data access and export
 
-- **[🔮 Predictive Analytics](PREDICTIVE_ANALYTICS.md)**  
+- **[Predictive Analytics](PREDICTIVE_ANALYTICS.md)**  
   Forecasting and optimization
 
 </td>
@@ -64,17 +64,14 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform. Choo
 <td width="50%" valign="top">
 
 ### 🔧 Technical Guides
-- **[Database Schema](../README.md#️-database-schema)**  
-  Table structures and relationships
+- **[Technical Guide](TECHNICAL_GUIDE.md)**  
+  Database schema, configuration, troubleshooting
 
-- **[ETL Pipeline](../README.md#-etl-pipeline)**  
-  Data loading process
+- **[Version History](../VERSIONING.md)**  
+  Complete development timeline
 
-- **[ML Models Guide](../. kiro/specs/predictive-analytics/USER_GUIDE.md)**  
-  Predictive analytics details
-
-- **[API Reference](API_REFERENCE.md)**  
-  Function and module documentation
+- **[Changelog](../CHANGELOG.md)**  
+  Detailed change log
 
 </td>
 </tr>
