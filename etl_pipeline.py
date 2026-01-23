@@ -148,6 +148,7 @@ def load_all_data():
         ('Dataset/MBS-Flex-Online-Admissions-2025-10-31.xlsx', 2027),
         ('Dataset/MBS-Flex-Online-Admissions-2025-10-31_New.xlsx', 2028),
         ('Dataset/MBS-Flex-Online-Admissions-2025-11-30.xlsx', 2028),
+        ('Dataset/MBS-Flex-Online-Admissions-2025-12-31.xlsx', 2028),
     ]
     
     all_records = []
@@ -194,8 +195,25 @@ def load_all_data():
         print(f"\nTotal records processed: {len(df_records)}")
     
     conn.commit()
+    
+    # Update metadata table with last update date
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS metadata (
+            key TEXT PRIMARY KEY,
+            value TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    conn.execute('''
+        INSERT OR REPLACE INTO metadata (key, value, updated_at)
+        VALUES ('last_data_update', ?, CURRENT_TIMESTAMP)
+    ''', (datetime.now().strftime('%Y-%m-%d'),))
+    
+    conn.commit()
     conn.close()
     print("\nDatabase created successfully: edulytix.db")
+    print(f"Last data update: {datetime.now().strftime('%Y-%m-%d')}")
 
 if __name__ == '__main__':
     load_all_data()

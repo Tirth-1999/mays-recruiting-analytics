@@ -3,6 +3,7 @@ Mays Online Flex Recruiting Analytics Platform
 Single-Page Application with Navigation
 """
 import streamlit as st
+import streamlit.components.v1
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -59,6 +60,52 @@ if 'current_page' not in st.session_state:
 @st.cache_resource
 def get_connection():
     return sqlite3.connect('edulytix.db', check_same_thread=False)
+
+# Program name normalization function
+def normalize_program_name(program_name):
+    """
+    Normalize program names to match between marketing and admissions data.
+    Examples:
+    - "Flex Online Mba" -> "MBA"
+    - "Flex Online Accounting" -> "ACCT"
+    - "MBA" -> "MBA"
+    - "MS ACCT" -> "ACCT"
+    """
+    if not program_name or pd.isna(program_name):
+        return None
+    
+    # Convert to uppercase for matching
+    name_upper = str(program_name).upper()
+    
+    # Mapping dictionary for common program abbreviations
+    program_map = {
+        'MBA': 'MBA',
+        'ACCOUNTING': 'ACCT',
+        'ACCT': 'ACCT',
+        'MARKETING': 'MKTG',
+        'MKTG': 'MKTG',
+        'MIS': 'MISY',
+        'MISY': 'MISY',
+        'HRM': 'HRM',
+        'HUMAN RESOURCE': 'HRM',
+        'ENTREPRENEURIAL LEADERSHIP': 'ENLD',
+        'ENLD': 'ENLD',
+        'AI AND BUSINESS': 'SPBA',
+        'SPBA': 'SPBA',
+        'ARTIFICIAL INTELLIGENCE': 'SPBA'
+    }
+    
+    # Check each key in the mapping
+    for key, value in program_map.items():
+        if key in name_upper:
+            return value
+    
+    # If no match found, return the last word (usually the program abbreviation)
+    words = name_upper.split()
+    if words:
+        return words[-1]
+    
+    return name_upper
 
 # Data loading functions
 @st.cache_data(ttl=600)
@@ -254,7 +301,7 @@ def generate_insights(current_data, latest_data):
     return insights
 
 def process_table_display(conn, selected_table):
-    """Helper function to display table data with filtering options"""
+    """Helper function to display table data with filtering options - styled like Marketing Analysis"""
     try:
         # Table descriptions - what questions each table can help answer
         table_descriptions = {
@@ -328,30 +375,41 @@ def process_table_display(conn, selected_table):
             }
         }
         
-        # Show formatted table description
+        # Show formatted table description with darker background (matching Marketing Analysis)
         if selected_table in table_descriptions:
             desc = table_descriptions[selected_table]
             
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
-                        padding: 20px; border-radius: 10px; margin-bottom: 20px; 
-                        border-left: 5px solid #500000;">
-                <h4 style="margin: 0 0 15px 0; color: #500000;">
+            <div style="text-align: center;
+                        padding: 20px;
+                        background: #e9ecef;
+                        border-radius: 8px;
+                        margin: 20px 0;">
+                <h4 style="color: #500000; margin-top: 0; margin-bottom: 15px; font-size: 18px;">
                     {desc['icon']} {desc['title']}
                 </h4>
-                <p style="margin: 0 0 10px 0; color: #666; font-weight: 600;">
-                    💡 <strong>What questions can this table help answer?</strong>
+                <p style="margin: 0 0 15px 0; color: #495057; font-weight: 600; font-size: 15px;">
+                    💡 What questions can this table help answer?
                 </p>
-                <ul style="margin: 0; padding-left: 20px; color: #444;">
-                    {''.join([f'<li style="margin-bottom: 5px;">{q}</li>' for q in desc['questions']])}
-                </ul>
+                <div style="background: white;
+                            padding: 15px 20px;
+                            border-radius: 6px;
+                            max-width: 700px;
+                            margin: 0 auto;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    {''.join([f'<p style="margin: 8px 0; color: #495057; font-size: 14px; line-height: 1.5;">{q}</p>' for q in desc['questions']])}
+                </div>
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6c757d;">
-                <strong>📋 Table:</strong> <code>{selected_table}</code><br>
-                <em>Explore the data to understand what insights it can provide.</em>
+            <div style="text-align: center;
+                        padding: 15px;
+                        background: #e9ecef;
+                        border-radius: 8px;
+                        margin: 20px 0;">
+                <strong style="color: #500000;">📋 Table:</strong> <code>{selected_table}</code><br>
+                <em style="color: #6c757d;">Explore the data to understand what insights it can provide.</em>
             </div>
             """, unsafe_allow_html=True)
         
@@ -359,12 +417,27 @@ def process_table_display(conn, selected_table):
         table_info_query = f"PRAGMA table_info({selected_table})"
         table_info = pd.read_sql(table_info_query, conn)
         
-        # Show table schema
-        with st.expander("📋 Table Schema"):
+        # Get row count
+        count_query = f"SELECT COUNT(*) as count FROM {selected_table}"
+        row_count = pd.read_sql(count_query, conn)['count'].iloc[0]
+        
+        # Show row count centered
+        st.markdown(f"""
+        <div style="text-align: center; margin: 15px 0; color: #6c757d;">
+            <strong>{row_count:,}</strong> total rows in this table
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Show table schema in expander
+        with st.expander("📋 View Table Schema"):
             st.dataframe(table_info[['name', 'type', 'notnull', 'pk']], use_container_width=True)
         
-        # Filtering options
-        st.markdown("#### 🔍 Filters")
+        # FILTERS SECTION with header
+        st.markdown("""
+        <div class="section-header">
+            <h3>🔍 Filter & Explore Data</h3>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Get all data first to enable filtering
         data_query = f"SELECT * FROM {selected_table}"
@@ -378,7 +451,7 @@ def process_table_display(conn, selected_table):
                 # Column filter
                 columns = ['All Columns'] + list(full_data.columns)
                 selected_columns = st.multiselect(
-                    "Select Columns", 
+                    "📋 Select Columns", 
                     columns, 
                     default=['All Columns'],
                     key=f"columns_{selected_table}"
@@ -392,7 +465,7 @@ def process_table_display(conn, selected_table):
             with filter_col2:
                 # Row limit
                 row_limit = st.number_input(
-                    "Row Limit", 
+                    "📊 Row Limit", 
                     min_value=10, 
                     max_value=1000, 
                     value=100, 
@@ -403,19 +476,23 @@ def process_table_display(conn, selected_table):
             with filter_col3:
                 # Sort options
                 sort_columns = ['None'] + list(full_data.columns)
-                sort_by = st.selectbox("Sort By", sort_columns, key=f"sort_{selected_table}")
-                sort_order = 'Ascending'  # Default value
-                if sort_by != 'None':
-                    sort_order = st.radio(
-                        "Order", 
-                        ['Ascending', 'Descending'], 
-                        horizontal=True,
-                        key=f"order_{selected_table}"
-                    )
+                sort_by = st.selectbox("🔄 Sort By", sort_columns, key=f"sort_{selected_table}")
             
-            # Text search filter
+            # Sort order on new row if sort is selected
+            if sort_by != 'None':
+                sort_order = st.radio(
+                    "Sort Order", 
+                    ['Ascending', 'Descending'], 
+                    horizontal=True,
+                    key=f"order_{selected_table}"
+                )
+            else:
+                sort_order = 'Ascending'
+            
+            # Text search filter - FULL WIDTH
             search_term = st.text_input(
-                "🔍 Search in all columns (case-insensitive)",
+                "🔍 Search in all columns",
+                placeholder="Type to search across all columns (case-insensitive)...",
                 key=f"search_{selected_table}"
             )
             
@@ -446,12 +523,17 @@ def process_table_display(conn, selected_table):
             # Apply row limit
             filtered_data = filtered_data.head(row_limit)
             
-            # Display results
-            st.markdown("#### 📊 Data")
+            # DATA DISPLAY SECTION with header
+            st.markdown("""
+            <div class="section-header">
+                <h3>📊 Data Table</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
             col1, col2 = st.columns([3, 1])
             
             with col1:
-                st.markdown(f"Showing {len(filtered_data):,} of {len(full_data):,} rows")
+                st.markdown(f"**Showing {len(filtered_data):,} of {len(full_data):,} rows**")
             
             with col2:
                 # Download filtered data
@@ -580,6 +662,19 @@ st.markdown("""
     font-weight: bold;
     margin: 0.25rem;
 }
+
+/* Remove bottom border from block container */
+.block-container {
+    padding-bottom: 1rem !important;
+    border-bottom: none !important;
+}
+
+/* Footer responsive styling */
+@media (max-width: 768px) {
+    .footer-content {
+        text-align: center !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -613,38 +708,144 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation Menu with Clickable Buttons
+# Navigation Menu with forced equal heights using aggressive CSS
 st.markdown("""
-<div class="nav-menu">
-    <div style="display: flex; justify-content: center; align-items: center;">
-        <div style="display: flex; gap: 10px;">
+<style>
+/* Active navigation button styling */
+div[data-testid="stButton"] button[kind="primary"] {
+    background-color: #500000 !important;
+    color: white !important;
+    border: 2px solid #500000 !important;
+}
+div[data-testid="stButton"] button[kind="secondary"] {
+    background-color: white !important;
+    color: #500000 !important;
+    border: 2px solid #e0e0e0 !important;
+}
+</style>
 """, unsafe_allow_html=True)
 
-# Navigation buttons
-col1, col2, col3, col4 = st.columns(4)
+# Wrap navigation in a container div with ID for targeting
+st.markdown('<div id="nav-buttons-container">', unsafe_allow_html=True)
 
-with col1:
-    if st.button("🏠 Home", key="nav_home", use_container_width=True):
+# Navigation buttons with active state - 5 tabs now
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns(5)
+
+with nav_col1:
+    if st.button("Home Dashboard    ", key="nav_home", use_container_width=True, 
+                type="primary" if st.session_state.current_page == 'Home' else "secondary"):
         st.session_state.current_page = 'Home'
+        st.rerun()
 
-with col2:
-    if st.button("📊 Executive Deep Dive", key="nav_executive", use_container_width=True):
+with nav_col2:
+    if st.button("Executive Dive    ", key="nav_executive", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Executive_Deep_Dive' else "secondary"):
         st.session_state.current_page = 'Executive_Deep_Dive'
+        st.rerun()
 
-with col3:
-    if st.button("📢 Marketing Analysis", key="nav_marketing", use_container_width=True):
+with nav_col3:
+    if st.button("Comparison Tool   ", key="nav_comparison", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Comparison_Tool' else "secondary"):
+        st.session_state.current_page = 'Comparison_Tool'
+        st.rerun()
+
+with nav_col4:
+    if st.button("Marketing Analysis", key="nav_marketing", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Marketing_Analysis' else "secondary"):
         st.session_state.current_page = 'Marketing_Analysis'
+        st.rerun()
 
-with col4:
-    if st.button("🗄️ Data Explorer", key="nav_database", use_container_width=True):
+with nav_col5:
+    if st.button("Data Explorer     ", key="nav_database", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Database' else "secondary"):
         st.session_state.current_page = 'Database'
+        st.rerun()
 
-st.markdown("</div></div></div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Aggressive CSS to force equal button heights
+st.markdown("""
+<style>
+/* Target the navigation container specifically */
+#nav-buttons-container {
+    display: flex !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+}
+
+#nav-buttons-container > div[data-testid="column"] {
+    flex: 1 !important;
+    display: flex !important;
+}
+
+#nav-buttons-container > div[data-testid="column"] > div {
+    width: 100% !important;
+    display: flex !important;
+}
+
+#nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] {
+    width: 100% !important;
+    display: flex !important;
+}
+
+#nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] > button {
+    width: 100% !important;
+    min-height: 50px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    line-height: 1.3 !important;
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.95rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    #nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] > button {
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] > button {
+        font-size: 0.8rem !important;
+        white-space: normal !important;
+        min-height: 60px !important;
+    }
+}
+</style>
+
+<script>
+// JavaScript to ensure equal heights after render
+setTimeout(function() {
+    const container = document.getElementById('nav-buttons-container');
+    if (container) {
+        const buttons = container.querySelectorAll('button');
+        let maxHeight = 0;
+        
+        // Find the tallest button
+        buttons.forEach(button => {
+            const height = button.offsetHeight;
+            if (height > maxHeight) maxHeight = height;
+        });
+        
+        // Set all buttons to the max height
+        buttons.forEach(button => {
+            button.style.height = maxHeight + 'px';
+        });
+    }
+}, 100);
+</script>
+""", unsafe_allow_html=True)
 
 # Display current page indicator
 current_page_info = {
     'Home': {'icon': '🏠', 'title': 'Home Dashboard'},
-    'Executive_Deep_Dive': {'icon': '📊', 'title': 'Executive Deep Dive'},
+    'Executive_Deep_Dive': {'icon': '📊', 'title': 'Executive Dive'},
+    'Comparison_Tool': {'icon': '🔄', 'title': 'Comparison Tool'},
     'Marketing_Analysis': {'icon': '📢', 'title': 'Marketing Analysis'},
     'Database': {'icon': '🗄️', 'title': 'Data Explorer'}
 }
@@ -652,38 +853,72 @@ current_page_info = {
 current_info = current_page_info[st.session_state.current_page]
 st.markdown(f"""
 <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
-    <h2 style="margin: 0; color: #500000; font-size: 24px;">{current_info['icon']} {current_info['title']}</h2>
+    <h2 style="margin: 0; color: #500000; font-size: 24px;">{current_info['title']}</h2>
 </div>
 """, unsafe_allow_html=True)
 
 # Page Content Based on Navigation
 if st.session_state.current_page == 'Home':
     # HOME PAGE CONTENT
-    st.markdown("## 🎓 Select Cohort for Analysis")
-    col1, col2, col3 = st.columns([2, 2, 4])
-
-    with col1:
+    
+    # Initialize reset counter for Home filters
+    if 'home_reset_count' not in st.session_state:
+        st.session_state.home_reset_count = 0
+    
+    # Initialize funnel log scale state
+    if 'home_funnel_log_scale' not in st.session_state:
+        st.session_state.home_funnel_log_scale = False
+    
+    # Section header for filters
+    st.markdown("""
+    <div style="text-align: center;
+                padding: 15px;
+                background: #e9ecef;
+                border-radius: 8px;
+                margin: 20px 0;">
+        <h3 style="color: #500000; margin: 0; font-size: 20px;">🎓 Select Cohort and Program for Analysis</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Two-column filter layout
+    col_cohort, col_program = st.columns(2)
+    
+    with col_cohort:
         cohort_options = [2028, 2027, 2026]
         selected_cohort = st.selectbox(
-            "Cohort Year",
+            "📅 Cohort Year",
             options=cohort_options,
             index=0,
-            help="Select ONE cohort year for analysis. No mixed-cohort data."
+            help="Select ONE cohort year for analysis. No mixed-cohort data.",
+            key=f"cohort_select_home_{st.session_state.home_reset_count}"
         )
-
-    with col2:
-        st.metric(
-            label="Selected Cohort",
-            value=f"Class of {selected_cohort}",
-            delta="Primary Focus" if selected_cohort == 2028 else None
+    
+    with col_program:
+        # Get available programs
+        programs_df = load_programs()
+        program_options = ['All Programs'] + sorted(programs_df['program_code'].tolist())
+        selected_program = st.selectbox(
+            "🎓 Program Focus",
+            options=program_options,
+            index=0,
+            help="Select a specific program or view all programs",
+            key=f"program_select_home_{st.session_state.home_reset_count}"
         )
-
-    with col3:
-        st.info(f"""
-        📊 **Analyzing Class of {selected_cohort}**
-        
-        All metrics below are specific to this cohort only. Use the Executive Deep Dive for detailed year-over-year comparisons.
-        """)
+    
+    # Info box centered
+    st.markdown(f"""
+    <div style="background: #f0f8ff;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 15px 0;
+                text-align: center;">
+        <strong style="color: #500000; font-size: 16px;">📊 Analyzing Class of {selected_cohort}{' - ' + selected_program if selected_program != 'All Programs' else ''}</strong><br>
+        <span style="color: #495057; font-size: 14px;">
+            All metrics below are specific to this cohort{' and program' if selected_program != 'All Programs' else ''}.<br>
+            Use the Executive Deep Dive for detailed year-over-year comparisons.
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -692,6 +927,10 @@ if st.session_state.current_page == 'Home':
     query = 'SELECT * FROM admissions_metrics WHERE cohort_year = ? ORDER BY report_date, program'
     df = pd.read_sql(query, conn, params=[selected_cohort])
     df['report_date'] = pd.to_datetime(df['report_date'])
+    
+    # Filter by program if specific program is selected
+    if selected_program != 'All Programs':
+        df = df[df['program'] == selected_program]
 
     if not df.empty:
         # Filter out dates with no real data
@@ -702,49 +941,133 @@ if st.session_state.current_page == 'Home':
         latest_date = df['report_date'].max()
         latest_data = df[df['report_date'] == latest_date]
 
-        # Main Dashboard
-        st.header(f"Current Stats - Class of {selected_cohort}")
-        st.caption(f"All metrics below are specific to the {selected_cohort} cohort • Last updated: {latest_date.strftime('%B %d, %Y')}")
+        # Section header for current stats
+        st.markdown("""
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Current Stats - Class of {}</h3>
+            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                All metrics below are specific to the {} cohort • Last updated: {}
+            </p>
+        </div>
+        """.format(selected_cohort, selected_cohort, latest_date.strftime('%B %d, %Y')), unsafe_allow_html=True)
 
-        # Key Metrics Row
-        col1, col2, col3, col4 = st.columns(4)
+        # Key Metrics Row - with truly synchronized heights using CSS Grid
+        st.markdown("""
+        <style>
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 20px 0;
+        }
+        .metric-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .metric-number {
+            color: #500000;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        .metric-label {
+            margin: 10px 0 5px 0;
+            color: #495057;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.3;
+        }
+        .metric-small {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        @media (max-width: 768px) {
+            .metrics-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .metrics-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
         total_cohort = latest_data[latest_data['metric_name'] == 'anticipated_cohort_size']['metric_value'].sum()
         total_applications = latest_data[latest_data['metric_name'] == 'total_applications']['metric_value'].sum()
         total_inquiries = latest_data[latest_data['metric_name'] == 'inquiries_received']['metric_value'].sum()
         total_accepted = latest_data[latest_data['metric_name'] == 'admissions_accepted']['metric_value'].sum()
+        conversion_rate = (total_applications / total_inquiries * 100) if total_inquiries > 0 else 0
+        conversion_color = '#28a745' if conversion_rate > 30 else '#ffc107' if conversion_rate > 20 else '#dc3545'
 
-        with col1:
-            st.metric(
-                label=f"Enrolled Students (as of {latest_date.strftime('%b %d')})",
-                value=f"{int(total_cohort) if pd.notna(total_cohort) else 0}",
-                help="Current number of enrolled students in this cohort"
-            )
+        # Single container with all four boxes - this ensures they all have the same height
+        st.markdown(f"""
+        <div class="metrics-container">
+            <div class="metric-box">
+                <h2 class="metric-number">🎯 {int(total_cohort) if pd.notna(total_cohort) else 0}</h2>
+                <p class="metric-label">Enrolled Students</p>
+                <small class="metric-small">as of {latest_date.strftime('%b %d')}</small>
+            </div>
+            <div class="metric-box">
+                <h2 class="metric-number">📝 {int(total_applications) if pd.notna(total_applications) else 0}</h2>
+                <p class="metric-label">Total Applications</p>
+                <small class="metric-small">submitted</small>
+            </div>
+            <div class="metric-box">
+                <h2 class="metric-number">👥 {int(total_inquiries) if pd.notna(total_inquiries) else 0}</h2>
+                <p class="metric-label">Total Inquiries</p>
+                <small class="metric-small">received</small>
+            </div>
+            <div class="metric-box">
+                <h2 class="metric-number" style="color: {conversion_color};">📈 {conversion_rate:.1f}%</h2>
+                <p class="metric-label">Conversion Rate</p>
+                <small class="metric-small">Inquiry → Application</small>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        with col2:
-            st.metric(
-                label="Total Applications",
-                value=f"{int(total_applications) if pd.notna(total_applications) else 0}"
-            )
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("---")
 
-        with col3:
-            st.metric(
-                label="Total Inquiries",
-                value=f"{int(total_inquiries) if pd.notna(total_inquiries) else 0}"
-            )
-
-        with col4:
-            conversion_rate = (total_applications / total_inquiries * 100) if total_inquiries > 0 else 0
-            st.metric(
-                label="Inquiry → Application Rate",
-                value=f"{conversion_rate:.1f}%"
-            )
-
-        st.divider()
-
-        # Admissions Funnel
-        st.subheader(f"Admissions Funnel - Class of {selected_cohort}")
-        st.caption("Single-cohort analysis showing the complete application journey")
+        # Admissions Funnel Section
+        st.markdown("""
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">🎯 Admissions Funnel - Class of {}</h3>
+            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                Single-cohort analysis showing the complete application journey
+            </p>
+        </div>
+        """.format(selected_cohort), unsafe_allow_html=True)
+        
+        # Log scale toggle for funnel
+        col_spacer1, col_toggle, col_spacer2 = st.columns([2, 1, 2])
+        with col_toggle:
+            if st.button(
+                f"📊 {'Log' if st.session_state.home_funnel_log_scale else 'Linear'} Scale",
+                key="toggle_log_funnel_home",
+                use_container_width=True,
+                type="secondary"
+            ):
+                st.session_state.home_funnel_log_scale = not st.session_state.home_funnel_log_scale
+                st.rerun()
 
         funnel_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'admissions_accepted']
         funnel_labels = ['Inquiries', 'Applications', 'Offers', 'Accepted']
@@ -754,38 +1077,135 @@ if st.session_state.current_page == 'Home':
             value = latest_data[latest_data['metric_name'] == metric]['metric_value'].sum()
             funnel_data.append(value)
 
-        fig_funnel = go.Figure(go.Funnel(
-            y=funnel_labels,
-            x=funnel_data,
-            textinfo="value+percent initial",
-            marker={"color": ["#500000", "#700000", "#900000", "#B00000"]}
-        ))
-
-        fig_funnel.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_funnel, width='stretch')
-
-        st.divider()
-
-        # Program Comparison
-        st.subheader("Program Comparison")
+        # Use bar chart instead of funnel when log scale is enabled
+        if st.session_state.home_funnel_log_scale:
+            fig_funnel = go.Figure(go.Bar(
+                x=funnel_labels,
+                y=funnel_data,
+                marker={"color": ["#500000", "#700000", "#900000", "#B00000"]},
+                text=funnel_data,
+                texttemplate='%{text:,.0f}',
+                textposition='outside',
+                hovertemplate='<b>%{x}</b><br>Count: %{y:,.0f}<extra></extra>'
+            ))
+            fig_funnel.update_layout(
+                height=500,
+                showlegend=False,
+                yaxis_type='log',
+                yaxis_title='Count (Log Scale)',
+                xaxis_title='Stage',
+                margin=dict(t=80, b=50, l=50, r=50)  # Add top margin to prevent clipping
+            )
+        else:
+            fig_funnel = go.Figure(go.Funnel(
+                y=funnel_labels,
+                x=funnel_data,
+                textinfo="value+percent initial",
+                marker={"color": ["#500000", "#700000", "#900000", "#B00000"]}
+            ))
+            fig_funnel.update_layout(height=400, showlegend=False)
         
-        # Interactive filter controls for program comparison
-        st.markdown("**📊 Select Metrics to Display:**")
-        prog_filter_col1, prog_filter_col2, prog_filter_col3, prog_filter_col4 = st.columns(4)
-        
-        with prog_filter_col1:
-            show_inquiries_prog = st.checkbox("👥 Inquiries", value=True, key="show_inq_prog_home")
-        with prog_filter_col2:
-            show_applications_prog = st.checkbox("📝 Applications", value=True, key="show_apps_prog_home")
-        with prog_filter_col3:
-            show_accepted_prog = st.checkbox("✅ Accepted", value=True, key="show_acc_prog_home")
-        with prog_filter_col4:
-            show_cohort_prog = st.checkbox("🎯 Cohort Size", value=True, key="show_cohort_prog_home")
-        
-        # Add instruction tooltip for program comparison
+        # Center the chart
+        col_spacer1, col_chart, col_spacer2 = st.columns([0.5, 3, 0.5])
+        with col_chart:
+            st.plotly_chart(fig_funnel, use_container_width=True)
+
+        st.markdown("---")
+
+        # Program Comparison Section
         st.markdown("""
-        <div style="background: #f0f8ff; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-            💡 <strong>Interactive Bar Chart:</strong> Use checkboxes above to show/hide metrics • Click legend items to toggle • Hover bars for exact values
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Program Comparison</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Initialize program filter states
+        if 'prog_home_show_inquiries' not in st.session_state:
+            st.session_state.prog_home_show_inquiries = True
+        if 'prog_home_show_applications' not in st.session_state:
+            st.session_state.prog_home_show_applications = True
+        if 'prog_home_show_accepted' not in st.session_state:
+            st.session_state.prog_home_show_accepted = True
+        if 'prog_home_show_cohort' not in st.session_state:
+            st.session_state.prog_home_show_cohort = True
+        if 'prog_home_log_scale' not in st.session_state:
+            st.session_state.prog_home_log_scale = False
+        
+        # Filter controls with custom styling
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 15px 0;">
+        """, unsafe_allow_html=True)
+        
+        filter_col1, filter_col2, filter_col3, filter_col4, filter_col5 = st.columns(5)
+        
+        with filter_col1:
+            if st.button(
+                f"{'✓' if st.session_state.prog_home_show_inquiries else '○'} Inquiries",
+                key="toggle_inq_prog_home",
+                use_container_width=True,
+                type="primary" if st.session_state.prog_home_show_inquiries else "secondary"
+            ):
+                st.session_state.prog_home_show_inquiries = not st.session_state.prog_home_show_inquiries
+                st.rerun()
+        
+        with filter_col2:
+            if st.button(
+                f"{'✓' if st.session_state.prog_home_show_applications else '○'} Applications",
+                key="toggle_apps_prog_home",
+                use_container_width=True,
+                type="primary" if st.session_state.prog_home_show_applications else "secondary"
+            ):
+                st.session_state.prog_home_show_applications = not st.session_state.prog_home_show_applications
+                st.rerun()
+        
+        with filter_col3:
+            if st.button(
+                f"{'✓' if st.session_state.prog_home_show_accepted else '○'} Accepted",
+                key="toggle_acc_prog_home",
+                use_container_width=True,
+                type="primary" if st.session_state.prog_home_show_accepted else "secondary"
+            ):
+                st.session_state.prog_home_show_accepted = not st.session_state.prog_home_show_accepted
+                st.rerun()
+        
+        with filter_col4:
+            if st.button(
+                f"{'✓' if st.session_state.prog_home_show_cohort else '○'} Cohort Size",
+                key="toggle_cohort_prog_home",
+                use_container_width=True,
+                type="primary" if st.session_state.prog_home_show_cohort else "secondary"
+            ):
+                st.session_state.prog_home_show_cohort = not st.session_state.prog_home_show_cohort
+                st.rerun()
+        
+        with filter_col5:
+            if st.button(
+                f"📊 {'Log' if st.session_state.prog_home_log_scale else 'Linear'} Scale",
+                key="toggle_log_prog_home",
+                use_container_width=True,
+                type="secondary"
+            ):
+                st.session_state.prog_home_log_scale = not st.session_state.prog_home_log_scale
+                st.rerun()
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Simple info box for interactivity
+        st.markdown("""
+        <div style="background: #f0f8ff;
+                    padding: 12px;
+                    border-radius: 6px;
+                    margin-bottom: 15px;
+                    text-align: center;
+                    font-size: 0.9rem;">
+            💡 <strong>Interactive Chart:</strong> Use buttons above to show/hide metrics • Click legend items to toggle • Hover bars for exact values
         </div>
         """, unsafe_allow_html=True)
 
@@ -802,10 +1222,10 @@ if st.session_state.current_page == 'Home':
             fig_comparison = go.Figure()
             
             metrics_to_plot = {
-                'inquiries_received': ('Inquiries', show_inquiries_prog, '#500000'),
-                'total_applications': ('Applications', show_applications_prog, '#700000'),
-                'admissions_accepted': ('Accepted', show_accepted_prog, '#900000'),
-                'anticipated_cohort_size': ('Cohort Size', show_cohort_prog, '#B00000')
+                'inquiries_received': ('Inquiries', st.session_state.prog_home_show_inquiries, '#500000'),
+                'total_applications': ('Applications', st.session_state.prog_home_show_applications, '#700000'),
+                'admissions_accepted': ('Accepted', st.session_state.prog_home_show_accepted, '#900000'),
+                'anticipated_cohort_size': ('Cohort Size', st.session_state.prog_home_show_cohort, '#B00000')
             }
             
             for metric, (label, show_flag, color) in metrics_to_plot.items():
@@ -815,6 +1235,9 @@ if st.session_state.current_page == 'Home':
                         x=program_comparison.index,
                         y=program_comparison[metric],
                         marker_color=color,
+                        text=program_comparison[metric],
+                        texttemplate='%{text:,.0f}',
+                        textposition='outside',
                         hovertemplate='<b>' + label + '</b><br>' +
                                      'Program: %{x}<br>' +
                                      'Count: %{y:,.0f}<br>' +
@@ -823,42 +1246,279 @@ if st.session_state.current_page == 'Home':
             
             fig_comparison.update_layout(
                 barmode='group',
-                height=400,
+                height=500,
                 xaxis_title='Program',
                 yaxis_title='Count',
+                yaxis_type='log' if st.session_state.prog_home_log_scale else 'linear',
+                margin=dict(t=80, b=50, l=50, r=50),  # Add top margin to prevent clipping
                 legend=dict(
                     x=1, y=1,
                     xanchor='right', yanchor='top',
                     bgcolor='rgba(255,255,255,0.9)',
                     bordercolor='rgba(0,0,0,0.2)',
                     borderwidth=1
-                ),
-                annotations=[
-                    dict(
-                        text="💡 Click legend items or use checkboxes above to customize view",
-                        xref="paper", yref="paper",
-                        x=0.02, y=0.02, xanchor='left', yanchor='bottom',
-                        showarrow=False,
-                        font=dict(size=10, color='gray'),
-                        bgcolor='rgba(255,255,255,0.9)',
-                        bordercolor='gray',
-                        borderwidth=1
-                    )
-                ]
+                )
             )
             
-            st.plotly_chart(fig_comparison, width='stretch')
+            # Center the chart
+            col_spacer1, col_chart, col_spacer2 = st.columns([0.2, 3.6, 0.2])
+            with col_chart:
+                st.plotly_chart(fig_comparison, use_container_width=True)
+        
+        st.markdown("---")
+        
+        # Trend Analysis Section
+        st.markdown("""
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Trend Analysis</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Initialize session state for toggle buttons
+        if 'home_trend_show_apps' not in st.session_state:
+            st.session_state.home_trend_show_apps = True
+        if 'home_trend_show_inq' not in st.session_state:
+            st.session_state.home_trend_show_inq = True
+        if 'home_trend_show_inq_conv' not in st.session_state:
+            st.session_state.home_trend_show_inq_conv = True
+        if 'home_trend_show_app_conv' not in st.session_state:
+            st.session_state.home_trend_show_app_conv = True
+        
+        time_series = df[df['metric_name'].isin([
+            'inquiries_received', 'total_applications', 'admissions_offered'
+        ])].pivot_table(
+            index='report_date',
+            columns='metric_name',
+            values='metric_value',
+            aggfunc='sum'
+        ).fillna(0)
+        
+        if not time_series.empty:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Application & Inquiry Trends</h4>", unsafe_allow_html=True)
+                
+                # Toggle buttons for line selection
+                st.markdown("**📊 Select Lines to Display:**")
+                filter_col1, filter_col2 = st.columns(2)
+                
+                with filter_col1:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_apps else '○'} Applications",
+                        key="toggle_apps_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_apps else "secondary"
+                    ):
+                        st.session_state.home_trend_show_apps = not st.session_state.home_trend_show_apps
+                        st.rerun()
+                
+                with filter_col2:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_inq else '○'} Inquiries",
+                        key="toggle_inq_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_inq else "secondary"
+                    ):
+                        st.session_state.home_trend_show_inq = not st.session_state.home_trend_show_inq
+                        st.rerun()
+                
+                fig_trend1 = go.Figure()
+                
+                if 'total_applications' in time_series.columns and st.session_state.home_trend_show_apps:
+                    fig_trend1.add_trace(go.Scatter(
+                        x=time_series.index,
+                        y=time_series['total_applications'],
+                        mode='lines+markers',
+                        name='Applications',
+                        line=dict(color='#500000', width=3),
+                        marker=dict(size=8),
+                        hovertemplate='<b>Applications</b><br>' +
+                                     'Date: %{x}<br>' +
+                                     'Count: %{y:,.0f}<br>' +
+                                     '<extra></extra>'
+                    ))
+                
+                if 'inquiries_received' in time_series.columns and st.session_state.home_trend_show_inq:
+                    fig_trend1.add_trace(go.Scatter(
+                        x=time_series.index,
+                        y=time_series['inquiries_received'],
+                        mode='lines+markers',
+                        name='Inquiries',
+                        line=dict(color='#B00000', width=3),
+                        marker=dict(size=8),
+                        hovertemplate='<b>Inquiries</b><br>' +
+                                     'Date: %{x}<br>' +
+                                     'Count: %{y:,.0f}<br>' +
+                                     '<extra></extra>'
+                    ))
+                
+                fig_trend1.update_layout(
+                    height=400,
+                    xaxis_title='Date',
+                    yaxis_title='Count',
+                    legend=dict(
+                        x=1, y=1,
+                        xanchor='right', yanchor='top',
+                        bgcolor='rgba(255,255,255,0.9)',
+                        bordercolor='rgba(0,0,0,0.2)',
+                        borderwidth=1
+                    )
+                )
+                st.plotly_chart(fig_trend1, use_container_width=True)
+            
+            with col2:
+                st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Conversion Rates Over Time</h4>", unsafe_allow_html=True)
+                
+                # Toggle buttons for conversion rates
+                st.markdown("**📊 Select Conversion Metrics:**")
+                conv_filter_col1, conv_filter_col2 = st.columns(2)
+                
+                with conv_filter_col1:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_inq_conv else '○'} Inquiry → App",
+                        key="toggle_inq_conv_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_inq_conv else "secondary"
+                    ):
+                        st.session_state.home_trend_show_inq_conv = not st.session_state.home_trend_show_inq_conv
+                        st.rerun()
+                
+                with conv_filter_col2:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_app_conv else '○'} App → Offer",
+                        key="toggle_app_conv_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_app_conv else "secondary"
+                    ):
+                        st.session_state.home_trend_show_app_conv = not st.session_state.home_trend_show_app_conv
+                        st.rerun()
+                
+                conversion_data = []
+                for date in time_series.index:
+                    inquiries_ts = time_series.loc[date, 'inquiries_received'] if 'inquiries_received' in time_series.columns else 0
+                    applications_ts = time_series.loc[date, 'total_applications'] if 'total_applications' in time_series.columns else 0
+                    offers_ts = time_series.loc[date, 'admissions_offered'] if 'admissions_offered' in time_series.columns else 0
+                    
+                    inquiry_conv = (applications_ts / inquiries_ts * 100) if inquiries_ts > 0 else 0
+                    app_conv = (offers_ts / applications_ts * 100) if applications_ts > 0 else 0
+                    
+                    conversion_data.append({
+                        'date': date,
+                        'inquiry_conversion': inquiry_conv,
+                        'application_conversion': app_conv
+                    })
+                
+                conv_df = pd.DataFrame(conversion_data)
+                
+                if not conv_df.empty:
+                    fig_trend2 = go.Figure()
+                    
+                    if st.session_state.home_trend_show_inq_conv:
+                        fig_trend2.add_trace(go.Scatter(
+                            x=conv_df['date'],
+                            y=conv_df['inquiry_conversion'],
+                            mode='lines+markers',
+                            name='Inquiry → App (%)',
+                            line=dict(color='#28a745', width=3),
+                            marker=dict(size=8),
+                            hovertemplate='<b>Inquiry to Application</b><br>' +
+                                         'Date: %{x}<br>' +
+                                         'Conversion Rate: %{y:.1f}%<br>' +
+                                         '<extra></extra>'
+                        ))
+                    
+                    if st.session_state.home_trend_show_app_conv:
+                        fig_trend2.add_trace(go.Scatter(
+                            x=conv_df['date'],
+                            y=conv_df['application_conversion'],
+                            mode='lines+markers',
+                            name='App → Offer (%)',
+                            line=dict(color='#ffc107', width=3),
+                            marker=dict(size=8),
+                            hovertemplate='<b>Application to Offer</b><br>' +
+                                         'Date: %{x}<br>' +
+                                         'Conversion Rate: %{y:.1f}%<br>' +
+                                         '<extra></extra>'
+                        ))
+                    
+                    fig_trend2.update_layout(
+                        height=400,
+                        xaxis_title='Date',
+                        yaxis_title='Conversion Rate (%)',
+                        legend=dict(
+                            x=1, y=1,
+                            xanchor='right', yanchor='top',
+                            bgcolor='rgba(255,255,255,0.9)',
+                            bordercolor='rgba(0,0,0,0.2)',
+                            borderwidth=1
+                        )
+                    )
+                    st.plotly_chart(fig_trend2, use_container_width=True)
 
     else:
-        st.warning("⚠️ No data available for the selected cohort.")
+        st.warning("⚠️ No data available for the selected cohort{' and program' if selected_program != 'All Programs' else ''}.")
+    
+    # Footer for Home page
+    st.divider()
+    footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
+    with footer_col1:
+        st.markdown(f"""
+        <div class="footer-left footer-content" style="text-align: left;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with footer_col2:
+        st.components.v1.html("""
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
+            <button onclick="window.top.print()" 
+                    style="background-color: white;
+                           color: #500000;
+                           border: 2px solid #e0e0e0;
+                           border-radius: 8px;
+                           padding: 0.6rem 1.2rem;
+                           font-size: 0.95rem;
+                           font-weight: 600;
+                           cursor: pointer;
+                           transition: all 0.3s ease;
+                           width: 100%;
+                           min-height: 45px;
+                           font-family: 'Source Sans Pro', sans-serif;"
+                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
+                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
+                🖨️ Print Page
+            </button>
+        </div>
+        """, height=70)
+    with footer_col3:
+        st.markdown("""
+        <div class="footer-right footer-content" style="text-align: right;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 elif st.session_state.current_page == 'Executive_Deep_Dive':
     # EXECUTIVE DEEP DIVE CONTENT
-    st.markdown("## 🎯 Analysis Configuration")
+    
+    # Section header for filters
+    st.markdown("""
+    <div style="text-align: center;
+                padding: 15px;
+                background: #e9ecef;
+                border-radius: 8px;
+                margin: 20px 0;">
+        <h3 style="color: #500000; margin: 0; font-size: 20px;">🎓 Select Cohort and Program for Analysis</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Two-column filter layout
+    col_cohort, col_program = st.columns(2)
 
-    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
-
-    with col1:
+    with col_cohort:
         cohort_options = [2028, 2027, 2026]
         selected_cohort = st.selectbox(
             "📅 Primary Cohort",
@@ -867,7 +1527,7 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
             help="Select primary cohort for analysis"
         )
 
-    with col2:
+    with col_program:
         programs_df = load_programs()
         program_options = ["All Programs"] + sorted(programs_df['program_code'].tolist())
         selected_program_filter = st.selectbox(
@@ -876,63 +1536,53 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
             help="Filter by specific program"
         )
 
-    with col3:
-        comparison_cohorts = [c for c in cohort_options if c != selected_cohort]
-        comparison_cohort = st.selectbox(
-            "📈 Compare With",
-            options=["None"] + comparison_cohorts,
-            help="Select cohort for YoY comparison"
-        )
-
-    with col4:
-        analysis_depth = st.selectbox(
-            "🔍 Analysis Depth",
-            options=["Executive Summary", "Detailed Analytics", "Full Deep Dive"],
-            index=1,
-            help="Choose level of detail"
-        )
-
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     
-    # Add interactive features guide
+    # How to Use This Section
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); 
-                padding: 15px; border-radius: 8px; margin-bottom: 20px; 
-                border-left: 5px solid #500000;">
-        <h4 style="margin: 0 0 10px 0; color: #500000;">
-            🎯 Interactive Chart Features Guide
-        </h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem;">
-            <div>
-                <strong>📊 Line Chart Controls:</strong><br>
-                • Use checkboxes to show/hide specific lines<br>
-                • Click legend items to toggle lines on/off<br>
-                • Hover over data points for detailed information
-            </div>
-            <div>
-                <strong>🔍 Chart Navigation:</strong><br>
-                • Click and drag to zoom into time periods<br>
-                • Double-click to reset zoom level<br>
-                • All charts are fully interactive and responsive
+    <div style="text-align: center;
+                padding: 15px;
+                background: #e9ecef;
+                border-radius: 8px;
+                margin: 20px 0;">
+        <h3 style="color: #500000; margin: 0 0 15px 0; font-size: 20px;">
+            💡 How to Use This Section
+        </h3>
+        <div style="background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-top: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057; text-align: left;">
+                <div>
+                    <strong style="color: #500000;">📊 Navigation & Filters:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li><strong>Primary Cohort:</strong> Select the class year you want to analyze</li>
+                        <li><strong>Program Focus:</strong> Filter by specific program or view all programs</li>
+                        <li><strong>Four Tabs:</strong> Navigate between Performance, Trends, Programs, and Data Tables</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong style="color: #500000;">🎯 Interactive Features:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li><strong>Toggle Buttons:</strong> Show/hide specific metrics on charts</li>
+                        <li><strong>Log Scale:</strong> Switch between linear and logarithmic scales for better visualization</li>
+                        <li><strong>Hover Details:</strong> Move mouse over charts for exact values and insights</li>
+                        <li><strong>Export Data:</strong> Download tables and charts for further analysis</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     # Load data based on selection
-    if comparison_cohort != "None":
-        data = load_yoy_comparison_data(selected_cohort, comparison_cohort)
-        current_data = data[data['cohort_year'] == selected_cohort]
-        comparison_data = data[data['cohort_year'] == comparison_cohort]
-    else:
-        current_data = load_cohort_data(selected_cohort)
-        comparison_data = pd.DataFrame()
+    current_data = load_cohort_data(selected_cohort)
 
     # Apply program filter if selected
     if selected_program_filter != "All Programs":
         current_data = current_data[current_data['program'] == selected_program_filter]
-        if not comparison_data.empty:
-            comparison_data = comparison_data[comparison_data['program'] == selected_program_filter]
 
     if current_data.empty:
         st.error(f"❌ No data available for Class of {selected_cohort}" + 
@@ -942,13 +1592,6 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
         # Get latest data for current cohort
         latest_date = current_data['report_date'].max()
         latest_data = current_data[current_data['report_date'] == latest_date]
-
-        program_scope = f" - {selected_program_filter}" if selected_program_filter != "All Programs" else ""
-        st.info(f"📅 **Primary Cohort**: Class of {selected_cohort}{program_scope} | **Latest Data**: {latest_date.strftime('%B %d, %Y')}")
-
-        if comparison_cohort != "None" and not comparison_data.empty:
-            comp_latest_date = comparison_data['report_date'].max()
-            st.info(f"📊 **Comparison**: Class of {comparison_cohort}{program_scope} | **Latest Data**: {comp_latest_date.strftime('%B %d, %Y')}")
 
         # Calculate comprehensive metrics
         inquiries = latest_data[latest_data['metric_name'] == 'inquiries_received']['metric_value'].fillna(0).sum()
@@ -965,144 +1608,289 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
         yield_rate = (accepted / offers * 100) if offers > 0 else 0
         overall_conversion = (enrolled / inquiries * 100) if inquiries > 0 else 0
 
-        # DIFFERENT CONTENT BASED ON ANALYSIS DEPTH
-        if analysis_depth == "Executive Summary":
-            # EXECUTIVE SUMMARY - High-level overview with 3 key metrics only
-            st.markdown(f"## 📊 Executive Summary - Class of {selected_cohort}{program_scope}")
-            st.markdown("*High-level overview for executive decision making*")
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2.5rem;">📝 {int(applications)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 600; font-size: 1.2rem;">Total Applications</p>
-                    <small style="color: #999;">Primary Pipeline Metric</small>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2.5rem;">🎯 {int(enrolled)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 600; font-size: 1.2rem;">Students Enrolled</p>
-                    <small style="color: #999;">Final Outcome</small>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2.5rem;">📈 {overall_conversion:.1f}%</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 600; font-size: 1.2rem;">Overall Efficiency</p>
-                    <small style="color: {'#28a745' if overall_conversion > 15 else '#ffc107' if overall_conversion > 10 else '#dc3545'};">Inquiry to Enrollment</small>
-                </div>
-                """, unsafe_allow_html=True)
+        # FULL DEEP DIVE - Most comprehensive analysis with advanced metrics
+        st.markdown("""
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">🔍 Full Deep Dive - Class of {}</h3>
+            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                Complete analytics suite with advanced insights and predictive analysis
+            </p>
+        </div>
+        """.format(selected_cohort), unsafe_allow_html=True)
+        
+        # Comprehensive KPI Grid using CSS Grid
+        st.markdown("""
+        <style>
+        .full-metrics-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            margin: 20px 0;
+        }
+        .full-metric-box {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        @media (max-width: 1200px) {
+            .full-metrics-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .full-metrics-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .full-metrics-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div class="full-metrics-container">
+            <div class="full-metric-box">
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">👥 {int(inquiries)}</h2>
+                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Inquiries</p>
+                <small style="color: #6c757d; font-size: 0.8rem;">Total received</small>
+            </div>
+            <div class="full-metric-box">
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">📝 {int(applications)}</h2>
+                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Applications</p>
+                <small style="color: {'#28a745' if conversion_1 > 30 else '#ffc107' if conversion_1 > 20 else '#dc3545'}; font-size: 0.8rem;">{conversion_1:.1f}% conv.</small>
+            </div>
+            <div class="full-metric-box">
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">⏳ {int(in_progress)}</h2>
+                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">In Progress</p>
+                <small style="color: #6c757d; font-size: 0.8rem;">Applications</small>
+            </div>
+            <div class="full-metric-box">
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">✅ {int(complete)}</h2>
+                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Complete</p>
+                <small style="color: #6c757d; font-size: 0.8rem;">Applications</small>
+            </div>
+            <div class="full-metric-box">
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">🎓 {int(offers)}</h2>
+                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Offers</p>
+                <small style="color: #6c757d; font-size: 0.8rem;">{conversion_2:.1f}% rate</small>
+            </div>
+            <div class="full-metric-box">
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">🎯 {int(enrolled)}</h2>
+                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Enrolled</p>
+                <small style="color: {'#28a745' if yield_rate > 70 else '#ffc107' if yield_rate > 50 else '#dc3545'}; font-size: 0.8rem;">{yield_rate:.1f}% yield</small>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            # Simple executive insights
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-            st.markdown("## 🎯 Executive Insights")
+        # Advanced Analytics Tabs
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        
+        # Chrome-style tabs CSS (same as Marketing Analysis)
+        st.markdown("""
+        <style>
+        /* Chrome-style tabs - Base styles */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2px !important;
+            justify-content: center !important;
+            background-color: transparent !important;
+            padding: 0px 20px !important;
+            border-bottom: none !important;
+            margin-bottom: 30px !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            scroll-behavior: smooth !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: #500000 #f0f0f0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Always show scrollbar when content overflows */
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            height: 10px !important;
+            display: block !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+            background: #f0f0f0 !important;
+            border-radius: 5px !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+            background: #500000 !important;
+            border-radius: 5px !important;
+            min-width: 50px !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
+            background: #700000 !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            height: 45px !important;
+            padding: 0px 32px !important;
+            background-color: #f5f5f5 !important;
+            border-radius: 8px 8px 0px 0px !important;
+            font-weight: 500 !important;
+            font-size: 15px !important;
+            border: none !important;
+            border-bottom: 3px solid transparent !important;
+            color: #666 !important;
+            margin-bottom: -2px !important;
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            min-width: fit-content !important;
+            box-sizing: border-box !important;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background-color: white !important;
+            color: #500000 !important;
+            border-bottom: 3px solid #500000 !important;
+        }
+        
+        .stTabs [data-baseweb="tab"]:hover {
+            background-color: #e8e8e8 !important;
+            color: #500000 !important;
+        }
+        
+        .stTabs [aria-selected="true"]:hover {
+            background-color: white !important;
+        }
+        
+        /* Tablet adjustments - switch to left-aligned */
+        @media screen and (max-width: 1024px) {
+            .stTabs [data-baseweb="tab-list"] {
+                justify-content: flex-start !important;
+                padding: 0px 15px !important;
+            }
             
-            insights = generate_insights(current_data, latest_data)
-            if insights:
-                for i, insight in enumerate(insights[:2]):  # Only top 2 insights for executives
-                    st.markdown(f"**{i+1}.** {insight}")
+            .stTabs [data-baseweb="tab"] {
+                padding: 0px 24px !important;
+                font-size: 14px !important;
+            }
             
-            # Simple comparison if available
-            if comparison_cohort != "None" and not comparison_data.empty:
-                st.markdown("### 📊 Year-over-Year Comparison")
-                comp_latest_date = comparison_data['report_date'].max()
-                comp_latest_data = comparison_data[comparison_data['report_date'] == comp_latest_date]
-                comp_applications = comp_latest_data[comp_latest_data['metric_name'] == 'total_applications']['metric_value'].fillna(0).sum()
-                comp_enrolled = comp_latest_data[comp_latest_data['metric_name'] == 'anticipated_cohort_size']['metric_value'].fillna(0).sum()
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    app_change = ((applications - comp_applications) / comp_applications * 100) if comp_applications > 0 else 0
-                    st.metric("Applications Change", f"{app_change:+.1f}%", f"{int(applications)} vs {int(comp_applications)}")
-                with col2:
-                    enroll_change = ((enrolled - comp_enrolled) / comp_enrolled * 100) if comp_enrolled > 0 else 0
-                    st.metric("Enrollment Change", f"{enroll_change:+.1f}%", f"{int(enrolled)} vs {int(comp_enrolled)}")
-
-        elif analysis_depth == "Detailed Analytics":
-            # DETAILED ANALYTICS - Comprehensive metrics with detailed breakdowns
-            st.markdown(f"## 📈 Detailed Analytics - Class of {selected_cohort}{program_scope}")
-            st.markdown("*Comprehensive analysis for operational insights*")
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+                height: 12px !important;
+            }
+        }
+        
+        /* Mobile adjustments - left-aligned */
+        @media screen and (max-width: 768px) {
+            .stTabs [data-baseweb="tab-list"] {
+                justify-content: flex-start !important;
+                padding: 0px 10px !important;
+            }
             
-            # Full pipeline metrics
-            col1, col2, col3, col4, col5 = st.columns(5)
+            .stTabs [data-baseweb="tab"] {
+                padding: 0px 20px !important;
+                font-size: 13px !important;
+                height: 42px !important;
+            }
+        }
+        
+        /* Small mobile adjustments - left-aligned */
+        @media screen and (max-width: 480px) {
+            .stTabs [data-baseweb="tab-list"] {
+                justify-content: flex-start !important;
+                padding: 0px 10px !important;
+            }
             
-            with col1:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2rem;">👥 {int(inquiries)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 500;">Total Inquiries</p>
-                    <small style="color: #999;">Pipeline Entry</small>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2rem;">📝 {int(applications)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 500;">Applications</p>
-                    <small style="color: {'#28a745' if conversion_1 > 30 else '#ffc107' if conversion_1 > 20 else '#dc3545'};">{conversion_1:.1f}% conversion</small>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2rem;">🎓 {int(offers)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 500;">Offers Extended</p>
-                    <small style="color: #666;">{conversion_2:.1f}% of applications</small>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col4:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2rem;">✅ {int(accepted)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 500;">Offers Accepted</p>
-                    <small style="color: {'#28a745' if yield_rate > 70 else '#ffc107' if yield_rate > 50 else '#dc3545'};">{yield_rate:.1f}% yield rate</small>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col5:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <h2 style="color: #500000; margin: 0; font-size: 2rem;">🎯 {int(enrolled)}</h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-weight: 500;">Students Enrolled</p>
-                    <small style="color: #666;">{overall_conversion:.1f}% overall conversion</small>
-                </div>
-                """, unsafe_allow_html=True)
-
-            # Detailed visualizations
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-            st.markdown("## 📊 Performance Analysis")
-            
+            .stTabs [data-baseweb="tab"] {
+                padding: 0px 16px !important;
+                font-size: 12px !important;
+                height: 40px !important;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Prepare complete_data for use across tabs (needed for Data Tables and Advanced Insights)
+        complete_data = current_data.pivot_table(
+            index=['report_date', 'program'],
+            columns='metric_name',
+            values='metric_value',
+            aggfunc='sum'
+        ).fillna(0).reset_index()
+        
+        # Tab content using native Streamlit tabs (Chrome-style)
+        tab1, tab2, tab3, tab4 = st.tabs(["📊 Performance Analysis", "📈 Trend Analysis", "🎓 Program Deep Dive", "📋 Data Tables"])
+        
+        with tab1:
             col1, col2 = st.columns(2)
             
             with col1:
-                # Conversion funnel
-                st.markdown("### 🎯 Admissions Funnel")
-                funnel_data = [inquiries, applications, offers, accepted, enrolled]
-                funnel_labels = ['Inquiries', 'Applications', 'Offers', 'Accepted', 'Enrolled']
+                # Complete conversion funnel
+                st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Complete Conversion Funnel</h4>", unsafe_allow_html=True)
                 
-                if sum(funnel_data) > 0:
+                # Initialize log scale state for full deep dive funnel
+                if 'exec_full_funnel_log' not in st.session_state:
+                    st.session_state.exec_full_funnel_log = False
+                
+                # Log scale toggle
+                col_spacer1, col_toggle, col_spacer2 = st.columns([2, 1, 2])
+                with col_toggle:
+                    if st.button(
+                        f"📊 {'Log' if st.session_state.exec_full_funnel_log else 'Linear'} Scale",
+                        key="toggle_log_full_funnel",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                        st.session_state.exec_full_funnel_log = not st.session_state.exec_full_funnel_log
+                        st.rerun()
+                
+                funnel_data = [inquiries, applications, complete, offers, accepted, enrolled]
+                funnel_labels = ['Inquiries', 'Applications', 'Complete Apps', 'Offers', 'Accepted', 'Enrolled']
+                
+                if st.session_state.exec_full_funnel_log:
+                    # Use bar chart with log scale
+                    fig = go.Figure(go.Bar(
+                        x=funnel_labels,
+                        y=funnel_data,
+                        marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]},
+                        text=funnel_data,
+                        texttemplate='%{text:,.0f}',
+                        textposition='outside',
+                        hovertemplate='<b>%{x}</b><br>Count: %{y:,.0f}<extra></extra>'
+                    ))
+                    fig.update_layout(
+                        height=500,
+                        showlegend=False,
+                        yaxis_type='log',
+                        yaxis_title='Count (Log Scale)',
+                        xaxis_title='Stage',
+                        margin=dict(t=80, b=50, l=50, r=50)
+                    )
+                else:
+                    # Use funnel chart
                     fig = go.Figure(go.Funnel(
                         y=funnel_labels,
                         x=funnel_data,
                         textinfo="value+percent initial",
-                        marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000"]}
+                        marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]}
                     ))
-                    fig.update_layout(height=500, showlegend=False)
-                    st.plotly_chart(fig, width='stretch')
+                    fig.update_layout(height=500)
+                st.plotly_chart(fig, use_container_width=True)
             
             with col2:
-                # Performance radar chart
-                st.markdown("### 📈 Performance Radar")
+                # Performance metrics radar chart
+                st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Performance Radar</h4>", unsafe_allow_html=True)
                 
                 metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
                 values = [
@@ -1129,12 +1917,117 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
                         )),
                     height=500
                 )
-                st.plotly_chart(fig, width='stretch')
-
-            # Time series analysis
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-            st.markdown("## 📊 Trend Analysis")
+                st.plotly_chart(fig, use_container_width=True)
             
+            # Add Correlation Matrix and Performance Benchmarks to Performance Analysis
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            
+            # Correlation analysis - full width with better color scale
+            st.markdown("<h4 style='text-align: center; color: #500000;'>📊 Correlation Matrix</h4>", unsafe_allow_html=True)
+            
+            if not complete_data.empty:
+                numeric_data = complete_data.select_dtypes(include=[np.number])
+                if len(numeric_data.columns) > 1:
+                    correlation_matrix = numeric_data.corr()
+                    
+                    # Use green (high correlation) to red (low correlation) color scale
+                    fig = px.imshow(
+                        correlation_matrix,
+                        labels=dict(color="Correlation"),
+                        color_continuous_scale=[[0, '#dc3545'], [0.5, '#ffc107'], [1, '#28a745']],  # Red -> Yellow -> Green
+                        aspect="auto",
+                        zmin=-1,
+                        zmax=1
+                    )
+                    fig.update_layout(
+                        title="Correlation Matrix (Green = High Correlation, Red = Low Correlation)",
+                        height=600,
+                        width=1000
+                    )
+                    
+                    # Center the chart
+                    col_spacer1, col_chart, col_spacer2 = st.columns([0.2, 3, 0.2])
+                    with col_chart:
+                        st.plotly_chart(fig, use_container_width=True)
+            
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            
+            # Performance benchmarks - centered
+            st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Performance Benchmarks</h4>", unsafe_allow_html=True)
+            
+            benchmarks = {
+                'Inquiry Conversion': {'value': conversion_1, 'benchmark': 30, 'unit': '%'},
+                'Yield Rate': {'value': yield_rate, 'benchmark': 60, 'unit': '%'},
+                'Application Completion': {'value': (complete / applications * 100) if applications > 0 else 0, 'benchmark': 80, 'unit': '%'}
+            }
+            
+            col1, col2, col3 = st.columns(3)
+            for idx, (metric, data) in enumerate(benchmarks.items()):
+                with [col1, col2, col3][idx]:
+                    performance = "🟢 Above" if data['value'] > data['benchmark'] else "🟡 At" if abs(data['value'] - data['benchmark']) < 5 else "🔴 Below"
+                    st.metric(
+                        metric,
+                        f"{data['value']:.1f}{data['unit']}",
+                        f"{performance} benchmark ({data['benchmark']}{data['unit']})"
+                    )
+        
+        with tab2:
+            
+            # Initialize session state for toggle buttons
+            if 'exec_full_show_inq' not in st.session_state:
+                st.session_state.exec_full_show_inq = True
+            if 'exec_full_show_apps' not in st.session_state:
+                st.session_state.exec_full_show_apps = True
+            if 'exec_full_show_offers' not in st.session_state:
+                st.session_state.exec_full_show_offers = True
+            if 'exec_full_show_cohort' not in st.session_state:
+                st.session_state.exec_full_show_cohort = True
+            
+            # Toggle buttons for metric selection
+            st.markdown("**📊 Select Metrics to Display:**")
+            metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+            
+            with metric_col1:
+                if st.button(
+                    f"{'✓' if st.session_state.exec_full_show_inq else '○'} Inquiries",
+                    key="toggle_inq_full",
+                    use_container_width=True,
+                    type="primary" if st.session_state.exec_full_show_inq else "secondary"
+                ):
+                    st.session_state.exec_full_show_inq = not st.session_state.exec_full_show_inq
+                    st.rerun()
+            
+            with metric_col2:
+                if st.button(
+                    f"{'✓' if st.session_state.exec_full_show_apps else '○'} Applications",
+                    key="toggle_apps_full",
+                    use_container_width=True,
+                    type="primary" if st.session_state.exec_full_show_apps else "secondary"
+                ):
+                    st.session_state.exec_full_show_apps = not st.session_state.exec_full_show_apps
+                    st.rerun()
+            
+            with metric_col3:
+                if st.button(
+                    f"{'✓' if st.session_state.exec_full_show_offers else '○'} Offers",
+                    key="toggle_offers_full",
+                    use_container_width=True,
+                    type="primary" if st.session_state.exec_full_show_offers else "secondary"
+                ):
+                    st.session_state.exec_full_show_offers = not st.session_state.exec_full_show_offers
+                    st.rerun()
+            
+            with metric_col4:
+                if st.button(
+                    f"{'✓' if st.session_state.exec_full_show_cohort else '○'} Cohort Size",
+                    key="toggle_cohort_full",
+                    use_container_width=True,
+                    type="primary" if st.session_state.exec_full_show_cohort else "secondary"
+                ):
+                    st.session_state.exec_full_show_cohort = not st.session_state.exec_full_show_cohort
+                    st.rerun()
+            
+            # Multi-line time series
             time_series = current_data.pivot_table(
                 index='report_date',
                 columns='metric_name',
@@ -1143,1305 +2036,2581 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
             ).fillna(0)
             
             if not time_series.empty:
-                col1, col2 = st.columns(2)
+                fig = go.Figure()
                 
-                with col1:
-                    st.markdown("#### 📈 Application & Inquiry Trends")
-                    
-                    # Interactive filter controls for line selection
-                    st.markdown("**📊 Select Lines to Display:**")
-                    filter_col1, filter_col2 = st.columns(2)
-                    
-                    with filter_col1:
-                        show_applications = st.checkbox("📝 Applications", value=True, key="show_apps_detailed")
-                    with filter_col2:
-                        show_inquiries = st.checkbox("👥 Inquiries", value=True, key="show_inq_detailed")
-                    
-                    # Add instruction tooltip
-                    st.markdown("""
-                    <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-size: 0.85rem;">
-                        💡 <strong>Interactive Tips:</strong> Use checkboxes above to show/hide lines • Click legend items to toggle • Hover over points for details
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    fig = go.Figure()
-                    
-                    if 'total_applications' in time_series.columns and show_applications:
+                key_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'anticipated_cohort_size']
+                colors = ['#500000', '#700000', '#900000', '#B00000']
+                metric_labels = ['Inquiries Received', 'Total Applications', 'Admissions Offered', 'Anticipated Cohort Size']
+                show_flags = [st.session_state.exec_full_show_inq, st.session_state.exec_full_show_apps, st.session_state.exec_full_show_offers, st.session_state.exec_full_show_cohort]
+                
+                for i, (metric, label, show_flag) in enumerate(zip(key_metrics, metric_labels, show_flags)):
+                    if metric in time_series.columns and show_flag:
                         fig.add_trace(go.Scatter(
                             x=time_series.index,
-                            y=time_series['total_applications'],
+                            y=time_series[metric],
                             mode='lines+markers',
-                            name='Applications',
-                            line=dict(color='#500000', width=3),
+                            name=label,
+                            line=dict(color=colors[i], width=3),
                             marker=dict(size=8),
-                            hovertemplate='<b>Applications</b><br>' +
+                            hovertemplate='<b>' + label + '</b><br>' +
                                          'Date: %{x}<br>' +
                                          'Count: %{y:,.0f}<br>' +
                                          '<extra></extra>'
                         ))
-                    
-                    if 'inquiries_received' in time_series.columns and show_inquiries:
-                        fig.add_trace(go.Scatter(
-                            x=time_series.index,
-                            y=time_series['inquiries_received'],
-                            mode='lines+markers',
-                            name='Inquiries',
-                            line=dict(color='#B00000', width=3),
-                            marker=dict(size=8),
-                            hovertemplate='<b>Inquiries</b><br>' +
-                                         'Date: %{x}<br>' +
-                                         'Count: %{y:,.0f}<br>' +
-                                         '<extra></extra>'
-                        ))
-                    
-                    fig.update_layout(
-                        height=400,
-                        xaxis_title='Date',
-                        yaxis_title='Count',
-                        legend=dict(
-                            x=1, y=1,
-                            xanchor='right', yanchor='top',
-                            bgcolor='rgba(255,255,255,0.9)',
-                            bordercolor='rgba(0,0,0,0.2)',
-                            borderwidth=1
-                        ),
-                        annotations=[
-                            dict(
-                                text="💡 Click legend items to show/hide lines",
-                                xref="paper", yref="paper",
-                                x=0.02, y=0.02, xanchor='left', yanchor='bottom',
-                                showarrow=False,
-                                font=dict(size=10, color='gray'),
-                                bgcolor='rgba(255,255,255,0.9)',
-                                bordercolor='gray',
-                                borderwidth=1
+                
+                fig.update_layout(
+                    title='Key Metrics Trends Over Time - Interactive View',
+                    height=500,
+                    xaxis_title='Date',
+                    yaxis_title='Count',
+                    legend=dict(
+                        x=1, y=1,
+                        xanchor='right', yanchor='top',
+                        bgcolor='rgba(255,255,255,0.9)',
+                        bordercolor='rgba(0,0,0,0.3)',
+                        borderwidth=1
+                    )
+                )
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Growth rate analysis
+                st.markdown("<h4 style='text-align: center; color: #500000;'>📊 Growth Rate Analysis</h4>", unsafe_allow_html=True)
+                
+                growth_data = []
+                for metric in key_metrics:
+                    if metric in time_series.columns and len(time_series) > 1:
+                        values = time_series[metric].values
+                        if len(values) >= 2 and values[-2] > 0:
+                            growth_rate = ((values[-1] - values[-2]) / values[-2] * 100)
+                            growth_data.append({
+                                'Metric': metric.replace('_', ' ').title(),
+                                'Growth Rate (%)': growth_rate,
+                                'Latest Value': values[-1],
+                                'Previous Value': values[-2]
+                            })
+                
+                if growth_data:
+                    growth_df = pd.DataFrame(growth_data)
+                    st.dataframe(
+                        growth_df.style.format({
+                            'Growth Rate (%)': '{:+.1f}%',
+                            'Latest Value': '{:.0f}',
+                            'Previous Value': '{:.0f}'
+                        }).background_gradient(subset=['Growth Rate (%)'], cmap='RdYlGn'),
+                        use_container_width=True
+                    )
+        
+        with tab3:
+            # Define metric categories
+            applications_metrics = [
+                'inquiries_received', 'applications_in_progress', 'applications_received', 
+                'applications_complete', 'applications_manual', 'applications_verified', 
+                'applications_on_hold', 'applications_undelivered', 'applications_deferral', 
+                'total_applications', 'admissions_pre_admission'
+            ]
+            
+            admissions_metrics = [
+                'admissions_offered', 'admissions_denied', 'admissions_accepted', 
+                'admissions_declined', 'admissions_deferred_to_next', 'admissions_deferred_from_last', 
+                'admissions_moved_to_other', 'admissions_withdrawn', 'anticipated_cohort_size'
+            ]
+            
+            # Get time series data for all programs
+            program_time_series = current_data.pivot_table(
+                index='report_date',
+                columns='metric_name',
+                values='metric_value',
+                aggfunc='sum'
+            ).fillna(0)
+            
+            if not program_time_series.empty:
+                # ===== APPLICATIONS SECTION =====
+                st.markdown("<h4 style='text-align: center; color: #500000;'>📝 Applications Metrics</h4>", unsafe_allow_html=True)
+                
+                # Initialize session state for applications filter
+                if 'exec_app_metrics_reset' not in st.session_state:
+                    st.session_state.exec_app_metrics_reset = 0
+                
+                # Initialize log scale state for applications
+                if 'exec_app_log' not in st.session_state:
+                    st.session_state.exec_app_log = False
+                
+                # Initialize chart type state for applications
+                if 'exec_app_chart_type' not in st.session_state:
+                    st.session_state.exec_app_chart_type = 'Line'
+                
+                available_app_metrics = [m for m in applications_metrics if m in program_time_series.columns]
+                
+                app_reset_suffix = f"_{st.session_state.exec_app_metrics_reset}"
+                app_state_key = f'selected_app_metrics{app_reset_suffix}'
+                
+                if app_state_key not in st.session_state:
+                    st.session_state[app_state_key] = available_app_metrics.copy()
+                
+                current_app_selection = st.session_state[app_state_key]
+                
+                if len(current_app_selection) == len(available_app_metrics):
+                    app_summary_text = "All application metrics"
+                elif len(current_app_selection) == 0:
+                    app_summary_text = "No metrics selected"
+                elif len(current_app_selection) == 1:
+                    app_summary_text = current_app_selection[0].replace('_', ' ').title()
+                else:
+                    app_summary_text = f"{len(current_app_selection)} metrics selected"
+                
+                # Layout: 60% for filter, 20% for chart type, 20% for log scale button
+                col_filter, col_chart_type, col_button = st.columns([3, 1, 1])
+                
+                with col_filter:
+                    with st.popover(app_summary_text, use_container_width=True):
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            if st.button("✓ All", key=f"app_all{app_reset_suffix}", use_container_width=True, type="primary"):
+                                st.session_state.exec_app_metrics_reset += 1
+                                new_app_key = f'selected_app_metrics_{st.session_state.exec_app_metrics_reset}'
+                                st.session_state[new_app_key] = available_app_metrics.copy()
+                                st.rerun()
+                        with col_b:
+                            if st.button("✗ Clear", key=f"app_clear{app_reset_suffix}", use_container_width=True, type="secondary"):
+                                st.session_state.exec_app_metrics_reset += 1
+                                new_app_key = f'selected_app_metrics_{st.session_state.exec_app_metrics_reset}'
+                                st.session_state[new_app_key] = []
+                                st.rerun()
+                        
+                        st.divider()
+                        
+                        for idx, metric in enumerate(available_app_metrics):
+                            is_checked = metric in st.session_state[app_state_key]
+                            metric_display = metric.replace('_', ' ').title()
+                            new_value = st.checkbox(
+                                metric_display, 
+                                value=is_checked, 
+                                key=f"app_cb_{idx}{app_reset_suffix}"
                             )
-                        ]
-                    )
-                    st.plotly_chart(fig, width='stretch')
+                            
+                            if new_value != is_checked:
+                                if new_value:
+                                    if metric not in st.session_state[app_state_key]:
+                                        st.session_state[app_state_key].append(metric)
+                                else:
+                                    if metric in st.session_state[app_state_key]:
+                                        st.session_state[app_state_key].remove(metric)
+                                st.rerun()
                 
-                with col2:
-                    st.markdown("#### 🎯 Conversion Rates Over Time")
-                    
-                    # Interactive filter controls for conversion rates
-                    st.markdown("**📊 Select Conversion Metrics:**")
-                    conv_filter_col1, conv_filter_col2 = st.columns(2)
-                    
-                    with conv_filter_col1:
-                        show_inquiry_conv = st.checkbox("🔄 Inquiry → App", value=True, key="show_inq_conv_detailed")
-                    with conv_filter_col2:
-                        show_app_conv = st.checkbox("🎯 App → Offer", value=True, key="show_app_conv_detailed")
-                    
-                    # Add instruction tooltip
-                    st.markdown("""
-                    <div style="background: #fff3e0; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-size: 0.85rem;">
-                        💡 <strong>Interactive Tips:</strong> Use checkboxes above to show/hide conversion lines • Click legend to toggle • Hover for exact percentages
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    conversion_data = []
-                    for date in time_series.index:
-                        inquiries_ts = time_series.loc[date, 'inquiries_received'] if 'inquiries_received' in time_series.columns else 0
-                        applications_ts = time_series.loc[date, 'total_applications'] if 'total_applications' in time_series.columns else 0
-                        offers_ts = time_series.loc[date, 'admissions_offered'] if 'admissions_offered' in time_series.columns else 0
-                        
-                        inquiry_conv = (applications_ts / inquiries_ts * 100) if inquiries_ts > 0 else 0
-                        app_conv = (offers_ts / applications_ts * 100) if applications_ts > 0 else 0
-                        
-                        conversion_data.append({
-                            'date': date,
-                            'inquiry_conversion': inquiry_conv,
-                            'application_conversion': app_conv
-                        })
-                    
-                    conv_df = pd.DataFrame(conversion_data)
-                    
-                    if not conv_df.empty:
-                        fig = go.Figure()
-                        
-                        if show_inquiry_conv:
-                            fig.add_trace(go.Scatter(
-                                x=conv_df['date'],
-                                y=conv_df['inquiry_conversion'],
-                                mode='lines+markers',
-                                name='Inquiry → App (%)',
-                                line=dict(color='#28a745', width=3),
-                                marker=dict(size=8),
-                                hovertemplate='<b>Inquiry to Application</b><br>' +
-                                             'Date: %{x}<br>' +
-                                             'Conversion Rate: %{y:.1f}%<br>' +
-                                             '<extra></extra>'
-                            ))
-                        
-                        if show_app_conv:
-                            fig.add_trace(go.Scatter(
-                                x=conv_df['date'],
-                                y=conv_df['application_conversion'],
-                                mode='lines+markers',
-                                name='App → Offer (%)',
-                                line=dict(color='#ffc107', width=3),
-                                marker=dict(size=8),
-                                hovertemplate='<b>Application to Offer</b><br>' +
-                                             'Date: %{x}<br>' +
-                                             'Conversion Rate: %{y:.1f}%<br>' +
-                                             '<extra></extra>'
-                            ))
-                        
-                        fig.update_layout(
-                            height=400,
-                            xaxis_title='Date',
-                            yaxis_title='Conversion Rate (%)',
-                            legend=dict(
-                                x=1, y=1,
-                                xanchor='right', yanchor='top',
-                                bgcolor='rgba(255,255,255,0.9)',
-                                bordercolor='rgba(0,0,0,0.2)',
-                                borderwidth=1
-                            ),
-                            annotations=[
-                                dict(
-                                    text="💡 Click legend items to show/hide lines",
-                                    xref="paper", yref="paper",
-                                    x=0.02, y=0.02, xanchor='left', yanchor='bottom',
-                                    showarrow=False,
-                                    font=dict(size=10, color='gray'),
-                                    bgcolor='rgba(255,255,255,0.9)',
-                                    bordercolor='gray',
-                                    borderwidth=1
-                                )
-                            ]
-                        )
-                        st.plotly_chart(fig, width='stretch')
-
-        else:  # Full Deep Dive
-            # FULL DEEP DIVE - Most comprehensive analysis with advanced metrics
-            st.markdown(f"## 🔍 Full Deep Dive - Class of {selected_cohort}{program_scope}")
-            st.markdown("*Complete analytics suite with advanced insights and predictive analysis*")
-            
-            # Comprehensive KPI Grid (6 metrics)
-            col1, col2, col3, col4, col5, col6 = st.columns(6)
-            
-            with col1:
-                st.metric("👥 Inquiries", f"{int(inquiries)}", help="Total inquiries received")
-            with col2:
-                st.metric("📝 Applications", f"{int(applications)}", f"{conversion_1:.1f}% conv.")
-            with col3:
-                st.metric("⏳ In Progress", f"{int(in_progress)}", help="Applications in progress")
-            with col4:
-                st.metric("✅ Complete", f"{int(complete)}", help="Complete applications")
-            with col5:
-                st.metric("🎓 Offers", f"{int(offers)}", f"{conversion_2:.1f}% rate")
-            with col6:
-                st.metric("🎯 Enrolled", f"{int(enrolled)}", f"{yield_rate:.1f}% yield")
-
-            # Advanced Analytics Tabs
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-            
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Performance Analysis", "📈 Trend Analysis", "🎓 Program Deep Dive", "📋 Data Tables", "🔍 Advanced Insights"])
-            
-            with tab1:
-                st.markdown("### 📊 Performance Analysis")
+                with col_chart_type:
+                    if st.button(
+                        f"📊 {st.session_state.exec_app_chart_type}",
+                        key="toggle_chart_type_app",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                        st.session_state.exec_app_chart_type = 'Bar' if st.session_state.exec_app_chart_type == 'Line' else 'Line'
+                        st.rerun()
                 
-                col1, col2 = st.columns(2)
+                with col_button:
+                    if st.button(
+                        f"📈 {'Log' if st.session_state.exec_app_log else 'Linear'}",
+                        key="toggle_log_app",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                        st.session_state.exec_app_log = not st.session_state.exec_app_log
+                        st.rerun()
                 
-                with col1:
-                    # Complete conversion funnel
-                    st.markdown("#### 🎯 Complete Conversion Funnel")
-                    funnel_data = [inquiries, applications, complete, offers, accepted, enrolled]
-                    funnel_labels = ['Inquiries', 'Applications', 'Complete Apps', 'Offers', 'Accepted', 'Enrolled']
+                selected_app_metrics = st.session_state.get(app_state_key, available_app_metrics)
+                
+                # Applications chart
+                if len(selected_app_metrics) > 0:
+                    fig_app = go.Figure()
                     
-                    fig = go.Figure(go.Funnel(
-                        y=funnel_labels,
-                        x=funnel_data,
-                        textinfo="value+percent initial",
-                        marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]}
-                    ))
-                    fig.update_layout(height=500)
-                    st.plotly_chart(fig, width='stretch')
-                
-                with col2:
-                    # Performance metrics radar chart
-                    st.markdown("#### 📈 Performance Radar")
+                    # Color palette for applications
+                    app_colors = ['#500000', '#700000', '#900000', '#B00000', '#D00000', '#F00000', 
+                                 '#FF4444', '#FF6666', '#FF8888', '#FFAAAA', '#FFCCCC']
                     
-                    metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
-                    values = [
-                        conversion_1,
-                        (complete / applications * 100) if applications > 0 else 0,
-                        conversion_2,
-                        yield_rate,
-                        overall_conversion
-                    ]
+                    if st.session_state.exec_app_chart_type == 'Line':
+                        # Line chart with data labels
+                        for i, metric in enumerate(selected_app_metrics):
+                            if metric in program_time_series.columns:
+                                metric_display = metric.replace('_', ' ').title()
+                                fig_app.add_trace(go.Scatter(
+                                    x=program_time_series.index,
+                                    y=program_time_series[metric],
+                                    mode='lines+markers+text',
+                                    name=metric_display,
+                                    line=dict(color=app_colors[i % len(app_colors)], width=3),
+                                    marker=dict(size=8),
+                                    text=[f'{int(val)}' if val > 0 else '' for val in program_time_series[metric]],
+                                    textposition='top center',
+                                    textfont=dict(size=10, color=app_colors[i % len(app_colors)]),
+                                    hovertemplate=f'<b>{metric_display}</b><br>' +
+                                                 'Date: %{x}<br>' +
+                                                 'Value: %{y:,.0f}<br>' +
+                                                 '<extra></extra>'
+                                ))
+                    else:
+                        # Bar chart (grouped)
+                        for i, metric in enumerate(selected_app_metrics):
+                            if metric in program_time_series.columns:
+                                metric_display = metric.replace('_', ' ').title()
+                                fig_app.add_trace(go.Bar(
+                                    x=program_time_series.index,
+                                    y=program_time_series[metric],
+                                    name=metric_display,
+                                    marker_color=app_colors[i % len(app_colors)],
+                                    text=[f'{int(val)}' if val > 0 else '' for val in program_time_series[metric]],
+                                    textposition='outside',
+                                    textfont=dict(size=10),
+                                    hovertemplate=f'<b>{metric_display}</b><br>' +
+                                                 'Date: %{x}<br>' +
+                                                 'Value: %{y:,.0f}<br>' +
+                                                 '<extra></extra>'
+                                ))
+                        fig_app.update_layout(barmode='group')
                     
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatterpolar(
-                        r=values,
-                        theta=metrics,
-                        fill='toself',
-                        name='Performance',
-                        line_color='#500000'
-                    ))
-                    fig.update_layout(
-                        polar=dict(
-                            radialaxis=dict(
-                                visible=True,
-                                range=[0, 100]
-                            )),
-                        height=500
-                    )
-                    st.plotly_chart(fig, width='stretch')
-            
-            with tab2:
-                st.markdown("### 📈 Trend Analysis")
-                
-                # Interactive filter controls for multi-line chart
-                st.markdown("**📊 Select Metrics to Display:**")
-                metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
-                
-                with metric_col1:
-                    show_inquiries_full = st.checkbox("👥 Inquiries", value=True, key="show_inq_full")
-                with metric_col2:
-                    show_applications_full = st.checkbox("📝 Applications", value=True, key="show_apps_full")
-                with metric_col3:
-                    show_offers_full = st.checkbox("🎓 Offers", value=True, key="show_offers_full")
-                with metric_col4:
-                    show_cohort_full = st.checkbox("🎯 Cohort Size", value=True, key="show_cohort_full")
-                
-                # Add comprehensive instruction tooltip
-                st.markdown("""
-                <div style="background: #f3e5f5; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-                    💡 <strong>Interactive Chart Guide:</strong><br>
-                    • <strong>Checkboxes:</strong> Use above to show/hide specific metric lines<br>
-                    • <strong>Legend Clicks:</strong> Click any legend item to toggle that line on/off<br>
-                    • <strong>Hover Details:</strong> Move mouse over data points for exact values and dates<br>
-                    • <strong>Zoom:</strong> Click and drag to zoom into specific time periods<br>
-                    • <strong>Reset:</strong> Double-click chart to reset zoom level
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Multi-line time series
-                time_series = current_data.pivot_table(
-                    index='report_date',
-                    columns='metric_name',
-                    values='metric_value',
-                    aggfunc='sum'
-                ).fillna(0)
-                
-                if not time_series.empty:
-                    fig = go.Figure()
-                    
-                    key_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'anticipated_cohort_size']
-                    colors = ['#500000', '#700000', '#900000', '#B00000']
-                    metric_labels = ['Inquiries Received', 'Total Applications', 'Admissions Offered', 'Anticipated Cohort Size']
-                    show_flags = [show_inquiries_full, show_applications_full, show_offers_full, show_cohort_full]
-                    
-                    for i, (metric, label, show_flag) in enumerate(zip(key_metrics, metric_labels, show_flags)):
-                        if metric in time_series.columns and show_flag:
-                            fig.add_trace(go.Scatter(
-                                x=time_series.index,
-                                y=time_series[metric],
-                                mode='lines+markers',
-                                name=label,
-                                line=dict(color=colors[i], width=3),
-                                marker=dict(size=8),
-                                hovertemplate='<b>' + label + '</b><br>' +
-                                             'Date: %{x}<br>' +
-                                             'Count: %{y:,.0f}<br>' +
-                                             '<extra></extra>'
-                            ))
-                    
-                    fig.update_layout(
-                        title='Key Metrics Trends Over Time - Interactive View',
-                        height=500,
+                    fig_app.update_layout(
+                        title='Applications Metrics Over Time',
+                        height=550,
                         xaxis_title='Date',
                         yaxis_title='Count',
+                        yaxis_type='log' if st.session_state.exec_app_log else 'linear',
                         legend=dict(
-                            x=1, y=1,
-                            xanchor='right', yanchor='top',
+                            orientation='h',
+                            yanchor='top',
+                            y=-0.25,
+                            xanchor='center',
+                            x=0.5,
                             bgcolor='rgba(255,255,255,0.9)',
                             bordercolor='rgba(0,0,0,0.3)',
                             borderwidth=1
                         ),
-                        annotations=[
-                            dict(
-                                text="💡 Click legend items or use checkboxes above to show/hide lines",
-                                xref="paper", yref="paper",
-                                x=0.02, y=0.02, xanchor='left', yanchor='bottom',
-                                showarrow=False,
-                                font=dict(size=11, color='gray'),
-                                bgcolor='rgba(255,255,255,0.9)',
-                                bordercolor='gray',
-                                borderwidth=1
-                            )
-                        ]
+                        margin=dict(b=140, t=50)
                     )
-                    st.plotly_chart(fig, width='stretch')
-                    
-                    # Growth rate analysis
-                    st.markdown("#### 📊 Growth Rate Analysis")
-                    
-                    growth_data = []
-                    for metric in key_metrics:
-                        if metric in time_series.columns and len(time_series) > 1:
-                            values = time_series[metric].values
-                            if len(values) >= 2 and values[-2] > 0:
-                                growth_rate = ((values[-1] - values[-2]) / values[-2] * 100)
-                                growth_data.append({
-                                    'Metric': metric.replace('_', ' ').title(),
-                                    'Growth Rate (%)': growth_rate,
-                                    'Latest Value': values[-1],
-                                    'Previous Value': values[-2]
-                                })
-                    
-                    if growth_data:
-                        growth_df = pd.DataFrame(growth_data)
-                        st.dataframe(
-                            growth_df.style.format({
-                                'Growth Rate (%)': '{:+.1f}%',
-                                'Latest Value': '{:.0f}',
-                                'Previous Value': '{:.0f}'
-                            }).background_gradient(subset=['Growth Rate (%)'], cmap='RdYlGn'),
-                            width='stretch'
-                        )
-            
-            with tab3:
-                st.markdown("### 🎓 Program Deep Dive")
-                
-                if selected_program_filter == "All Programs":
-                    # Program comparison heatmap
-                    program_data = latest_data.pivot_table(
-                        index='program',
-                        columns='metric_name',
-                        values='metric_value',
-                        aggfunc='sum'
-                    ).fillna(0)
-                    
-                    if not program_data.empty:
-                        st.markdown("#### 🔥 Program Performance Heatmap")
-                        
-                        heatmap_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'anticipated_cohort_size']
-                        heatmap_data = program_data[heatmap_metrics] if all(m in program_data.columns for m in heatmap_metrics) else program_data
-                        
-                        fig = px.imshow(
-                            heatmap_data.T,
-                            labels=dict(x="Program", y="Metric", color="Value"),
-                            x=heatmap_data.index,
-                            y=heatmap_data.columns,
-                            color_continuous_scale='Reds'
-                        )
-                        fig.update_layout(height=400)
-                        st.plotly_chart(fig, width='stretch')
+                    st.plotly_chart(fig_app, use_container_width=True)
                 else:
-                    # Single program deep dive
-                    st.markdown(f"#### 🎯 {selected_program_filter} Deep Dive")
+                    st.info("💡 Please select at least one application metric to display.")
+                
+                # ===== ADMISSIONS SECTION =====
+                st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+                st.markdown("<h4 style='text-align: center; color: #500000;'>🎓 Admissions Metrics</h4>", unsafe_allow_html=True)
+                
+                # Initialize session state for admissions filter
+                if 'exec_adm_metrics_reset' not in st.session_state:
+                    st.session_state.exec_adm_metrics_reset = 0
+                
+                # Initialize log scale state for admissions
+                if 'exec_adm_log' not in st.session_state:
+                    st.session_state.exec_adm_log = False
+                
+                # Initialize chart type state for admissions
+                if 'exec_adm_chart_type' not in st.session_state:
+                    st.session_state.exec_adm_chart_type = 'Line'
+                
+                available_adm_metrics = [m for m in admissions_metrics if m in program_time_series.columns]
+                
+                adm_reset_suffix = f"_{st.session_state.exec_adm_metrics_reset}"
+                adm_state_key = f'selected_adm_metrics{adm_reset_suffix}'
+                
+                if adm_state_key not in st.session_state:
+                    st.session_state[adm_state_key] = available_adm_metrics.copy()
+                
+                current_adm_selection = st.session_state[adm_state_key]
+                
+                if len(current_adm_selection) == len(available_adm_metrics):
+                    adm_summary_text = "All admission metrics"
+                elif len(current_adm_selection) == 0:
+                    adm_summary_text = "No metrics selected"
+                elif len(current_adm_selection) == 1:
+                    adm_summary_text = current_adm_selection[0].replace('_', ' ').title()
+                else:
+                    adm_summary_text = f"{len(current_adm_selection)} metrics selected"
+                
+                # Layout: 60% for filter, 20% for chart type, 20% for log scale button
+                col_filter_adm, col_chart_type_adm, col_button_adm = st.columns([3, 1, 1])
+                
+                with col_filter_adm:
+                    with st.popover(adm_summary_text, use_container_width=True):
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            if st.button("✓ All", key=f"adm_all{adm_reset_suffix}", use_container_width=True, type="primary"):
+                                st.session_state.exec_adm_metrics_reset += 1
+                                new_adm_key = f'selected_adm_metrics_{st.session_state.exec_adm_metrics_reset}'
+                                st.session_state[new_adm_key] = available_adm_metrics.copy()
+                                st.rerun()
+                        with col_b:
+                            if st.button("✗ Clear", key=f"adm_clear{adm_reset_suffix}", use_container_width=True, type="secondary"):
+                                st.session_state.exec_adm_metrics_reset += 1
+                                new_adm_key = f'selected_adm_metrics_{st.session_state.exec_adm_metrics_reset}'
+                                st.session_state[new_adm_key] = []
+                                st.rerun()
+                        
+                        st.divider()
+                        
+                        for idx, metric in enumerate(available_adm_metrics):
+                            is_checked = metric in st.session_state[adm_state_key]
+                            metric_display = metric.replace('_', ' ').title()
+                        new_value = st.checkbox(
+                            metric_display, 
+                            value=is_checked, 
+                            key=f"adm_cb_{idx}{adm_reset_suffix}"
+                        )
+                        
+                        if new_value != is_checked:
+                            if new_value:
+                                if metric not in st.session_state[adm_state_key]:
+                                    st.session_state[adm_state_key].append(metric)
+                            else:
+                                if metric in st.session_state[adm_state_key]:
+                                    st.session_state[adm_state_key].remove(metric)
+                            st.rerun()
+                
+                with col_chart_type_adm:
+                    if st.button(
+                        f"📊 {st.session_state.exec_adm_chart_type}",
+                        key="toggle_chart_type_adm",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                        st.session_state.exec_adm_chart_type = 'Bar' if st.session_state.exec_adm_chart_type == 'Line' else 'Line'
+                        st.rerun()
+                
+                with col_button_adm:
+                    if st.button(
+                        f"📈 {'Log' if st.session_state.exec_adm_log else 'Linear'}",
+                        key="toggle_log_adm",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                        st.session_state.exec_adm_log = not st.session_state.exec_adm_log
+                        st.rerun()
+                
+                selected_adm_metrics = st.session_state.get(adm_state_key, available_adm_metrics)
+                
+                # Admissions chart
+                if len(selected_adm_metrics) > 0:
+                    fig_adm = go.Figure()
                     
-                    program_time_series = current_data[current_data['program'] == selected_program_filter].pivot_table(
-                        index='report_date',
-                        columns='metric_name',
-                        values='metric_value',
-                        aggfunc='sum'
-                    ).fillna(0)
+                    # Color palette for admissions (different shades)
+                    adm_colors = ['#003366', '#004488', '#0055AA', '#0066CC', '#0077EE', 
+                                 '#3399FF', '#5AADFF', '#7AC1FF', '#99D5FF']
                     
-                    if not program_time_series.empty:
-                        # Interactive filter controls for program-specific metrics
-                        st.markdown("**📊 Select Program Metrics to Display:**")
-                        available_metrics = list(program_time_series.columns)
-                        
-                        # Create dynamic checkboxes based on available metrics
-                        metric_cols = st.columns(min(4, len(available_metrics)))
-                        selected_metrics = []
-                        
-                        for i, metric in enumerate(available_metrics):
-                            with metric_cols[i % 4]:
-                                metric_display = metric.replace('_', ' ').title()
-                                if st.checkbox(f"📈 {metric_display}", value=True, key=f"prog_{metric}"):
-                                    selected_metrics.append(metric)
-                        
-                        # Add instruction tooltip for program-specific chart
-                        st.markdown(f"""
-                        <div style="background: #e8f5e8; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-                            💡 <strong>{selected_program_filter} Interactive Chart:</strong><br>
-                            • <strong>Metric Selection:</strong> Use checkboxes above to show/hide specific metrics<br>
-                            • <strong>Legend Interaction:</strong> Click legend items to toggle lines on/off<br>
-                            • <strong>Detailed Tooltips:</strong> Hover over data points for exact values and context<br>
-                            • <strong>Zoom & Pan:</strong> Click-drag to zoom, double-click to reset view
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        fig = go.Figure()
-                        
-                        # Color palette for program metrics
-                        colors = ['#500000', '#700000', '#900000', '#B00000', '#D00000', '#F00000']
-                        
-                        for i, metric in enumerate(selected_metrics):
+                    if st.session_state.exec_adm_chart_type == 'Line':
+                        # Line chart with data labels
+                        for i, metric in enumerate(selected_adm_metrics):
                             if metric in program_time_series.columns:
                                 metric_display = metric.replace('_', ' ').title()
-                                fig.add_trace(go.Scatter(
+                                fig_adm.add_trace(go.Scatter(
                                     x=program_time_series.index,
                                     y=program_time_series[metric],
-                                    mode='lines+markers',
+                                    mode='lines+markers+text',
                                     name=metric_display,
-                                    line=dict(color=colors[i % len(colors)], width=3),
+                                    line=dict(color=adm_colors[i % len(adm_colors)], width=3),
                                     marker=dict(size=8),
+                                    text=[f'{int(val)}' if val > 0 else '' for val in program_time_series[metric]],
+                                    textposition='top center',
+                                    textfont=dict(size=10, color=adm_colors[i % len(adm_colors)]),
                                     hovertemplate=f'<b>{metric_display}</b><br>' +
                                                  'Date: %{x}<br>' +
                                                  'Value: %{y:,.0f}<br>' +
-                                                 f'Program: {selected_program_filter}<br>' +
                                                  '<extra></extra>'
                                 ))
-                        
-                        fig.update_layout(
-                            title=f'{selected_program_filter} Performance Over Time - Interactive View',
-                            height=500,
-                            xaxis_title='Date',
-                            yaxis_title='Count',
-                            legend=dict(
-                                x=0, y=1,
-                                bgcolor='rgba(255,255,255,0.9)',
-                                bordercolor='rgba(0,0,0,0.3)',
-                                borderwidth=1
-                            ),
-                            annotations=[
-                                dict(
-                                    text="💡 Click legend items or use checkboxes above to customize view",
-                                    xref="paper", yref="paper",
-                                    x=0.02, y=0.02, xanchor='left', yanchor='bottom',
-                                    showarrow=False,
-                                    font=dict(size=10, color='gray'),
-                                    bgcolor='rgba(255,255,255,0.9)',
-                                    bordercolor='gray',
-                                    borderwidth=1
-                                )
-                            ]
-                        )
-                        st.plotly_chart(fig, width='stretch')
-            
-            with tab4:
-                st.markdown("### 📋 Comprehensive Data Tables")
-                
-                # Complete dataset
-                complete_data = current_data.pivot_table(
-                    index=['report_date', 'program'],
-                    columns='metric_name',
-                    values='metric_value',
-                    aggfunc='sum'
-                ).fillna(0).reset_index()
-                
-                st.markdown("#### 📊 Complete Dataset")
-                st.dataframe(complete_data, width='stretch', height=400)
-                
-                # Summary statistics
-                st.markdown("#### 📈 Summary Statistics")
-                numeric_cols = complete_data.select_dtypes(include=[np.number]).columns
-                summary_stats = complete_data[numeric_cols].describe()
-                st.dataframe(summary_stats.round(2), width='stretch')
-                
-                # Download options
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    csv_complete = complete_data.to_csv(index=False)
-                    st.download_button(
-                        "📥 Download Complete Data",
-                        csv_complete,
-                        f"complete_data_{selected_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
-                        "text/csv"
-                    )
-                
-                with col2:
-                    csv_summary = summary_stats.to_csv()
-                    st.download_button(
-                        "📥 Download Summary Stats",
-                        csv_summary,
-                        f"summary_stats_{selected_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
-                        "text/csv"
-                    )
-                
-                with col3:
-                    # Create executive summary report
-                    exec_summary = pd.DataFrame({
-                        'Metric': ['Total Inquiries', 'Total Applications', 'Total Offers', 'Total Enrolled', 'Conversion Rate', 'Yield Rate'],
-                        'Value': [inquiries, applications, offers, enrolled, f"{conversion_1:.1f}%", f"{yield_rate:.1f}%"]
-                    })
-                    csv_exec = exec_summary.to_csv(index=False)
-                    st.download_button(
-                        "📥 Download Executive Summary",
-                        csv_exec,
-                        f"executive_summary_{selected_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
-                        "text/csv"
-                    )
-            
-            with tab5:
-                st.markdown("### 🔍 Advanced Insights")
-                
-                # Statistical analysis
-                st.markdown("#### 📊 Statistical Analysis")
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    # Correlation analysis
-                    if not complete_data.empty:
-                        numeric_data = complete_data.select_dtypes(include=[np.number])
-                        if len(numeric_data.columns) > 1:
-                            correlation_matrix = numeric_data.corr()
-                            
-                            fig = px.imshow(
-                                correlation_matrix,
-                                labels=dict(color="Correlation"),
-                                color_continuous_scale='RdBu',
-                                aspect="auto"
-                            )
-                            fig.update_layout(title="Correlation Matrix", height=400)
-                            st.plotly_chart(fig, width='stretch')
-                
-                with col2:
-                    # Performance benchmarks
-                    st.markdown("##### 🎯 Performance Benchmarks")
+                    else:
+                        # Bar chart (grouped)
+                        for i, metric in enumerate(selected_adm_metrics):
+                            if metric in program_time_series.columns:
+                                metric_display = metric.replace('_', ' ').title()
+                                fig_adm.add_trace(go.Bar(
+                                    x=program_time_series.index,
+                                    y=program_time_series[metric],
+                                    name=metric_display,
+                                    marker_color=adm_colors[i % len(adm_colors)],
+                                    text=[f'{int(val)}' if val > 0 else '' for val in program_time_series[metric]],
+                                    textposition='outside',
+                                    textfont=dict(size=10),
+                                    hovertemplate=f'<b>{metric_display}</b><br>' +
+                                                 'Date: %{x}<br>' +
+                                                 'Value: %{y:,.0f}<br>' +
+                                                 '<extra></extra>'
+                                ))
+                        fig_adm.update_layout(barmode='group')
                     
-                    benchmarks = {
-                        'Inquiry Conversion': {'value': conversion_1, 'benchmark': 30, 'unit': '%'},
-                        'Yield Rate': {'value': yield_rate, 'benchmark': 60, 'unit': '%'},
-                        'Application Completion': {'value': (complete / applications * 100) if applications > 0 else 0, 'benchmark': 80, 'unit': '%'}
-                    }
-                    
-                    for metric, data in benchmarks.items():
-                        performance = "🟢 Above" if data['value'] > data['benchmark'] else "🟡 At" if abs(data['value'] - data['benchmark']) < 5 else "🔴 Below"
-                        st.metric(
-                            metric,
-                            f"{data['value']:.1f}{data['unit']}",
-                            f"{performance} benchmark ({data['benchmark']}{data['unit']})"
-                        )
-
-        # Year-over-Year Comparison (Enhanced) - Available for all analysis depths
-        if comparison_cohort != "None" and not comparison_data.empty:
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-            st.markdown(f"### 🔄 Year-over-Year Analysis: {selected_cohort} vs {comparison_cohort}")
-            
-            current_metrics = latest_data.groupby('metric_name')['metric_value'].sum()
-            comp_latest_date = comparison_data['report_date'].max()
-            comp_latest_data = comparison_data[comparison_data['report_date'] == comp_latest_date]
-            comp_metrics = comp_latest_data.groupby('metric_name')['metric_value'].sum()
-            
-            yoy_comparison = pd.DataFrame({
-                f'Class of {selected_cohort}': current_metrics,
-                f'Class of {comparison_cohort}': comp_metrics
-            }).fillna(0)
-            
-            yoy_comparison['Absolute Change'] = yoy_comparison[f'Class of {selected_cohort}'] - yoy_comparison[f'Class of {comparison_cohort}']
-            yoy_comparison['% Change'] = ((yoy_comparison[f'Class of {selected_cohort}'] / yoy_comparison[f'Class of {comparison_cohort}']) - 1) * 100
-            yoy_comparison['% Change'] = yoy_comparison['% Change'].replace([float('inf'), -float('inf')], 0).round(1)
-            
-            # IMPROVEMENT 5: Add variance metrics for clearer comparison
-            # Calculate statistical variance and standard deviation
-            yoy_comparison['Variance'] = ((yoy_comparison[f'Class of {selected_cohort}'] - yoy_comparison[f'Class of {comparison_cohort}']) ** 2)
-            yoy_comparison['Std Deviation'] = np.sqrt(yoy_comparison['Variance'])
-            yoy_comparison['Coefficient of Variation'] = (yoy_comparison['Std Deviation'] / yoy_comparison[[f'Class of {selected_cohort}', f'Class of {comparison_cohort}']].mean(axis=1) * 100).round(2)
-            
-            # Add performance indicators
-            yoy_comparison['Performance Indicator'] = yoy_comparison['% Change'].apply(
-                lambda x: '🟢 Strong Growth' if x > 15 
-                else '🟡 Moderate Growth' if x > 5 
-                else '🔴 Decline' if x < -5 
-                else '➡️ Stable'
-            )
-            
-            if analysis_depth != "Executive Summary":  # Show detailed comparison for non-executive views
-                st.markdown("#### 📊 Comprehensive YoY Comparison Table with Variance Metrics")
-                
-                # Enhanced comparison table with variance metrics
-                enhanced_comparison = yoy_comparison.copy()
-                enhanced_comparison = enhanced_comparison.round(2)
-                
-                st.dataframe(
-                    enhanced_comparison.style.format({
-                        f'Class of {selected_cohort}': '{:.0f}',
-                        f'Class of {comparison_cohort}': '{:.0f}',
-                        'Absolute Change': '{:+.0f}',
-                        '% Change': '{:+.1f}%',
-                        'Variance': '{:.1f}',
-                        'Std Deviation': '{:.1f}',
-                        'Coefficient of Variation': '{:.1f}%'
-                    }).background_gradient(subset=['% Change'], cmap='RdYlGn')
-                    .background_gradient(subset=['Coefficient of Variation'], cmap='YlOrRd'),
-                    width='stretch'
-                )
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.markdown("#### 📊 Side-by-Side Comparison")
-                    key_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'anticipated_cohort_size']
-                    
-                    fig = go.Figure()
-                    
-                    for metric in key_metrics:
-                        if metric in yoy_comparison.index:
-                            fig.add_trace(go.Bar(
-                                name=f'Class of {selected_cohort}',
-                                x=[metric.replace('_', ' ').title()],
-                                y=[yoy_comparison.loc[metric, f'Class of {selected_cohort}']],
-                                marker_color='#500000'
-                            ))
-                            
-                            fig.add_trace(go.Bar(
-                                name=f'Class of {comparison_cohort}',
-                                x=[metric.replace('_', ' ').title()],
-                                y=[yoy_comparison.loc[metric, f'Class of {comparison_cohort}']],
-                                marker_color='#B00000'
-                            ))
-                    
-                    fig.update_layout(
-                        barmode='group',
-                        height=400,
-                        xaxis_title='Metrics',
-                        yaxis_title='Count'
-                    )
-                    st.plotly_chart(fig, width='stretch')
-                
-                with col2:
-                    st.markdown("#### 📈 Percentage Change Analysis")
-                    
-                    change_data = yoy_comparison['% Change'].dropna()
-                    colors = ['#28a745' if x > 0 else '#dc3545' if x < 0 else '#6c757d' for x in change_data.values]
-                    
-                    fig = go.Figure(go.Bar(
-                        x=change_data.index,
-                        y=change_data.values,
-                        marker_color=colors,
-                        text=[f'{x:+.1f}%' for x in change_data.values],
-                        textposition='outside'
-                    ))
-                    
-                    fig.update_layout(
-                        height=400,
-                        xaxis_title='Metrics',
-                        yaxis_title='% Change',
-                        showlegend=False
-                    )
-                    fig.add_hline(y=0, line_dash="dash", line_color="black")
-                    st.plotly_chart(fig, width='stretch')
-
-elif st.session_state.current_page == 'Marketing_Analysis':
-    # MARKETING ANALYSIS CONTENT
-    col1, col2, col3 = st.columns([2, 2, 4])
-
-    with col1:
-        cohort_options = ["All Cohorts", 2028, 2027, 2026]
-        selected_cohort = st.selectbox(
-            "🎯 Target Cohort",
-            options=cohort_options,
-            index=1,
-            help="Filter marketing data by target cohort"
-        )
-
-    with col2:
-        st.metric(
-            "Analysis Scope",
-            f"Class of {selected_cohort}" if selected_cohort != "All Cohorts" else "All Cohorts",
-            "Primary Focus" if selected_cohort == 2028 else None
-        )
-
-    with col3:
-        if selected_cohort != "All Cohorts":
-            st.info(f"📊 **Marketing Focus**: All campaigns and spend targeting Class of {selected_cohort}")
-        else:
-            st.info("📊 **Marketing Focus**: Comprehensive view across all cohorts and campaigns")
-
-    st.markdown("---")
-
-    # Check if marketing data is available
-    has_data, status_msg = check_marketing_data_exists()
-
-    if not has_data:
-        st.warning("⚠️ Marketing data not yet available")
-        
-        st.info("""
-        ### 🚧 Coming Soon: Marketing Performance Dashboard
-        
-        This page will display comprehensive marketing analytics once the Ologie marketing spend data is integrated.
-        
-        **What you'll see here:**
-        - 📊 Inquiry source breakdown (Google Ads, Facebook, LinkedIn, etc.)
-        - 💰 Marketing spend by channel and program
-        - 📈 Campaign performance metrics
-        - 🎯 Cost per inquiry/application by source
-        - 📉 ROI analysis by marketing channel
-        - 🔄 Conversion rates by source
-        - 📅 Trend analysis over time
-        """)
-    else:
-        st.success("✅ Marketing data loaded")
-        
-        conn = get_connection()
-        metrics_df = pd.read_sql("SELECT * FROM marketing_metrics ORDER BY report_date DESC", conn)
-        
-        # Filter data by cohort if selected
-        if selected_cohort != "All Cohorts":
-            if selected_cohort == 2028:
-                filtered_metrics = metrics_df.head(int(len(metrics_df) * 0.6))
-            elif selected_cohort == 2027:
-                filtered_metrics = metrics_df.iloc[int(len(metrics_df) * 0.2):int(len(metrics_df) * 0.8)]
-            else:
-                filtered_metrics = metrics_df.tail(int(len(metrics_df) * 0.4))
-            
-            cohort_note = f" - Class of {selected_cohort}"
-            st.info(f"📊 **Data Filtered**: Showing marketing data relevant to Class of {selected_cohort} recruitment campaigns")
-        else:
-            filtered_metrics = metrics_df
-            cohort_note = " - All Cohorts"
-            st.info("📊 **Data Scope**: Showing all marketing campaigns across all cohorts")
-        
-        # Comprehensive Marketing KPIs
-        st.markdown(f"## 📊 Marketing Performance{cohort_note}")
-        
-        # IMPROVEMENT 1: Add marketing spend date clarification
-        # Get the latest marketing data date
-        latest_marketing_date = filtered_metrics['report_date'].max() if not filtered_metrics.empty else "N/A"
-        dashboard_updated = datetime.now().strftime('%m/%d/%Y')
-        
-        # Add date clarification notice
-        st.markdown(f"""
-        <div style="background: #fff3cd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-            <strong>📅 Data Date Notice:</strong><br>
-            • <strong>Dashboard Last Updated:</strong> {dashboard_updated}<br>
-            • <strong>Marketing Spend Data:</strong> {latest_marketing_date}<br>
-            <em>Note: Marketing spend data may reflect a different pull date than the dashboard's last updated date due to data processing schedules.</em>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        total_spend = filtered_metrics['spend'].sum()
-        total_clicks = filtered_metrics['clicks'].sum()
-        total_impressions = filtered_metrics['impressions'].sum()
-        total_inquiries = filtered_metrics['inquiries'].sum()
-        
-        cost_per_inquiry = total_spend / total_inquiries if total_inquiries > 0 else 0
-        click_through_rate = (total_clicks / total_impressions * 100) if total_impressions > 0 else 0
-        inquiry_conversion_rate = (total_inquiries / total_clicks * 100) if total_clicks > 0 else 0
-        avg_cpc = filtered_metrics['cost_per_click'].mean()
-        
-        # Top-line metrics
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
-        with col1:
-            st.metric("💰 Total Spend", f"${total_spend:,.0f}")
-        with col2:
-            st.metric("👥 Inquiries", f"{total_inquiries:,}")
-        with col3:
-            st.metric("💵 Cost/Inquiry", f"${cost_per_inquiry:.2f}")
-        with col4:
-            st.metric("📈 CTR", f"{click_through_rate:.1f}%")
-        with col5:
-            st.metric("🎯 Conv. Rate", f"{inquiry_conversion_rate:.1f}%")
-
-        st.divider()
-
-        # Channel Performance with Comprehensive Charts
-        st.markdown("## 📊 Channel Performance Analysis")
-        
-        channel_summary = metrics_df.groupby('channel').agg({
-            'impressions': 'sum',
-            'clicks': 'sum',
-            'spend': 'sum',
-            'inquiries': 'sum'
-        }).reset_index()
-        
-        channel_summary['CTR'] = (channel_summary['clicks'] / channel_summary['impressions'] * 100).round(2)
-        channel_summary['CPC'] = (channel_summary['spend'] / channel_summary['clicks']).round(2)
-        channel_summary['Cost_Per_Inquiry'] = (channel_summary['spend'] / channel_summary['inquiries']).round(2)
-        channel_summary = channel_summary.sort_values('spend', ascending=False)
-        
-        # Interactive channel selection for charts
-        st.markdown("**📊 Select Channels to Display:**")
-        available_channels = channel_summary['channel'].tolist()
-        
-        # Create dynamic checkboxes for channels
-        channel_cols = st.columns(min(4, len(available_channels)))
-        selected_channels = []
-        
-        for i, channel in enumerate(available_channels):
-            with channel_cols[i % 4]:
-                if st.checkbox(f"📈 {channel}", value=True, key=f"channel_{channel}_marketing"):
-                    selected_channels.append(channel)
-        
-        # Add instruction tooltip for marketing charts
-        st.markdown("""
-        <div style="background: #fff8e1; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-            💡 <strong>Interactive Marketing Charts:</strong> Use checkboxes above to show/hide channels • Click legend items to toggle • Hover for detailed metrics
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Filter data based on selection
-        filtered_channel_summary = channel_summary[channel_summary['channel'].isin(selected_channels)] if selected_channels else channel_summary
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 💰 Marketing Spend Distribution")
-            if not filtered_channel_summary.empty:
-                fig = px.pie(
-                    filtered_channel_summary,
-                    values='spend',
-                    names='channel',
-                    title='Marketing Spend by Channel - Interactive View',
-                    color_discrete_sequence=px.colors.sequential.Reds_r,
-                    hover_data=['clicks', 'inquiries'],
-                    hover_name='channel'
-                )
-                fig.update_traces(
-                    textposition='inside', 
-                    textinfo='percent+label',
-                    hovertemplate='<b>%{label}</b><br>' +
-                                 'Spend: $%{value:,.0f}<br>' +
-                                 'Clicks: %{customdata[0]:,.0f}<br>' +
-                                 'Inquiries: %{customdata[1]:,.0f}<br>' +
-                                 'Percentage: %{percent}<br>' +
-                                 '<extra></extra>'
-                )
-                fig.update_layout(
-                    height=400,
-                    legend=dict(
-                        x=1, y=0.5,
-                        xanchor='left', yanchor='middle',
-                        bgcolor='rgba(255,255,255,0.9)',
-                        bordercolor='rgba(0,0,0,0.2)',
-                        borderwidth=1
-                    ),
-                    annotations=[
-                        dict(
-                            text="💡 Click legend or use checkboxes above",
-                            xref="paper", yref="paper",
-                            x=0.02, y=0.02, xanchor='left', yanchor='bottom',
-                            showarrow=False,
-                            font=dict(size=9, color='gray'),
+                    fig_adm.update_layout(
+                        title='Admissions Metrics Over Time',
+                        height=550,
+                        xaxis_title='Date',
+                        yaxis_title='Count',
+                        yaxis_type='log' if st.session_state.exec_adm_log else 'linear',
+                        legend=dict(
+                            orientation='h',
+                            yanchor='top',
+                            y=-0.25,
+                            xanchor='center',
+                            x=0.5,
                             bgcolor='rgba(255,255,255,0.9)',
-                            bordercolor='gray',
+                            bordercolor='rgba(0,0,0,0.3)',
                             borderwidth=1
-                        )
-                    ]
-                )
-                st.plotly_chart(fig, width='stretch')
-            else:
-                st.info("Select at least one channel to display the chart.")
+                        ),
+                        margin=dict(b=140, t=50)
+                    )
+                    st.plotly_chart(fig_adm, use_container_width=True)
+                else:
+                    st.info("💡 Please select at least one admission metric to display.")
         
-        with col2:
-            st.markdown("### 👆 Clicks by Channel")
-            if not filtered_channel_summary.empty:
-                fig = px.bar(
-                    filtered_channel_summary,
-                    x='channel',
-                    y='clicks',
-                    title='Total Clicks by Channel - Interactive View',
-                    color='clicks',
-                    color_continuous_scale='Blues',
-                    hover_data=['spend', 'inquiries', 'CTR']
-                )
-                fig.update_traces(
-                    hovertemplate='<b>%{x}</b><br>' +
-                                 'Clicks: %{y:,.0f}<br>' +
-                                 'Spend: $%{customdata[0]:,.0f}<br>' +
-                                 'Inquiries: %{customdata[1]:,.0f}<br>' +
-                                 'CTR: %{customdata[2]:.2f}%<br>' +
-                                 '<extra></extra>'
-                )
-                fig.update_layout(
-                    height=400,
-                    annotations=[
-                        dict(
-                            text="💡 Use checkboxes above to filter channels",
-                            xref="paper", yref="paper",
-                            x=0.02, y=0.98, xanchor='left', yanchor='top',
-                            showarrow=False,
-                            font=dict(size=9, color='gray'),
-                            bgcolor='rgba(255,255,255,0.9)',
-                            bordercolor='gray',
-                            borderwidth=1
-                        )
-                    ]
-                )
-                st.plotly_chart(fig, width='stretch')
-            else:
-                st.info("Select at least one channel to display the chart.")
-
-        # Performance Metrics Comparison
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 📈 Click-Through Rates")
-            if not filtered_channel_summary.empty:
-                fig = px.bar(
-                    filtered_channel_summary,
-                    x='channel',
-                    y='CTR',
-                    title='CTR by Channel (%) - Interactive View',
-                    color='CTR',
-                    color_continuous_scale='Greens',
-                    hover_data=['clicks', 'impressions', 'spend']
-                )
-                fig.update_traces(
-                    hovertemplate='<b>%{x}</b><br>' +
-                                 'CTR: %{y:.2f}%<br>' +
-                                 'Clicks: %{customdata[0]:,.0f}<br>' +
-                                 'Impressions: %{customdata[1]:,.0f}<br>' +
-                                 'Spend: $%{customdata[2]:,.0f}<br>' +
-                                 '<extra></extra>'
-                )
-                fig.update_layout(
-                    height=400, 
-                    yaxis_title='CTR (%)',
-                    annotations=[
-                        dict(
-                            text="💡 Use checkboxes above to filter channels",
-                            xref="paper", yref="paper",
-                            x=0.02, y=0.98, xanchor='left', yanchor='top',
-                            showarrow=False,
-                            font=dict(size=9, color='gray'),
-                            bgcolor='rgba(255,255,255,0.9)',
-                            bordercolor='gray',
-                            borderwidth=1
-                        )
-                    ]
-                )
-                st.plotly_chart(fig, width='stretch')
-            else:
-                st.info("Select at least one channel to display the chart.")
-        
-        with col2:
-            st.markdown("### 💵 Cost Efficiency")
-            if not filtered_channel_summary.empty:
-                fig = px.bar(
-                    filtered_channel_summary,
-                    x='channel',
-                    y='Cost_Per_Inquiry',
-                    title='Cost per Inquiry by Channel - Interactive View',
-                    color='Cost_Per_Inquiry',
-                    color_continuous_scale='Reds',
-                    hover_data=['spend', 'inquiries', 'CPC']
-                )
-                fig.update_traces(
-                    hovertemplate='<b>%{x}</b><br>' +
-                                 'Cost per Inquiry: $%{y:.2f}<br>' +
-                                 'Total Spend: $%{customdata[0]:,.0f}<br>' +
-                                 'Total Inquiries: %{customdata[1]:,.0f}<br>' +
-                                 'Cost per Click: $%{customdata[2]:.2f}<br>' +
-                                 '<extra></extra>'
-                )
-                fig.update_layout(
-                    height=400, 
-                    yaxis_title='Cost per Inquiry ($)',
-                    annotations=[
-                        dict(
-                            text="💡 Use checkboxes above to filter channels",
-                            xref="paper", yref="paper",
-                            x=0.02, y=0.98, xanchor='left', yanchor='top',
-                            showarrow=False,
-                            font=dict(size=9, color='gray'),
-                            bgcolor='rgba(255,255,255,0.9)',
-                            bordercolor='gray',
-                            borderwidth=1
-                        )
-                    ]
-                )
-                st.plotly_chart(fig, width='stretch')
-            else:
-                st.info("Select at least one channel to display the chart.")
-
-        # Channel Summary Table
-        st.markdown("### 📋 Channel Performance Summary")
-        st.dataframe(
-            channel_summary.style.format({
-                'impressions': '{:,.0f}',
-                'clicks': '{:,.0f}',
-                'spend': '${:,.2f}',
-                'inquiries': '{:,.0f}',
-                'CTR': '{:.2f}%',
-                'CPC': '${:.2f}',
-                'Cost_Per_Inquiry': '${:.2f}'
-            }),
-            width="stretch"
-        )
-
-        # IMPROVEMENT 6: Add heatmap showing source increases across channels
-        st.divider()
-        st.markdown("## 🔥 Channel Performance Heatmap")
-        st.markdown("*Visual representation of performance metrics across all marketing channels*")
-        
-        # Create heatmap data
-        if len(channel_summary) > 1:
-            # Normalize metrics for better heatmap visualization
-            heatmap_data = channel_summary[['channel', 'spend', 'clicks', 'inquiries', 'CTR', 'CPC', 'Cost_Per_Inquiry']].copy()
+        with tab4:
+            # Data Tables
+            st.markdown("<h4 style='text-align: center; color: #500000;'>📊 Complete Dataset</h4>", unsafe_allow_html=True)
+            st.dataframe(complete_data, use_container_width=True, height=400)
             
-            # Normalize values to 0-100 scale for better comparison
-            metrics_to_normalize = ['spend', 'clicks', 'inquiries', 'CTR']
-            for metric in metrics_to_normalize:
-                if heatmap_data[metric].max() > 0:
-                    heatmap_data[f'{metric}_normalized'] = (heatmap_data[metric] / heatmap_data[metric].max() * 100).round(1)
+            # Summary statistics
+            st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Summary Statistics</h4>", unsafe_allow_html=True)
+            numeric_cols = complete_data.select_dtypes(include=[np.number]).columns
+            summary_stats = complete_data[numeric_cols].describe()
+            st.dataframe(summary_stats.round(2), use_container_width=True)
             
-            # Invert cost metrics (lower is better)
-            cost_metrics = ['CPC', 'Cost_Per_Inquiry']
-            for metric in cost_metrics:
-                if heatmap_data[metric].max() > 0:
-                    heatmap_data[f'{metric}_normalized'] = (100 - (heatmap_data[metric] / heatmap_data[metric].max() * 100)).round(1)
-            
-            # Create the heatmap
-            heatmap_matrix = heatmap_data[['spend_normalized', 'clicks_normalized', 'inquiries_normalized', 
-                                         'CTR_normalized', 'CPC_normalized', 'Cost_Per_Inquiry_normalized']].T
-            heatmap_matrix.columns = heatmap_data['channel']
-            heatmap_matrix.index = ['Spend Volume', 'Click Volume', 'Inquiry Volume', 'Click-Through Rate', 'Cost Efficiency (CPC)', 'Cost Efficiency (CPI)']
-            
-            fig_heatmap = px.imshow(
-                heatmap_matrix,
-                labels=dict(x="Marketing Channel", y="Performance Metric", color="Performance Score"),
-                x=heatmap_matrix.columns,
-                y=heatmap_matrix.index,
-                color_continuous_scale='RdYlGn',
-                aspect="auto",
-                title="Marketing Channel Performance Heatmap (0-100 Scale)"
-            )
-            
-            # IMPROVEMENT 7: Add enhanced tooltips to heatmap
-            fig_heatmap.update_traces(
-                text=heatmap_matrix.round(1),
-                texttemplate="%{text}",
-                textfont={"size": 12},
-                hovertemplate='<b>%{y}</b><br>' +
-                             'Channel: %{x}<br>' +
-                             'Performance Score: %{z:.1f}/100<br>' +
-                             '<extra></extra>'
-            )
-            
-            fig_heatmap.update_layout(
-                height=400,
-                xaxis_title="Marketing Channel",
-                yaxis_title="Performance Metric"
-            )
-            
-            st.plotly_chart(fig_heatmap, width='stretch')
-            
-            # Add interpretation guide
-            st.markdown("""
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
-                <strong>📊 Heatmap Interpretation:</strong><br>
-                • <span style="color: #28a745;">Green (80-100)</span>: Excellent performance<br>
-                • <span style="color: #ffc107;">Yellow (50-79)</span>: Good performance<br>
-                • <span style="color: #dc3545;">Red (0-49)</span>: Needs improvement<br>
-                • Higher scores indicate better performance across all metrics
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.info("Heatmap requires multiple channels for comparison. Add more marketing channels to see the heatmap visualization.")
-        st.markdown("### 📋 Channel Performance Summary")
-        st.dataframe(
-            channel_summary.style.format({
-                'impressions': '{:,.0f}',
-                'clicks': '{:,.0f}',
-                'spend': '${:,.2f}',
-                'inquiries': '{:,.0f}',
-                'CTR': '{:.2f}%',
-                'CPC': '${:.2f}',
-                'Cost_Per_Inquiry': '${:.2f}'
-            }),
-            width="stretch"
-        )
-
-        st.divider()
-
-        # Program Performance Analysis
-        st.markdown("## 🎓 Performance by Program")
-        
-        program_metrics = metrics_df[metrics_df['program'] != 'All Programs'].copy()
-        
-        if not program_metrics.empty:
-            program_summary = program_metrics.groupby('program').agg({
-                'impressions': 'sum',
-                'clicks': 'sum',
-                'spend': 'sum',
-                'inquiries': 'sum'
-            }).reset_index()
-            
-            program_summary['CPC'] = (program_summary['spend'] / program_summary['clicks']).round(2)
-            program_summary['Cost_Per_Inquiry'] = (program_summary['spend'] / program_summary['inquiries']).round(2)
-            program_summary = program_summary.sort_values('spend', ascending=False)
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("### 💰 Marketing Spend by Program")
-                fig = px.bar(
-                    program_summary,
-                    x='program',
-                    y='spend',
-                    title='Marketing Investment by Program',
-                    color='spend',
-                    color_continuous_scale='Reds'
-                )
-                fig.update_layout(height=400, yaxis_title='Spend ($)')
-                st.plotly_chart(fig, width='stretch')
-            
-            with col2:
-                st.markdown("### 👥 Inquiries Generated by Program")
-                fig = px.bar(
-                    program_summary,
-                    x='program',
-                    y='inquiries',
-                    title='Inquiries by Program',
-                    color='inquiries',
-                    color_continuous_scale='Blues'
-                )
-                fig.update_layout(height=400, yaxis_title='Inquiries')
-                st.plotly_chart(fig, width='stretch')
-            
-            # Program ROI Analysis
-            st.markdown("### 📊 Program ROI Analysis")
-            fig = px.scatter(
-                program_summary,
-                x='spend',
-                y='inquiries',
-                size='clicks',
-                color='Cost_Per_Inquiry',
-                hover_name='program',
-                title='Program Performance: Spend vs Inquiries (bubble size = clicks)',
-                color_continuous_scale='RdYlGn_r'
-            )
-            fig.update_layout(height=500, xaxis_title='Marketing Spend ($)', yaxis_title='Inquiries Generated')
-            st.plotly_chart(fig, width='stretch')
-            
-            # Program summary table
-            st.markdown("### 📋 Program Performance Summary")
-            st.dataframe(
-                program_summary.style.format({
-                    'impressions': '{:,.0f}',
-                    'clicks': '{:,.0f}',
-                    'spend': '${:,.2f}',
-                    'inquiries': '{:,.0f}',
-                    'CPC': '${:.2f}',
-                    'Cost_Per_Inquiry': '${:.2f}'
-                }),
-                width="stretch"
-            )
-
-        st.divider()
-
-        # Partner Performance Analysis
-        st.markdown("## 🤝 Marketing Partner Performance")
-        
-        partners = ['Google', 'LinkedIn', 'Meta']
-        partner_metrics = metrics_df[metrics_df['channel'].isin(partners)].copy()
-        
-        if not partner_metrics.empty:
-            partner_summary = partner_metrics.groupby('channel').agg({
-                'impressions': 'sum',
-                'clicks': 'sum',
-                'spend': 'sum',
-                'cost_per_click': 'mean',
-                'conversion_rate': 'mean',
-                'inquiries': 'sum'
-            }).reset_index()
-            
-            partner_summary = partner_summary.sort_values('spend', ascending=False)
-            
-            # Partner metrics overview
+            # Download options - centered and full width
+            st.markdown("<br>", unsafe_allow_html=True)
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                google_data = partner_summary[partner_summary['channel']=='Google']
-                if not google_data.empty:
-                    st.metric(
-                        "🔍 Google",
-                        f"${google_data['spend'].iloc[0]:,.0f}",
-                        f"{google_data['clicks'].iloc[0]:,} clicks"
-                    )
-                else:
-                    st.metric("🔍 Google", "No data", "")
+                csv_complete = complete_data.to_csv(index=False)
+                st.download_button(
+                    "📥 Download Complete Data",
+                    csv_complete,
+                    f"complete_data_{selected_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
             
             with col2:
-                linkedin_data = partner_summary[partner_summary['channel']=='LinkedIn']
-                if not linkedin_data.empty:
-                    st.metric(
-                        "💼 LinkedIn",
-                        f"${linkedin_data['spend'].iloc[0]:,.0f}",
-                        f"{linkedin_data['clicks'].iloc[0]:,} clicks"
-                    )
-                else:
-                    st.metric("💼 LinkedIn", "No data", "")
+                csv_summary = summary_stats.to_csv()
+                st.download_button(
+                    "📥 Download Summary Stats",
+                    csv_summary,
+                    f"summary_stats_{selected_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
             
             with col3:
-                meta_data = partner_summary[partner_summary['channel']=='Meta']
-                if not meta_data.empty:
-                    st.metric(
-                        "📘 Meta",
-                        f"${meta_data['spend'].iloc[0]:,.0f}",
-                        f"{meta_data['clicks'].iloc[0]:,} clicks"
-                    )
-                else:
-                    st.metric("📘 Meta", "No data", "")
-            
-            # Partner comparison charts
-            st.markdown("### 📊 Partner Performance Comparison")
-            
-            fig = make_subplots(
-                rows=2, cols=2,
-                subplot_titles=('Impressions', 'Clicks', 'Spend', 'Inquiries'),
-                specs=[[{"secondary_y": False}, {"secondary_y": False}],
-                       [{"secondary_y": False}, {"secondary_y": False}]]
-            )
-            
-            # Add traces
-            fig.add_trace(go.Bar(x=partner_summary['channel'], y=partner_summary['impressions'], name='Impressions'), row=1, col=1)
-            fig.add_trace(go.Bar(x=partner_summary['channel'], y=partner_summary['clicks'], name='Clicks'), row=1, col=2)
-            fig.add_trace(go.Bar(x=partner_summary['channel'], y=partner_summary['spend'], name='Spend'), row=2, col=1)
-            fig.add_trace(go.Bar(x=partner_summary['channel'], y=partner_summary['inquiries'], name='Inquiries'), row=2, col=2)
-            
-            fig.update_layout(height=600, showlegend=False)
-            st.plotly_chart(fig, width='stretch')
-            
-            # Partner performance table
-            st.dataframe(
-                partner_summary.style.format({
-                    'impressions': '{:,.0f}',
-                    'clicks': '{:,.0f}',
-                    'spend': '${:,.2f}',
-                    'cost_per_click': '${:.2f}',
-                    'conversion_rate': '{:.2f}%',
-                    'inquiries': '{:,.0f}'
-                }),
-                width="stretch"
-            )
-
-        st.divider()
-
-        # Raw Marketing Data
-        st.markdown("## 📋 Raw Marketing Data")
-        
-        if st.checkbox("Show all marketing metrics", key="show_marketing_data"):
-            st.dataframe(metrics_df, width="stretch", height=400)
-            
-            csv = metrics_df.to_csv(index=False)
-            st.download_button(
-                label="📥 Download Marketing Data CSV",
-                data=csv,
-                file_name=f"marketing_data_{datetime.now().strftime('%Y%m%d')}.csv",
-                mime="text/csv"
-            )
-
-elif st.session_state.current_page == 'Database':
-    # DATABASE TABLE VIEWER
-    st.markdown("### 🗄️ Database Tables")
+                # Create executive summary report
+                exec_summary = pd.DataFrame({
+                    'Metric': ['Total Inquiries', 'Total Applications', 'Total Offers', 'Total Enrolled', 'Conversion Rate', 'Yield Rate'],
+                    'Value': [inquiries, applications, offers, enrolled, f"{conversion_1:.1f}%", f"{yield_rate:.1f}%"]
+                })
+                csv_exec = exec_summary.to_csv(index=False)
+                st.download_button(
+                    "📥 Download Executive Summary",
+                    csv_exec,
+                    f"executive_summary_{selected_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
     
-    # IMPROVEMENT 2 & 3: Add keyword search and guiding questions
-    st.markdown("#### 🔍 Find What You're Looking For")
+    # Footer for Executive Deep Dive page
+    st.divider()
+    footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
+    with footer_col1:
+        st.markdown(f"""
+        <div class="footer-left footer-content" style="text-align: left;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with footer_col2:
+        st.components.v1.html("""
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
+            <button onclick="window.top.print()" 
+                    style="background-color: white;
+                           color: #500000;
+                           border: 2px solid #e0e0e0;
+                           border-radius: 8px;
+                           padding: 0.6rem 1.2rem;
+                           font-size: 0.95rem;
+                           font-weight: 600;
+                           cursor: pointer;
+                           transition: all 0.3s ease;
+                           width: 100%;
+                           min-height: 45px;
+                           font-family: 'Source Sans Pro', sans-serif;"
+                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
+                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
+                🖨️ Print Page
+            </button>
+        </div>
+        """, height=70)
+    with footer_col3:
+        st.markdown("""
+        <div class="footer-right footer-content" style="text-align: right;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif st.session_state.current_page == 'Comparison_Tool':
+    # COMPARISON TOOL CONTENT
     
-    # Keyword search for tables and questions
-    search_col1, search_col2 = st.columns([3, 1])
+    # Cohort selection filters - directly after page header
+    col1, col2, col3 = st.columns(3)
     
-    with search_col1:
-        keyword_search = st.text_input(
-            "🔍 Search tables, questions, or data types (e.g., 'applications', 'marketing', 'programs')",
-            placeholder="Type keywords to find relevant tables...",
-            key="table_keyword_search"
+    with col1:
+        st.markdown("**Primary Cohort**")
+        cohort_options = [2028, 2027, 2026]
+        primary_cohort = st.selectbox(
+            "Primary Cohort",
+            options=cohort_options,
+            index=0,
+            key="comparison_tool_primary",
+            label_visibility="collapsed"
         )
     
-    with search_col2:
-        show_all_questions = st.checkbox("Show All Guiding Questions", key="show_all_questions")
+    with col2:
+        st.markdown("**Comparison Cohort**")
+        comparison_cohorts = [c for c in cohort_options if c != primary_cohort]
+        if comparison_cohorts:
+            comparison_cohort = st.selectbox(
+                "Comparison Cohort",
+                options=comparison_cohorts,
+                key="comparison_tool_secondary",
+                label_visibility="collapsed"
+            )
+        else:
+            st.warning("No other cohorts available for comparison")
+            comparison_cohort = None
+    
+    with col3:
+        st.markdown("**Program Filter**")
+        programs_df = load_programs()
+        program_options = ['All Programs'] + sorted(programs_df['program_code'].tolist())
+        program_filter_comp = st.selectbox(
+            "Program Filter",
+            options=program_options,
+            key="comparison_tool_program",
+            label_visibility="collapsed"
+        )
+    
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    
+    # How to Use This Comparison Tool
+    st.markdown("""
+    <div style="text-align: center;
+                padding: 15px;
+                background: #e9ecef;
+                border-radius: 8px;
+                margin: 20px 0;">
+        <h3 style="color: #500000; margin: 0 0 15px 0; font-size: 20px;">
+            💡 How to Use This Comparison Tool
+        </h3>
+        <div style="background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-top: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057; text-align: left;">
+                <div>
+                    <strong style="color: #500000;">📊 Step-by-Step Guide:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li><strong>Select Cohorts:</strong> Choose primary and comparison cohorts using filters above</li>
+                        <li><strong>Filter by Program:</strong> Select specific program or view all programs combined</li>
+                        <li><strong>Explore Time Series:</strong> Click metric selector to visualize trends over time</li>
+                        <li><strong>View Data Tables:</strong> Click "Show Data Table" for detailed program breakdowns</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong style="color: #500000;">🎯 Key Features:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li><strong>Percentage Changes:</strong> Full-width bar chart showing growth/decline metrics</li>
+                        <li><strong>Comprehensive Table:</strong> Detailed comparison with variance metrics</li>
+                        <li><strong>Export Options:</strong> Download comparison tables or individual cohort data</li>
+                        <li><strong>Visual Indicators:</strong> Green = growth, Red = decline, hover for exact values</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    
+    # Load comparison data
+    if comparison_cohort:
+        comp_data = load_yoy_comparison_data(primary_cohort, comparison_cohort)
+        primary_data = comp_data[comp_data['cohort_year'] == primary_cohort]
+        secondary_data = comp_data[comp_data['cohort_year'] == comparison_cohort]
+        
+        # Apply program filter
+        if program_filter_comp != "All Programs":
+            primary_data = primary_data[primary_data['program'] == program_filter_comp]
+            secondary_data = secondary_data[secondary_data['program'] == program_filter_comp]
+        
+        if not primary_data.empty and not secondary_data.empty:
+            # Get latest data for both cohorts
+            primary_latest_date = primary_data['report_date'].max()
+            primary_latest = primary_data[primary_data['report_date'] == primary_latest_date]
+            
+            secondary_latest_date = secondary_data['report_date'].max()
+            secondary_latest = secondary_data[secondary_data['report_date'] == secondary_latest_date]
+            
+            program_scope = f" - {program_filter_comp}" if program_filter_comp != "All Programs" else ""
+            
+            # Display comparison header
+            st.markdown(f"""
+            <div style="text-align: center;
+                        padding: 15px;
+                        background: #f8f9fa;
+                        border-radius: 8px;
+                        margin: 20px 0;">
+                <h3 style="color: #500000; margin: 0; font-size: 20px;">
+                    📊 Comparing: Class of {primary_cohort} vs Class of {comparison_cohort}{program_scope}
+                </h3>
+                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                    Primary: {primary_latest_date.strftime('%B %d, %Y')} | Comparison: {secondary_latest_date.strftime('%B %d, %Y')}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            
+            # Calculate metrics for both cohorts
+            primary_metrics = primary_latest.groupby('metric_name')['metric_value'].sum()
+            secondary_metrics = secondary_latest.groupby('metric_name')['metric_value'].sum()
+            
+            # Create comprehensive comparison dataframe
+            yoy_comparison = pd.DataFrame({
+                f'Class of {primary_cohort}': primary_metrics,
+                f'Class of {comparison_cohort}': secondary_metrics
+            }).fillna(0)
+            
+            yoy_comparison['Absolute Change'] = yoy_comparison[f'Class of {primary_cohort}'] - yoy_comparison[f'Class of {comparison_cohort}']
+            
+            # Calculate % Change with proper handling of edge cases
+            def calculate_pct_change(row):
+                primary_val = row[f'Class of {primary_cohort}']
+                comparison_val = row[f'Class of {comparison_cohort}']
+                
+                # Case 1: Both are zero - no change
+                if primary_val == 0 and comparison_val == 0:
+                    return 0.0
+                
+                # Case 2: Comparison is zero but primary is not - show as N/A (will be handled in display)
+                if comparison_val == 0 and primary_val > 0:
+                    return np.nan  # Not applicable - no base for comparison
+                
+                # Case 3: Primary is zero but comparison is not - 100% decline
+                if primary_val == 0 and comparison_val > 0:
+                    return -100.0
+                
+                # Case 4: Normal calculation
+                return ((primary_val / comparison_val) - 1) * 100
+            
+            yoy_comparison['% Change'] = yoy_comparison.apply(calculate_pct_change, axis=1).round(1)
+            
+            # Calculate variance metrics (statistical variance for two data points)
+            # Mean of the two cohorts
+            yoy_comparison['Mean'] = yoy_comparison[[f'Class of {primary_cohort}', f'Class of {comparison_cohort}']].mean(axis=1)
+            
+            # Variance: average of squared deviations from mean
+            yoy_comparison['Variance'] = (
+                ((yoy_comparison[f'Class of {primary_cohort}'] - yoy_comparison['Mean']) ** 2 + 
+                 (yoy_comparison[f'Class of {comparison_cohort}'] - yoy_comparison['Mean']) ** 2) / 2
+            )
+            
+            # Standard Deviation: square root of variance
+            yoy_comparison['Std Deviation'] = np.sqrt(yoy_comparison['Variance'])
+            
+            # Coefficient of Variation: (Std Dev / Mean) × 100
+            # Avoid division by zero
+            yoy_comparison['Coefficient of Variation'] = np.where(
+                yoy_comparison['Mean'] != 0,
+                (yoy_comparison['Std Deviation'] / yoy_comparison['Mean']) * 100,
+                0
+            ).round(2)
+            
+            # Add performance indicators with proper edge case handling
+            
+            # Add performance indicators with proper edge case handling
+            def get_performance_indicator(row):
+                pct_change = row['% Change']
+                primary_val = row[f'Class of {primary_cohort}']
+                comparison_val = row[f'Class of {comparison_cohort}']
+                
+                # Special case: no base for comparison (comparison was 0)
+                if comparison_val == 0 and primary_val > 0:
+                    return '🟢 New Metric - Strong Growth (No Base Year Data)'
+                
+                # Special case: metric disappeared (primary is 0, comparison had value)
+                if primary_val == 0 and comparison_val > 0:
+                    return '🔴 Complete Decline (Metric Discontinued)'
+                
+                # Normal cases based on % change
+                if pct_change > 15:
+                    return '🟢 Strong Growth'
+                elif pct_change > 5:
+                    return '🟡 Moderate Growth'
+                elif pct_change >= -5:
+                    return '➡️ Stable'
+                else:
+                    return '🔴 Decline'
+            
+            yoy_comparison['Performance Indicator'] = yoy_comparison.apply(get_performance_indicator, axis=1)
+            
+            # Filter out metrics where BOTH cohorts have zero values (no data for either)
+            metrics_with_data = yoy_comparison[
+                (yoy_comparison[f'Class of {primary_cohort}'] != 0) | 
+                (yoy_comparison[f'Class of {comparison_cohort}'] != 0)
+            ]
+            
+            # Track excluded metrics for display
+            excluded_metrics = yoy_comparison[
+                (yoy_comparison[f'Class of {primary_cohort}'] == 0) & 
+                (yoy_comparison[f'Class of {comparison_cohort}'] == 0)
+            ].index.tolist()
+            
+            # Use filtered data for display
+            yoy_comparison = metrics_with_data.copy()
+            
+            # Initialize session state for time series metrics filter
+            if 'comp_ts_metrics_reset' not in st.session_state:
+                st.session_state.comp_ts_metrics_reset = 0
+            
+            # Metric selector for time series - Custom popover dropdown
+            # Filter to only show metrics that have data for at least one cohort
+            all_metrics = sorted(primary_data['metric_name'].unique())
+            available_metrics = [m for m in all_metrics if m in yoy_comparison.index]
+            
+            ts_reset_suffix = f"_{st.session_state.comp_ts_metrics_reset}"
+            ts_state_key = f'selected_ts_metrics{ts_reset_suffix}'
+            
+            # Set default selection
+            default_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'anticipated_cohort_size']
+            default_selection = [m for m in default_metrics if m in available_metrics]
+            if not default_selection:
+                default_selection = available_metrics[:4] if len(available_metrics) >= 4 else available_metrics
+            
+            if ts_state_key not in st.session_state:
+                st.session_state[ts_state_key] = default_selection.copy()
+            
+            current_ts_selection = st.session_state[ts_state_key]
+            
+            # Create summary text for popover button
+            if len(current_ts_selection) == len(available_metrics):
+                ts_summary_text = "All metrics selected"
+            elif len(current_ts_selection) == 0:
+                ts_summary_text = "No metrics selected - Click to select"
+            elif len(current_ts_selection) == 1:
+                ts_summary_text = current_ts_selection[0].replace('_', ' ').title()
+            else:
+                ts_summary_text = f"{len(current_ts_selection)} metrics selected"
+            
+            # Custom popover dropdown
+            with st.popover(f"📊 {ts_summary_text}", use_container_width=True):
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    if st.button("✓ All", key=f"ts_all{ts_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state.comp_ts_metrics_reset += 1
+                        new_ts_key = f'selected_ts_metrics_{st.session_state.comp_ts_metrics_reset}'
+                        st.session_state[new_ts_key] = available_metrics.copy()
+                        st.rerun()
+                with col_b:
+                    if st.button("✗ Clear", key=f"ts_clear{ts_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state.comp_ts_metrics_reset += 1
+                        new_ts_key = f'selected_ts_metrics_{st.session_state.comp_ts_metrics_reset}'
+                        st.session_state[new_ts_key] = []
+                        st.rerun()
+                
+                st.divider()
+                
+                for idx, metric in enumerate(available_metrics):
+                    is_checked = metric in st.session_state[ts_state_key]
+                    metric_display = metric.replace('_', ' ').title()
+                    new_value = st.checkbox(
+                        metric_display, 
+                        value=is_checked, 
+                        key=f"ts_cb_{idx}{ts_reset_suffix}"
+                    )
+                    
+                    if new_value != is_checked:
+                        if new_value:
+                            if metric not in st.session_state[ts_state_key]:
+                                st.session_state[ts_state_key].append(metric)
+                        else:
+                            if metric in st.session_state[ts_state_key]:
+                                st.session_state[ts_state_key].remove(metric)
+                        st.rerun()
+            
+            selected_ts_metrics = st.session_state.get(ts_state_key, default_selection)
+            
+            if selected_ts_metrics:
+                for idx, metric in enumerate(selected_ts_metrics):
+                    # Properly aggregate data by date (sum across programs)
+                    primary_ts = primary_data[primary_data['metric_name'] == metric].groupby('report_date')['metric_value'].sum().reset_index().sort_values('report_date')
+                    secondary_ts = secondary_data[secondary_data['metric_name'] == metric].groupby('report_date')['metric_value'].sum().reset_index().sort_values('report_date')
+                    
+                    # Keep original data for drill-down
+                    primary_detail = primary_data[primary_data['metric_name'] == metric].sort_values(['report_date', 'program'])
+                    secondary_detail = secondary_data[secondary_data['metric_name'] == metric].sort_values(['report_date', 'program'])
+                    
+                    if not primary_ts.empty or not secondary_ts.empty:
+                        # Display metric name as section header
+                        st.markdown(f"""
+                        <div style="text-align: center;
+                                    padding: 10px;
+                                    background: #e9ecef;
+                                    border-radius: 6px;
+                                    margin: 15px 0 10px 0;">
+                            <h4 style="color: #500000; margin: 0; font-size: 16px;">{metric.replace('_', ' ').title()}</h4>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Side-by-side comparison
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.markdown(f"<p style='text-align: center; font-weight: bold; color: #500000;'>Class of {primary_cohort}</p>", unsafe_allow_html=True)
+                            if not primary_ts.empty:
+                                fig_primary = go.Figure()
+                                fig_primary.add_trace(go.Scatter(
+                                    x=primary_ts['report_date'],
+                                    y=primary_ts['metric_value'],
+                                    mode='lines+markers+text',
+                                    name=f'Class of {primary_cohort}',
+                                    line=dict(color='#500000', width=4),
+                                    marker=dict(size=12, symbol='circle'),
+                                    text=[f'{int(val):,}' for val in primary_ts['metric_value']],
+                                    textposition='top center',
+                                    textfont=dict(size=10, color='#500000'),
+                                    hovertemplate='<b>%{x|%b %d, %Y}</b><br>Value: %{y:,.0f}<extra></extra>',
+                                    showlegend=False
+                                ))
+                                
+                                fig_primary.update_layout(
+                                    height=350,
+                                    xaxis_title='Date',
+                                    yaxis_title='Count',
+                                    xaxis=dict(
+                                        showgrid=True,
+                                        gridcolor='#e0e0e0',
+                                        showline=True,
+                                        linecolor='#500000',
+                                        linewidth=2
+                                    ),
+                                    yaxis=dict(
+                                        showgrid=True,
+                                        gridcolor='#e0e0e0',
+                                        showline=True,
+                                        linecolor='#500000',
+                                        linewidth=2
+                                    ),
+                                    plot_bgcolor='#fafafa',
+                                    margin=dict(t=40, b=60, l=60, r=40)
+                                )
+                                st.plotly_chart(fig_primary, use_container_width=True, key=f"comp_primary_{metric}_{idx}")
+                            else:
+                                st.info("No data available")
+                        
+                        with col2:
+                            st.markdown(f"<p style='text-align: center; font-weight: bold; color: #B00000;'>Class of {comparison_cohort}</p>", unsafe_allow_html=True)
+                            if not secondary_ts.empty:
+                                fig_secondary = go.Figure()
+                                fig_secondary.add_trace(go.Scatter(
+                                    x=secondary_ts['report_date'],
+                                    y=secondary_ts['metric_value'],
+                                    mode='lines+markers+text',
+                                    name=f'Class of {comparison_cohort}',
+                                    line=dict(color='#B00000', width=4),
+                                    marker=dict(size=12, symbol='diamond'),
+                                    text=[f'{int(val):,}' for val in secondary_ts['metric_value']],
+                                    textposition='top center',
+                                    textfont=dict(size=10, color='#B00000'),
+                                    hovertemplate='<b>%{x|%b %d, %Y}</b><br>Value: %{y:,.0f}<extra></extra>',
+                                    showlegend=False
+                                ))
+                                
+                                fig_secondary.update_layout(
+                                    height=350,
+                                    xaxis_title='Date',
+                                    yaxis_title='Count',
+                                    xaxis=dict(
+                                        showgrid=True,
+                                        gridcolor='#e0e0e0',
+                                        showline=True,
+                                        linecolor='#B00000',
+                                        linewidth=2
+                                    ),
+                                    yaxis=dict(
+                                        showgrid=True,
+                                        gridcolor='#e0e0e0',
+                                        showline=True,
+                                        linecolor='#B00000',
+                                        linewidth=2
+                                    ),
+                                    plot_bgcolor='#fafafa',
+                                    margin=dict(t=40, b=60, l=60, r=40)
+                                )
+                                st.plotly_chart(fig_secondary, use_container_width=True, key=f"comp_secondary_{metric}_{idx}")
+                            else:
+                                st.info("No data available")
+                        
+                        # Centered button for this metric (controls both tables)
+                        col_left, col_center, col_right = st.columns([2, 1, 2])
+                        with col_center:
+                            # Initialize session state for this metric's table visibility
+                            table_key = f"comp_table_visible_{metric}_{idx}"
+                            if table_key not in st.session_state:
+                                st.session_state[table_key] = False
+                            
+                            # Toggle button
+                            button_label = "Hide Data Table" if st.session_state[table_key] else "📊 Show Data Table"
+                            if st.button(button_label, key=f"comp_btn_metric_{metric}_{idx}", use_container_width=True):
+                                st.session_state[table_key] = not st.session_state[table_key]
+                                st.rerun()
+                        
+                        # Data tables with expandable rows (only if button was clicked)
+                        if st.session_state.get(table_key, False):
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                if not primary_ts.empty:
+                                    st.markdown("**📋 Data Details (Click to expand by program)**")
+                                    for date_idx, row in primary_ts.iterrows():
+                                        date_val = pd.to_datetime(row['report_date'])
+                                        total_val = int(row['metric_value'])
+                                        date_str = date_val.strftime('%b %d, %Y')
+                                        
+                                        # Get program breakdown for this date
+                                        date_details = primary_detail[primary_detail['report_date'] == row['report_date']]
+                                        
+                                        with st.expander(f"📅 {date_str} - Total: {total_val:,}"):
+                                            if not date_details.empty:
+                                                breakdown = date_details[['program', 'metric_value']].copy()
+                                                breakdown.columns = ['Program', 'Value']
+                                                breakdown['Value'] = breakdown['Value'].astype(int)
+                                                st.dataframe(
+                                                    breakdown.style.set_properties(**{
+                                                        'text-align': 'center',
+                                                        'font-size': '13px'
+                                                    }).set_table_styles([
+                                                        {'selector': 'th', 'props': [('text-align', 'center'), ('background-color', '#500000'), ('color', 'white'), ('font-weight', 'bold')]}
+                                                    ]),
+                                                    use_container_width=True,
+                                                    hide_index=True
+                                                )
+                                            else:
+                                                st.info("No program breakdown available")
+                            
+                            with col2:
+                                if not secondary_ts.empty:
+                                    st.markdown("**📋 Data Details (Click to expand by program)**")
+                                    for date_idx, row in secondary_ts.iterrows():
+                                        date_val = pd.to_datetime(row['report_date'])
+                                        total_val = int(row['metric_value'])
+                                        date_str = date_val.strftime('%b %d, %Y')
+                                        
+                                        # Get program breakdown for this date
+                                        date_details = secondary_detail[secondary_detail['report_date'] == row['report_date']]
+                                        
+                                        with st.expander(f"📅 {date_str} - Total: {total_val:,}"):
+                                            if not date_details.empty:
+                                                breakdown = date_details[['program', 'metric_value']].copy()
+                                                breakdown.columns = ['Program', 'Value']
+                                                breakdown['Value'] = breakdown['Value'].astype(int)
+                                                st.dataframe(
+                                                    breakdown.style.set_properties(**{
+                                                        'text-align': 'center',
+                                                        'font-size': '13px'
+                                                    }).set_table_styles([
+                                                        {'selector': 'th', 'props': [('text-align', 'center'), ('background-color', '#B00000'), ('color', 'white'), ('font-weight', 'bold')]}
+                                                    ]),
+                                                    use_container_width=True,
+                                                    hide_index=True
+                                                )
+                                            else:
+                                                st.info("No program breakdown available")
+            else:
+                st.info("💡 Select at least one metric to view time series comparison.")
+            
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            
+            # Percentage Change Analysis (FULL WIDTH with styled header)
+            st.markdown("""
+            <div style="text-align: center;
+                        padding: 15px;
+                        background: #f8f9fa;
+                        border-radius: 8px;
+                        margin: 20px 0;">
+                <h3 style="color: #500000; margin: 0; font-size: 20px;">📈 Percentage Change Analysis</h3>
+                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                    Compare performance changes across all metrics
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            change_data = yoy_comparison['% Change'].dropna()
+            colors = ['#28a745' if x > 0 else '#dc3545' if x < 0 else '#6c757d' for x in change_data.values]
+            
+            # Calculate y-axis range with padding for text labels
+            max_val = change_data.max()
+            min_val = change_data.min()
+            y_range_padding = max(abs(max_val), abs(min_val)) * 0.2  # 20% padding
+            
+            fig = go.Figure(go.Bar(
+                x=change_data.index,
+                y=change_data.values,
+                marker_color=colors,
+                text=[f'{x:+.1f}%' for x in change_data.values],
+                textposition='outside',
+                hovertemplate='<b>%{x}</b><br>Change: %{y:+.1f}%<extra></extra>'
+            ))
+            
+            fig.update_layout(
+                height=550,
+                xaxis_title='Metrics',
+                yaxis_title='% Change',
+                yaxis=dict(
+                    range=[min_val - y_range_padding, max_val + y_range_padding]
+                ),
+                showlegend=False,
+                margin=dict(t=60, b=100, l=60, r=60)
+            )
+            fig.add_hline(y=0, line_dash="dash", line_color="black", line_width=2)
+            st.plotly_chart(fig, use_container_width=True)
+            
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            
+            # Show note about excluded metrics if any
+            if excluded_metrics:
+                excluded_list = ', '.join([m.replace('_', ' ').title() for m in excluded_metrics])
+                st.markdown(f"""
+                <div style="background: #fff3cd;
+                            border-left: 4px solid #ffc107;
+                            padding: 12px 15px;
+                            border-radius: 6px;
+                            margin: 15px 0;">
+                    <p style="margin: 0; color: #856404; font-size: 14px;">
+                        ℹ️ <strong>Note:</strong> The following metrics were excluded from comparison as they have no data for either cohort: <strong>{excluded_list}</strong>
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Comprehensive Comparison Table with Export Buttons (styled header)
+            st.markdown("""
+            <div style="text-align: center;
+                        padding: 15px;
+                        background: #f8f9fa;
+                        border-radius: 8px;
+                        margin: 20px 0;">
+                <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Comprehensive Comparison Table with Variance Metrics</h3>
+                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                    Detailed comparison with statistical variance analysis
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            enhanced_comparison = yoy_comparison.copy()
+            # Drop the Mean column (used only for calculation)
+            if 'Mean' in enhanced_comparison.columns:
+                enhanced_comparison = enhanced_comparison.drop(columns=['Mean'])
+            
+            # Round for display
+            display_df = enhanced_comparison.copy().round(2)
+            
+            # Create display dataframe with selected columns
+            
+            # Create styled dataframe with proper formatting
+            styled_df = display_df.style.format({
+                f'Class of {primary_cohort}': '{:.0f}',
+                f'Class of {comparison_cohort}': '{:.0f}',
+                'Absolute Change': '{:+.0f}',
+                '% Change': lambda x: 'N/A' if pd.isna(x) else f'{x:+.1f}%',
+                'Variance': '{:.1f}',
+                'Std Deviation': '{:.1f}',
+                'Coefficient of Variation': '{:.1f}%'
+            }).background_gradient(subset=['Coefficient of Variation'], cmap='YlOrRd')
+            
+            st.dataframe(
+                styled_df,
+                use_container_width=True,
+                height=500
+            )
+            
+            # Add spacing before export buttons
+            st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+            
+            # Export buttons directly below the table
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                csv_comparison = enhanced_comparison.to_csv()
+                st.download_button(
+                    "📥 Download Comparison Table",
+                    csv_comparison,
+                    f"comparison_{primary_cohort}_vs_{comparison_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
+            
+            with col2:
+                csv_primary = primary_data.to_csv(index=False)
+                st.download_button(
+                    f"📥 Download {primary_cohort} Data",
+                    csv_primary,
+                    f"cohort_{primary_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
+            
+            with col3:
+                csv_secondary = secondary_data.to_csv(index=False)
+                st.download_button(
+                    f"📥 Download {comparison_cohort} Data",
+                    csv_secondary,
+                    f"cohort_{comparison_cohort}_{datetime.now().strftime('%Y%m%d')}.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
+        
+        else:
+            st.warning("⚠️ No data available for the selected cohorts and program filter combination.")
+            st.info("💡 Try selecting different cohorts or adjusting the program filter.")
+    else:
+        st.info("💡 Please select a comparison cohort to begin the analysis.")
+    
+    # Footer for Comparison Tool page
+    st.divider()
+    footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
+    with footer_col1:
+        st.markdown(f"""
+        <div class="footer-left footer-content" style="text-align: left;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with footer_col2:
+        st.components.v1.html("""
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
+            <button onclick="window.top.print()" 
+                    style="background-color: white;
+                           color: #500000;
+                           border: 2px solid #e0e0e0;
+                           border-radius: 8px;
+                           padding: 0.6rem 1.2rem;
+                           font-size: 0.95rem;
+                           font-weight: 600;
+                           cursor: pointer;
+                           transition: all 0.3s ease;
+                           width: 100%;
+                           min-height: 45px;
+                           font-family: 'Source Sans Pro', sans-serif;"
+                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
+                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
+                🖨️ Print Page
+            </button>
+        </div>
+        """, height=70)
+    with footer_col3:
+        st.markdown("""
+        <div class="footer-right footer-content" style="text-align: right;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif st.session_state.current_page == 'Marketing_Analysis':
+    # MARKETING ANALYSIS CONTENT
+    
+    # Check if marketing data is available
+    conn = get_connection()
+    
+    # Test if marketing tables exist
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend';")
+    has_marketing_spend = cursor.fetchone() is not None
+    
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend_totals';")
+    has_marketing_totals = cursor.fetchone() is not None
+    
+    has_data = has_marketing_spend and has_marketing_totals
+    
+    if not has_data:
+        st.warning("⚠️ Marketing data not yet available")
+        st.info("""
+        ### 🚧 Marketing Spend Dashboard
+        
+        Run `python3 marketing_etl.py` to load marketing spend data.
+        
+        **What you'll see here:**
+        - 📊 Spend by program and channel
+        - 💰 Monthly spend trends
+        - 📈 Channel performance comparison
+        - 🎯 Fiscal year breakdown
+        - 📝 Incremental spend notes
+        """)
+    else:
+        # Load data from new tables
+        spend_df = pd.read_sql("""
+            SELECT 
+                program,
+                channel,
+                fiscal_year,
+                month_date,
+                spend_amount,
+                extra_notes
+            FROM marketing_spend
+            ORDER BY month_date DESC, program, channel
+        """, conn)
+        
+        # Convert dates
+        spend_df['month_date'] = pd.to_datetime(spend_df['month_date'])
+        
+        # Add normalized program names for matching
+        spend_df['program_normalized'] = spend_df['program'].apply(normalize_program_name)
+        
+        # GLOBAL FILTERS - Applied to all tabs
+        st.markdown("""
+        <style>
+        /* Section headers with centered styling */
+        .section-header {
+            text-align: center;
+            padding: 12px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin: 20px 0 15px 0;
+        }
+        .section-header h3 {
+            margin: 0;
+            color: #500000;
+            font-size: 20px;
+        }
+        
+        /* Style bordered containers with gradient background */
+        div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlock"]:has(> div[data-testid="stHorizontalBlock"]) {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+        }
+        
+        /* Equal-sized buttons */
+        div[data-testid="stButton"] button {
+            width: 100% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            font-size: 12px !important;
+            padding: 8px 4px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        
+        # Initialize independent reset counters for each filter
+        if 'fy_reset_count' not in st.session_state:
+            st.session_state.fy_reset_count = 0
+        if 'prog_reset_count' not in st.session_state:
+            st.session_state.prog_reset_count = 0
+        if 'chan_reset_count' not in st.session_state:
+            st.session_state.chan_reset_count = 0
+        
+        col1, col2, col3 = st.columns(3)
+        
+        # FISCAL YEAR MULTI-SELECT
+        with col1:
+            fiscal_years_list_global = sorted(spend_df['fiscal_year'].unique().tolist())
+            
+            # Use independent reset counter for fiscal year
+            fy_reset_suffix = f"_{st.session_state.fy_reset_count}"
+            fy_state_key_global = f'selected_fy_global{fy_reset_suffix}'
+            
+            if fy_state_key_global not in st.session_state:
+                st.session_state[fy_state_key_global] = fiscal_years_list_global.copy()
+            
+            current_fy_selection_global = st.session_state[fy_state_key_global]
+            
+            if len(current_fy_selection_global) == len(fiscal_years_list_global):
+                fy_summary_text_global = "All fiscal years"
+            elif len(current_fy_selection_global) == 0:
+                fy_summary_text_global = "No fiscal years selected"
+            elif len(current_fy_selection_global) == 1:
+                fy_summary_text_global = str(current_fy_selection_global[0])
+            else:
+                fy_summary_text_global = f"{len(current_fy_selection_global)} fiscal years"
+            
+            st.markdown("**📅 Fiscal Year**")
+            
+            with st.popover(fy_summary_text_global, use_container_width=True):
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    if st.button("✓ All", key=f"fy_all_global{fy_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state.fy_reset_count += 1
+                        new_fy_key_global = f'selected_fy_global_{st.session_state.fy_reset_count}'
+                        st.session_state[new_fy_key_global] = fiscal_years_list_global.copy()
+                        st.rerun()
+                with col_b:
+                    if st.button("✗ Clear", key=f"fy_clear_global{fy_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state.fy_reset_count += 1
+                        new_fy_key_global = f'selected_fy_global_{st.session_state.fy_reset_count}'
+                        st.session_state[new_fy_key_global] = []
+                        st.rerun()
+                
+                st.divider()
+                
+                for idx, fy in enumerate(fiscal_years_list_global):
+                    is_checked = fy in st.session_state[fy_state_key_global]
+                    new_value = st.checkbox(
+                        str(fy), 
+                        value=is_checked, 
+                        key=f"fy_cb_{idx}_global{fy_reset_suffix}"
+                    )
+                    
+                    if new_value != is_checked:
+                        if new_value:
+                            if fy not in st.session_state[fy_state_key_global]:
+                                st.session_state[fy_state_key_global].append(fy)
+                        else:
+                            if fy in st.session_state[fy_state_key_global]:
+                                st.session_state[fy_state_key_global].remove(fy)
+                        st.rerun()
+        
+        selected_fy_global = st.session_state.get(fy_state_key_global, fiscal_years_list_global)
+        
+        fy_filtered_global = spend_df.copy()
+        if len(selected_fy_global) > 0:
+            fy_filtered_global = fy_filtered_global[fy_filtered_global['fiscal_year'].isin(selected_fy_global)]
+        else:
+            fy_filtered_global = fy_filtered_global.head(0)
+        
+        # PROGRAM MULTI-SELECT
+        with col2:
+            programs_list_global = sorted(fy_filtered_global['program'].unique().tolist())
+            
+            # Use independent reset counter for programs
+            prog_reset_suffix = f"_{st.session_state.prog_reset_count}"
+            prog_state_key_global = f'selected_programs_global{prog_reset_suffix}'
+            
+            if prog_state_key_global not in st.session_state:
+                st.session_state[prog_state_key_global] = programs_list_global.copy()
+            
+            # Auto-update: Remove programs that are no longer available due to fiscal year filter changes
+            current_prog_selection_global = st.session_state[prog_state_key_global]
+            valid_programs = [prog for prog in current_prog_selection_global if prog in programs_list_global]
+            
+            # If the available programs changed, update the selection to only valid ones
+            if set(valid_programs) != set(current_prog_selection_global):
+                st.session_state[prog_state_key_global] = valid_programs if valid_programs else programs_list_global.copy()
+                current_prog_selection_global = st.session_state[prog_state_key_global]
+            
+            if len(current_prog_selection_global) == len(programs_list_global):
+                prog_summary_text_global = "All programs"
+            elif len(current_prog_selection_global) == 0:
+                prog_summary_text_global = "No programs selected"
+            elif len(current_prog_selection_global) == 1:
+                prog_summary_text_global = current_prog_selection_global[0]
+            else:
+                prog_summary_text_global = f"{len(current_prog_selection_global)} programs"
+            
+            st.markdown("**🎓 Program**")
+            
+            with st.popover(prog_summary_text_global, use_container_width=True):
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    if st.button("✓ All", key=f"prog_all_global{prog_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state.prog_reset_count += 1
+                        new_prog_key_global = f'selected_programs_global_{st.session_state.prog_reset_count}'
+                        st.session_state[new_prog_key_global] = programs_list_global.copy()
+                        st.rerun()
+                with col_b:
+                    if st.button("✗ Clear", key=f"prog_clear_global{prog_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state.prog_reset_count += 1
+                        new_prog_key_global = f'selected_programs_global_{st.session_state.prog_reset_count}'
+                        st.session_state[new_prog_key_global] = []
+                        st.rerun()
+                
+                st.divider()
+                
+                for idx, program in enumerate(programs_list_global):
+                    is_checked = program in st.session_state[prog_state_key_global]
+                    new_value = st.checkbox(
+                        program, 
+                        value=is_checked, 
+                        key=f"prog_cb_{idx}_global{prog_reset_suffix}"
+                    )
+                    
+                    if new_value != is_checked:
+                        if new_value:
+                            if program not in st.session_state[prog_state_key_global]:
+                                st.session_state[prog_state_key_global].append(program)
+                        else:
+                            if program in st.session_state[prog_state_key_global]:
+                                st.session_state[prog_state_key_global].remove(program)
+                        st.rerun()
+        
+        selected_programs_global = st.session_state.get(prog_state_key_global, programs_list_global)
+        
+        program_filtered_global = fy_filtered_global.copy()
+        if len(selected_programs_global) > 0:
+            program_filtered_global = program_filtered_global[program_filtered_global['program'].isin(selected_programs_global)]
+        else:
+            program_filtered_global = program_filtered_global.head(0)
+        
+        # CHANNEL MULTI-SELECT
+        with col3:
+            channels_list_global = sorted(program_filtered_global['channel'].unique().tolist())
+            
+            # Use independent reset counter for channels
+            chan_reset_suffix = f"_{st.session_state.chan_reset_count}"
+            chan_state_key_global = f'selected_channels_global{chan_reset_suffix}'
+            
+            if chan_state_key_global not in st.session_state:
+                st.session_state[chan_state_key_global] = channels_list_global.copy()
+            
+            # Auto-update: Remove channels that are no longer available due to upstream filter changes
+            current_chan_selection_global = st.session_state[chan_state_key_global]
+            valid_channels = [ch for ch in current_chan_selection_global if ch in channels_list_global]
+            
+            # If the available channels changed, update the selection to only valid ones
+            if set(valid_channels) != set(current_chan_selection_global):
+                st.session_state[chan_state_key_global] = valid_channels if valid_channels else channels_list_global.copy()
+                current_chan_selection_global = st.session_state[chan_state_key_global]
+            
+            if len(current_chan_selection_global) == len(channels_list_global):
+                chan_summary_text_global = "All channels"
+            elif len(current_chan_selection_global) == 0:
+                chan_summary_text_global = "No channels selected"
+            elif len(current_chan_selection_global) == 1:
+                chan_summary_text_global = current_chan_selection_global[0]
+            else:
+                chan_summary_text_global = f"{len(current_chan_selection_global)} channels"
+            
+            st.markdown("**📢 Channel**")
+            
+            with st.popover(chan_summary_text_global, use_container_width=True):
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    if st.button("✓ All", key=f"chan_all_global{chan_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state.chan_reset_count += 1
+                        new_chan_key_global = f'selected_channels_global_{st.session_state.chan_reset_count}'
+                        st.session_state[new_chan_key_global] = channels_list_global.copy()
+                        st.rerun()
+                with col_b:
+                    if st.button("✗ Clear", key=f"chan_clear_global{chan_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state.chan_reset_count += 1
+                        new_chan_key_global = f'selected_channels_global_{st.session_state.chan_reset_count}'
+                        st.session_state[new_chan_key_global] = []
+                        st.rerun()
+                
+                st.divider()
+                
+                for idx, channel in enumerate(channels_list_global):
+                    is_checked = channel in st.session_state[chan_state_key_global]
+                    new_value = st.checkbox(
+                        channel, 
+                        value=is_checked, 
+                        key=f"chan_cb_{idx}_global{chan_reset_suffix}"
+                    )
+                    
+                    if new_value != is_checked:
+                        if new_value:
+                            if channel not in st.session_state[chan_state_key_global]:
+                                st.session_state[chan_state_key_global].append(channel)
+                        else:
+                            if channel in st.session_state[chan_state_key_global]:
+                                st.session_state[chan_state_key_global].remove(channel)
+                        st.rerun()
+        
+        selected_channels_global = st.session_state.get(chan_state_key_global, channels_list_global)
+        
+        # Apply all global filters to create the master filtered dataset
+        filtered_spend_global = spend_df.copy()
+        
+        if len(selected_fy_global) > 0:
+            filtered_spend_global = filtered_spend_global[filtered_spend_global['fiscal_year'].isin(selected_fy_global)]
+        else:
+            filtered_spend_global = filtered_spend_global.head(0)
+        
+        if len(selected_programs_global) > 0:
+            filtered_spend_global = filtered_spend_global[filtered_spend_global['program'].isin(selected_programs_global)]
+        else:
+            filtered_spend_global = filtered_spend_global.head(0)
+        
+        if len(selected_channels_global) > 0:
+            filtered_spend_global = filtered_spend_global[filtered_spend_global['channel'].isin(selected_channels_global)]
+        else:
+            filtered_spend_global = filtered_spend_global.head(0)
+        
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        
+        # How to Use This Analysis
+        st.markdown("""
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0 0 15px 0; font-size: 20px;">
+                💡 How to Use This Analysis
+            </h3>
+            <div style="background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-top: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057; text-align: left;">
+                    <div>
+                        <strong style="color: #500000;">� What You Can Discover:</strong>
+                        <ul style="margin: 8px 0; padding-left: 20px;">
+                            <li><strong>Spend Analysis:</strong> Track marketing investments by channel and program</li>
+                            <li><strong>Channel Performance:</strong> Compare effectiveness across different marketing channels</li>
+                            <li><strong>Trend Tracking:</strong> Monitor spending patterns over time and fiscal years</li>
+                            <li><strong>ROI Insights:</strong> Understand cost per inquiry and conversion metrics</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong style="color: #500000;">🎯 Interactive Features:</strong>
+                        <ul style="margin: 8px 0; padding-left: 20px;">
+                            <li><strong>Multi-Select Filters:</strong> Choose fiscal years, programs, and channels</li>
+                            <li><strong>Dynamic Charts:</strong> Click legend items to toggle data series on/off</li>
+                            <li><strong>Hover Details:</strong> Move mouse over charts for exact values and breakdowns</li>
+                            <li><strong>Data Export:</strong> Download filtered data for further analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        
+        # Chrome-style CSS for tabs with always-visible scrollbar when needed
+        st.markdown("""
+        <style>
+        /* Chrome-style tabs - Base styles */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2px !important;
+            justify-content: center !important;
+            background-color: transparent !important;
+            padding: 0px 20px !important;
+            border-bottom: none !important;
+            margin-bottom: 30px !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            scroll-behavior: smooth !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: #500000 #f0f0f0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Always show scrollbar when content overflows */
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            height: 10px !important;
+            display: block !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+            background: #f0f0f0 !important;
+            border-radius: 5px !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+            background: #500000 !important;
+            border-radius: 5px !important;
+            min-width: 50px !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
+            background: #700000 !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            height: 45px !important;
+            padding: 0px 32px !important;
+            background-color: #f5f5f5 !important;
+            border-radius: 8px 8px 0px 0px !important;
+            font-weight: 500 !important;
+            font-size: 15px !important;
+            border: none !important;
+            border-bottom: 3px solid transparent !important;
+            color: #666 !important;
+            margin-bottom: -2px !important;
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            min-width: fit-content !important;
+            box-sizing: border-box !important;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background-color: white !important;
+            color: #500000 !important;
+            border-bottom: 3px solid #500000 !important;
+        }
+        
+        .stTabs [data-baseweb="tab"]:hover {
+            background-color: #e8e8e8 !important;
+            color: #500000 !important;
+        }
+        
+        .stTabs [aria-selected="true"]:hover {
+            background-color: white !important;
+        }
+        
+        /* Tablet adjustments - switch to left-aligned */
+        @media screen and (max-width: 1024px) {
+            .stTabs [data-baseweb="tab-list"] {
+                justify-content: flex-start !important;
+                padding: 0px 15px !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                padding: 0px 24px !important;
+                font-size: 14px !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+                height: 12px !important;
+            }
+        }
+        
+        /* Mobile adjustments - left-aligned */
+        @media screen and (max-width: 768px) {
+            .stTabs [data-baseweb="tab-list"] {
+                justify-content: flex-start !important;
+                padding: 0px 10px !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                padding: 0px 20px !important;
+                font-size: 13px !important;
+                height: 42px !important;
+            }
+        }
+        
+        /* Small mobile adjustments - left-aligned */
+        @media screen and (max-width: 480px) {
+            .stTabs [data-baseweb="tab-list"] {
+                justify-content: flex-start !important;
+                padding: 0px 10px !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                padding: 0px 16px !important;
+                font-size: 12px !important;
+                height: 40px !important;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # TABS - Now using globally filtered data
+        overview_tab, advanced_tab, channel_tab, notes_tab = st.tabs(["📊 Overview", "🔬 Advanced Analytics", "📢 Channel Analytics", "📝 Incremental Notes"])
+        
+        with overview_tab:
+            # Use globally filtered data
+            filtered_spend = filtered_spend_global.copy()
+            
+            if filtered_spend.empty:
+                st.warning("⚠️ No data matches the selected filters")
+            else:
+                # Try to load admissions data for ROI metrics
+                try:
+                    admissions_df = pd.read_sql("""
+                        SELECT 
+                            report_date,
+                            program,
+                            metric_name,
+                            metric_value
+                        FROM admissions_metrics
+                        WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                    """, conn)
+                    
+                    # Normalize admissions program names
+                    admissions_df['program_normalized'] = admissions_df['program'].apply(normalize_program_name)
+                    admissions_df['report_date'] = pd.to_datetime(admissions_df['report_date'])
+                    admissions_df['month_date'] = admissions_df['report_date'].dt.to_period('M').dt.to_timestamp()
+                    
+                    # Pivot admissions data
+                    admissions_pivot = admissions_df.pivot_table(
+                        index=['month_date', 'program_normalized'],
+                        columns='metric_name',
+                        values='metric_value',
+                        aggfunc='sum'
+                    ).reset_index()
+                    
+                    # Aggregate marketing spend by month and normalized program
+                    monthly_spend_norm = filtered_spend.groupby(['month_date', 'program_normalized']).agg({
+                        'spend_amount': 'sum'
+                    }).reset_index()
+                    
+                    # Merge on normalized program names
+                    roi_df = pd.merge(
+                        monthly_spend_norm,
+                        admissions_pivot,
+                        on=['month_date', 'program_normalized'],
+                        how='inner'
+                    )
+                    
+                    has_roi_data = not roi_df.empty
+                    
+                    if has_roi_data:
+                        # Calculate ROI metrics
+                        roi_df['CPI'] = roi_df.apply(lambda x: x['spend_amount'] / x['inquiries_received'] if x['inquiries_received'] > 0 else 0, axis=1)
+                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['applications_received'] if x['applications_received'] > 0 else 0, axis=1)
+                        roi_df['CPAd'] = roi_df.apply(lambda x: x['spend_amount'] / x['admissions_accepted'] if x['admissions_accepted'] > 0 else 0, axis=1)
+                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['applications_received'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
+                    else:
+                        # Debug: Show why no match
+                        if len(monthly_spend_norm) > 0 and len(admissions_pivot) > 0:
+                            with st.expander("🔍 Debug: Why are metrics showing N/A?", expanded=False):
+                                st.markdown("**Marketing Data Programs:**")
+                                st.write(sorted(monthly_spend_norm['program_normalized'].unique().tolist()))
+                                st.markdown("**Admissions Data Programs:**")
+                                st.write(sorted(admissions_pivot['program_normalized'].unique().tolist()))
+                                st.info("💡 If your selected program doesn't appear in both lists, that's why metrics show N/A. The program names need to match between marketing and admissions data.")
+                except Exception as e:
+                    has_roi_data = False
+                    with st.expander("⚠️ Debug: Error loading admissions data", expanded=False):
+                        st.error(f"Error: {str(e)}")
+                        st.info("This usually means the admissions_metrics table is empty or doesn't exist. Run the ETL pipeline to populate it.")
+                
+                # KEY METRICS SECTION
+                st.markdown("""
+                <div class="section-header">
+                    <h3>💰 Marketing Performance Overview</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if has_roi_data:
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        st.metric("Total Spend", f"${filtered_spend['spend_amount'].sum():,.2f}")
+                    with col2:
+                        avg_cpi = roi_df[roi_df['CPI'] > 0]['CPI'].mean()
+                        st.metric("Avg Cost per Inquiry", f"${avg_cpi:,.2f}" if pd.notna(avg_cpi) and avg_cpi > 0 else "N/A")
+                    with col3:
+                        avg_cpa = roi_df[roi_df['CPA'] > 0]['CPA'].mean()
+                        st.metric("Avg Cost per Application", f"${avg_cpa:,.2f}" if pd.notna(avg_cpa) and avg_cpa > 0 else "N/A")
+                    with col4:
+                        avg_conv = roi_df[roi_df['Conversion_Rate'] > 0]['Conversion_Rate'].mean()
+                        st.metric("Avg Conversion Rate", f"{avg_conv:.1f}%" if pd.notna(avg_conv) and avg_conv > 0 else "N/A")
+                else:
+                    # Fallback to basic metrics if no ROI data
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        st.metric("Total Spend", f"${filtered_spend['spend_amount'].sum():,.2f}")
+                    with col2:
+                        st.metric("Programs", filtered_spend['program'].nunique())
+                    with col3:
+                        st.metric("Channels", filtered_spend['channel'].nunique())
+                    with col4:
+                        avg_spend = filtered_spend.groupby('channel')['spend_amount'].sum().mean()
+                        st.metric("Avg per Channel", f"${avg_spend:,.2f}")
+                
+                st.divider()
+                
+                # SPEND BY PROGRAM SECTION
+                st.markdown("""
+                <div class="section-header">
+                    <h3>📊 Spend by Program</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Use container with border
+                filter_container_prog = st.container(border=True)
+                
+                with filter_container_prog:
+                    # Row 1: Action buttons
+                    btn_col1, btn_col2, btn_col3 = st.columns(3)
+                    with btn_col1:
+                        available_programs = sorted(filtered_spend['program'].unique().tolist())
+                        if st.button("✓ All", key="overview_prog_all", use_container_width=True):
+                            for program in available_programs:
+                                st.session_state[f"overview_prog_check_{program}"] = True
+                            st.rerun()
+                    with btn_col2:
+                        if st.button("✗ Clear", key="overview_prog_none", use_container_width=True):
+                            for program in available_programs:
+                                st.session_state[f"overview_prog_check_{program}"] = False
+                            st.rerun()
+                    with btn_col3:
+                        if 'overview_prog_log_scale' not in st.session_state:
+                            st.session_state.overview_prog_log_scale = False
+                        if st.button("📊 " + ("Log" if not st.session_state.overview_prog_log_scale else "Linear"), 
+                                   key="overview_prog_log_toggle", use_container_width=True):
+                            st.session_state.overview_prog_log_scale = not st.session_state.overview_prog_log_scale
+                            st.rerun()
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Program toggle buttons - FORCE multi-row layout
+                    num_programs = len(available_programs)
+                    programs_per_row = 4  # Force 4 buttons per row
+                    
+                    overview_prog_selected = []
+                    
+                    # Create rows explicitly
+                    for row_start in range(0, num_programs, programs_per_row):
+                        row_end = min(row_start + programs_per_row, num_programs)
+                        row_programs = available_programs[row_start:row_end]
+                        
+                        # Create columns for this row
+                        row_cols = st.columns(len(row_programs))
+                        
+                        for idx, program in enumerate(row_programs):
+                            with row_cols[idx]:
+                                if f"overview_prog_check_{program}" not in st.session_state:
+                                    st.session_state[f"overview_prog_check_{program}"] = True
+                                
+                                is_selected = st.session_state[f"overview_prog_check_{program}"]
+                                button_type = "primary" if is_selected else "secondary"
+                                button_label = f"✓ {program}" if is_selected else program
+                                
+                                if st.button(button_label, key=f"overview_prog_btn_{program}", 
+                                           use_container_width=True, type=button_type):
+                                    st.session_state[f"overview_prog_check_{program}"] = not is_selected
+                                    st.rerun()
+                                
+                                if st.session_state[f"overview_prog_check_{program}"]:
+                                    overview_prog_selected.append(program)
+                
+                # Filter and display chart
+                if overview_prog_selected:
+                    chart1_data = filtered_spend[filtered_spend['program'].isin(overview_prog_selected)]
+                    program_spend = chart1_data.groupby('program')['spend_amount'].sum().sort_values(ascending=False)
+                    
+                    fig = px.bar(x=program_spend.index, y=program_spend.values,
+                               labels={'x': 'Program', 'y': 'Total Spend ($)'},
+                               color=program_spend.values, color_continuous_scale='RdYlGn_r',
+                               log_y=st.session_state.overview_prog_log_scale)
+                    fig.update_layout(height=400, showlegend=False)
+                    st.plotly_chart(fig, use_container_width=True, key="overview_prog_chart")
+                else:
+                    st.info("No programs selected. Click '✓ All' to select all programs.")
+                
+                st.divider()
+                
+                # SPEND BY CHANNEL SECTION
+                st.markdown("""
+                <div class="section-header">
+                    <h3>📢 Spend by Channel</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Use container with border
+                filter_container_chan = st.container(border=True)
+                
+                with filter_container_chan:
+                    # Row 1: Action buttons
+                    btn_col1, btn_col2, btn_col3 = st.columns(3)
+                    with btn_col1:
+                        available_channels = sorted(filtered_spend['channel'].unique().tolist())
+                        if st.button("✓ All", key="overview_chan_all", use_container_width=True):
+                            for channel in available_channels:
+                                st.session_state[f"overview_chan_check_{channel}"] = True
+                            st.rerun()
+                    with btn_col2:
+                        if st.button("✗ Clear", key="overview_chan_none", use_container_width=True):
+                            for channel in available_channels:
+                                st.session_state[f"overview_chan_check_{channel}"] = False
+                            st.rerun()
+                    with btn_col3:
+                        if 'overview_chan_chart_type' not in st.session_state:
+                            st.session_state.overview_chan_chart_type = "Pie"
+                        if st.button("📊 " + st.session_state.overview_chan_chart_type, 
+                                   key="overview_chan_type_toggle", use_container_width=True):
+                            st.session_state.overview_chan_chart_type = "Bar" if st.session_state.overview_chan_chart_type == "Pie" else "Pie"
+                            st.rerun()
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Channel toggle buttons - FORCE multi-row layout
+                    num_channels = len(available_channels)
+                    channels_per_row = 4  # Force 4 buttons per row
+                    
+                    overview_chan_selected = []
+                    
+                    # Create rows explicitly
+                    for row_start in range(0, num_channels, channels_per_row):
+                        row_end = min(row_start + channels_per_row, num_channels)
+                        row_channels = available_channels[row_start:row_end]
+                        
+                        # Create columns for this row
+                        row_cols = st.columns(len(row_channels))
+                        
+                        for idx, channel in enumerate(row_channels):
+                            with row_cols[idx]:
+                                if f"overview_chan_check_{channel}" not in st.session_state:
+                                    st.session_state[f"overview_chan_check_{channel}"] = True
+                                
+                                is_selected = st.session_state[f"overview_chan_check_{channel}"]
+                                button_type = "primary" if is_selected else "secondary"
+                                button_label = f"✓ {channel}" if is_selected else channel
+                                
+                                if st.button(button_label, key=f"overview_chan_btn_{channel}", 
+                                           use_container_width=True, type=button_type):
+                                    st.session_state[f"overview_chan_check_{channel}"] = not is_selected
+                                    st.rerun()
+                                
+                                if st.session_state[f"overview_chan_check_{channel}"]:
+                                    overview_chan_selected.append(channel)
+                
+                # Filter and display chart
+                if overview_chan_selected:
+                    chart2_data = filtered_spend[filtered_spend['channel'].isin(overview_chan_selected)]
+                    channel_spend = chart2_data.groupby('channel')['spend_amount'].sum().sort_values(ascending=False)
+                    
+                    if st.session_state.overview_chan_chart_type == "Pie":
+                        fig = px.pie(values=channel_spend.values, names=channel_spend.index,
+                                   title='Spend Distribution by Channel')
+                        fig.update_traces(textposition='inside', textinfo='percent+label')
+                    else:
+                        fig = px.bar(x=channel_spend.index, y=channel_spend.values,
+                                   labels={'x': 'Channel', 'y': 'Total Spend ($)'},
+                                   color=channel_spend.values, color_continuous_scale='RdYlGn_r')
+                        fig.update_layout(showlegend=False)
+                    fig.update_layout(height=400)
+                    st.plotly_chart(fig, use_container_width=True, key="overview_chan_chart")
+                else:
+                    st.info("No channels selected. Click '✓ All' to select all channels.")
+        
+        with advanced_tab:
+            # Use globally filtered data
+            filtered_spend_adv = filtered_spend_global.copy()
+            
+            if filtered_spend_adv.empty:
+                st.warning("⚠️ No data matches the selected filters")
+            else:
+                try:
+                    # Load admissions data
+                    admissions_df = pd.read_sql("""
+                        SELECT 
+                            report_date,
+                            program,
+                            metric_name,
+                            metric_value
+                        FROM admissions_metrics
+                        WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                    """, conn)
+                    
+                    # Normalize admissions program names
+                    admissions_df['program_normalized'] = admissions_df['program'].apply(normalize_program_name)
+                    admissions_df['report_date'] = pd.to_datetime(admissions_df['report_date'])
+                    admissions_df['month_date'] = admissions_df['report_date'].dt.to_period('M').dt.to_timestamp()
+                    
+                    # Pivot admissions data
+                    admissions_pivot = admissions_df.pivot_table(
+                        index=['month_date', 'program_normalized'],
+                        columns='metric_name',
+                        values='metric_value',
+                        aggfunc='sum'
+                    ).reset_index()
+                    
+                    # Aggregate marketing spend by month and normalized program
+                    monthly_spend_norm = filtered_spend_adv.groupby(['month_date', 'program_normalized']).agg({
+                        'spend_amount': 'sum'
+                    }).reset_index()
+                    
+                    # Merge on normalized program names
+                    roi_df = pd.merge(
+                        monthly_spend_norm,
+                        admissions_pivot,
+                        on=['month_date', 'program_normalized'],
+                        how='inner'
+                    )
+                    
+                    if not roi_df.empty and len(roi_df) > 0:
+                        # Calculate ROI metrics
+                        roi_df['CPI'] = roi_df.apply(lambda x: x['spend_amount'] / x['inquiries_received'] if x['inquiries_received'] > 0 else 0, axis=1)
+                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['applications_received'] if x['applications_received'] > 0 else 0, axis=1)
+                        roi_df['CPAd'] = roi_df.apply(lambda x: x['spend_amount'] / x['admissions_accepted'] if x['admissions_accepted'] > 0 else 0, axis=1)
+                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['applications_received'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
+                        
+                        # ROI SUMMARY SECTION
+                        st.markdown("""
+                        <div class="section-header">
+                            <h3>💰 ROI Summary</h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        with col1:
+                            avg_cpi = roi_df[roi_df['CPI'] > 0]['CPI'].mean()
+                            st.metric("Avg Cost per Inquiry", f"${avg_cpi:,.2f}" if avg_cpi > 0 else "N/A")
+                        with col2:
+                            avg_cpa = roi_df[roi_df['CPA'] > 0]['CPA'].mean()
+                            st.metric("Avg Cost per Application", f"${avg_cpa:,.2f}" if avg_cpa > 0 else "N/A")
+                        with col3:
+                            avg_cpad = roi_df[roi_df['CPAd'] > 0]['CPAd'].mean()
+                            st.metric("Avg Cost per Admission", f"${avg_cpad:,.2f}" if avg_cpad > 0 else "N/A")
+                        with col4:
+                            avg_conv = roi_df[roi_df['Conversion_Rate'] > 0]['Conversion_Rate'].mean()
+                            st.metric("Avg Conversion Rate", f"{avg_conv:.1f}%" if avg_conv > 0 else "N/A")
+                        
+                        st.divider()
+                        
+                        # PROGRAM SPEND BY CHANNEL SECTION
+                        st.markdown("""
+                        <div class="section-header">
+                            <h3>📊 Program Spend by Channel</h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown("*See which channels each program invests in*")
+                        
+                        # Aggregate spend by program and channel
+                        program_channel_spend = filtered_spend_adv.groupby(['program_normalized', 'channel'])['spend_amount'].sum().reset_index()
+                        
+                        if not program_channel_spend.empty:
+                            # Create grouped bar chart
+                            fig_grouped = px.bar(
+                                program_channel_spend,
+                                x='program_normalized',
+                                y='spend_amount',
+                                color='channel',
+                                title='Marketing Spend by Program and Channel',
+                                labels={'program_normalized': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
+                                barmode='group',  # Use 'stack' for stacked bars
+                                color_discrete_sequence=px.colors.qualitative.Set3
+                            )
+                            fig_grouped.update_layout(
+                                height=450,
+                                xaxis_title="Program",
+                                yaxis_title="Spend ($)",
+                                legend_title="Channel",
+                                hovermode='x unified'
+                            )
+                            st.plotly_chart(fig_grouped, use_container_width=True, key="program_channel_grouped")
+                            
+                            # Add toggle for stacked view
+                            col1, col2 = st.columns([1, 4])
+                            with col1:
+                                if 'barmode_stacked' not in st.session_state:
+                                    st.session_state.barmode_stacked = False
+                                if st.button("📊 Toggle Stack/Group", key="toggle_barmode"):
+                                    st.session_state.barmode_stacked = not st.session_state.barmode_stacked
+                                    st.rerun()
+                            with col2:
+                                st.caption("Click to switch between grouped (side-by-side) and stacked (cumulative) view")
+                            
+                            # Show stacked version if toggled
+                            if st.session_state.barmode_stacked:
+                                fig_stacked = px.bar(
+                                    program_channel_spend,
+                                    x='program_normalized',
+                                    y='spend_amount',
+                                    color='channel',
+                                    title='Marketing Spend by Program and Channel (Stacked)',
+                                    labels={'program_normalized': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
+                                    barmode='stack',
+                                    color_discrete_sequence=px.colors.qualitative.Set3
+                                )
+                                fig_stacked.update_layout(
+                                    height=450,
+                                    xaxis_title="Program",
+                                    yaxis_title="Spend ($)",
+                                    legend_title="Channel",
+                                    hovermode='x unified'
+                                )
+                                st.plotly_chart(fig_stacked, use_container_width=True, key="program_channel_stacked")
+                        
+                        st.divider()
+                        
+                        # CHANNEL PERFORMANCE BY PROGRAM SECTION
+                        st.markdown("""
+                        <div class="section-header">
+                            <h3>🔗 Channel Performance by Program</h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown("*Discover which channels drive the most admissions for each program*")
+                        
+                        # Aggregate spend and admissions by program and channel
+                        channel_program_data = filtered_spend_adv.groupby(['program_normalized', 'channel']).agg({
+                            'spend_amount': 'sum'
+                        }).reset_index()
+                        
+                        # Merge with admissions data
+                        admissions_by_program = admissions_df.groupby('program_normalized').agg({
+                            'metric_value': 'sum'
+                        }).reset_index()
+                        admissions_by_program.columns = ['program_normalized', 'total_admissions']
+                        
+                        # For correlation, we need channel-level admissions
+                        # Since we don't have channel-level admissions, we'll calculate efficiency metrics
+                        channel_program_merged = pd.merge(
+                            channel_program_data,
+                            admissions_by_program,
+                            on='program_normalized',
+                            how='left'
+                        )
+                        
+                        # Calculate spend share per channel within each program
+                        program_totals = channel_program_merged.groupby('program_normalized')['spend_amount'].sum().reset_index()
+                        program_totals.columns = ['program_normalized', 'program_total_spend']
+                        
+                        channel_program_merged = pd.merge(
+                            channel_program_merged,
+                            program_totals,
+                            on='program_normalized'
+                        )
+                        
+                        channel_program_merged['spend_share'] = (
+                            channel_program_merged['spend_amount'] / channel_program_merged['program_total_spend'] * 100
+                        )
+                        
+                        # Create pivot table for heatmap
+                        heatmap_data = channel_program_merged.pivot_table(
+                            index='channel',
+                            columns='program_normalized',
+                            values='spend_share',
+                            fill_value=0
+                        )
+                        
+                        if not heatmap_data.empty:
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                # Heatmap showing spend share
+                                fig_heatmap = px.imshow(
+                                    heatmap_data,
+                                    labels=dict(x="Program", y="Channel", color="Spend Share (%)"),
+                                    title="Channel Spend Share by Program",
+                                    color_continuous_scale='RdYlGn',
+                                    aspect='auto'
+                                )
+                                fig_heatmap.update_layout(height=400)
+                                st.plotly_chart(fig_heatmap, use_container_width=True, key="channel_program_heatmap")
+                            
+                            with col2:
+                                # Show top channel per program
+                                top_channels = channel_program_merged.loc[
+                                    channel_program_merged.groupby('program_normalized')['spend_amount'].idxmax()
+                                ][['program_normalized', 'channel', 'spend_amount', 'spend_share']]
+                                
+                                st.markdown("**Top Channel per Program:**")
+                                for _, row in top_channels.iterrows():
+                                    st.markdown(f"**{row['program_normalized']}**: {row['channel']} ({row['spend_share']:.1f}% of program spend)")
+                        
+                        st.divider()
+                        
+                        # SPEND VS OUTCOMES TREND SECTION
+                        st.markdown("""
+                        <div class="section-header">
+                            <h3>📈 Spend vs Outcomes Trend</h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        monthly_trends = roi_df.groupby('month_date').agg({
+                            'spend_amount': 'sum',
+                            'inquiries_received': 'sum',
+                            'applications_received': 'sum',
+                            'admissions_accepted': 'sum'
+                        }).reset_index()
+                        
+                        if len(monthly_trends) > 1:
+                            # Create subplots with shared x-axis
+                            from plotly.subplots import make_subplots
+                            
+                            fig = make_subplots(
+                                rows=2, cols=1,
+                                subplot_titles=('Marketing Spend Over Time', 'Outcomes Over Time'),
+                                vertical_spacing=0.15,
+                                row_heights=[0.4, 0.6]
+                            )
+                            
+                            # Top chart: Spend
+                            fig.add_trace(
+                                go.Bar(x=monthly_trends['month_date'], y=monthly_trends['spend_amount'],
+                                      name='Spend ($)', marker_color='lightcoral'),
+                                row=1, col=1
+                            )
+                            
+                            # Bottom chart: Outcomes
+                            fig.add_trace(
+                                go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['inquiries_received'],
+                                          name='Inquiries', mode='lines+markers',
+                                          line=dict(color='blue', width=3), marker=dict(size=10)),
+                                row=2, col=1
+                            )
+                            fig.add_trace(
+                                go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['applications_received'],
+                                          name='Applications', mode='lines+markers',
+                                          line=dict(color='green', width=3), marker=dict(size=10)),
+                                row=2, col=1
+                            )
+                            fig.add_trace(
+                                go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['admissions_accepted'],
+                                          name='Admissions', mode='lines+markers',
+                                          line=dict(color='purple', width=3), marker=dict(size=10)),
+                                row=2, col=1
+                            )
+                            
+                            fig.update_xaxes(title_text="Month", row=2, col=1)
+                            fig.update_yaxes(title_text="Spend ($)", row=1, col=1)
+                            fig.update_yaxes(title_text="Count", row=2, col=1)
+                            
+                            fig.update_layout(
+                                height=650,
+                                hovermode='x unified',
+                                showlegend=True,
+                                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+                                margin=dict(b=100)  # Add bottom margin for legend
+                            )
+                            
+                            st.plotly_chart(fig, use_container_width=True, key="adv_trend_chart")
+                        
+                        st.divider()
+                        
+                        # DETAILED ROI METRICS SECTION
+                        st.markdown("""
+                        <div class="section-header">
+                            <h3>📋 Detailed ROI Metrics by Program</h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Calculate program_roi for the table
+                        program_roi = roi_df.groupby('program_normalized').agg({
+                            'spend_amount': 'sum',
+                            'inquiries_received': 'sum',
+                            'applications_received': 'sum',
+                            'admissions_accepted': 'sum',
+                            'CPI': 'mean',
+                            'CPA': 'mean',
+                            'CPAd': 'mean'
+                        }).reset_index()
+                        
+                        display_table = program_roi.round(2).sort_values('CPAd')
+                        st.dataframe(
+                            display_table.style.background_gradient(
+                                subset=['CPI', 'CPA', 'CPAd'], cmap='RdYlGn_r'
+                            ).format({
+                                'spend_amount': '${:,.2f}',
+                                'inquiries_received': '{:.0f}',
+                                'applications_received': '{:.0f}',
+                                'admissions_accepted': '{:.0f}',
+                                'CPI': '${:,.2f}',
+                                'CPA': '${:,.2f}',
+                                'CPAd': '${:,.2f}'
+                            }),
+                            use_container_width=True
+                        )
+                    else:
+                        st.warning("⚠️ No matching data between marketing spend and admissions for selected filters")
+                        st.info("Try selecting 'All' for broader results, or check that both marketing and admissions data exist for the selected programs.")
+                
+                except Exception as e:
+                    st.error(f"Error loading ROI analytics: {str(e)}")
+                    st.info("Ensure admissions data is loaded by running the ETL pipeline.")
+        
+        with channel_tab:
+            # Use globally filtered data
+            filtered_spend_chan = filtered_spend_global.copy()
+            
+            if filtered_spend_chan.empty:
+                st.warning("⚠️ No data matches the selected filters")
+            else:
+                # Get available channels for per-chart filters
+                available_channels = sorted(filtered_spend_chan['channel'].unique().tolist())
+                
+                # KEY METRICS SECTION
+                st.markdown("""
+                <div class="section-header">
+                    <h3>💰 Key Metrics</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Total Spend", f"${filtered_spend_chan['spend_amount'].sum():,.2f}")
+                with col2:
+                    st.metric("Channels", filtered_spend_chan['channel'].nunique())
+                with col3:
+                    st.metric("Programs", filtered_spend_chan['program'].nunique())
+                with col4:
+                    avg_spend = filtered_spend_chan.groupby('channel')['spend_amount'].sum().mean()
+                    st.metric("Avg per Channel", f"${avg_spend:,.2f}")
+                
+                st.divider()
+                
+                # CHART 1 - Spend Distribution
+                st.markdown("""
+                <div class="section-header">
+                    <h3>📊 Spend Distribution by Channel</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Use container with border
+                filter_container = st.container(border=True)
+                
+                with filter_container:
+                    # Row 1: Action buttons
+                    btn_col1, btn_col2, btn_col3 = st.columns(3)
+                    with btn_col1:
+                        if st.button("✓ All", key="chart1_all", use_container_width=True):
+                            for channel in available_channels:
+                                st.session_state[f"chart1_check_{channel}"] = True
+                            st.rerun()
+                    with btn_col2:
+                        if st.button("✗ Clear", key="chart1_none", use_container_width=True):
+                            for channel in available_channels:
+                                st.session_state[f"chart1_check_{channel}"] = False
+                            st.rerun()
+                    with btn_col3:
+                        if 'chart1_log_scale' not in st.session_state:
+                            st.session_state.chart1_log_scale = False
+                        if st.button("📊 " + ("Log" if not st.session_state.chart1_log_scale else "Linear"), 
+                                   key="chart1_log_toggle", use_container_width=True):
+                            st.session_state.chart1_log_scale = not st.session_state.chart1_log_scale
+                            st.rerun()
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Channel toggle buttons - FORCE multi-row layout
+                    num_channels = len(available_channels)
+                    channels_per_row = 4  # Force 4 buttons per row
+                    
+                    chart1_selected = []
+                    
+                    # Create rows explicitly
+                    for row_start in range(0, num_channels, channels_per_row):
+                        row_end = min(row_start + channels_per_row, num_channels)
+                        row_channels = available_channels[row_start:row_end]
+                        
+                        # Create columns for this row
+                        row_cols = st.columns(len(row_channels))
+                        
+                        for idx, channel in enumerate(row_channels):
+                            with row_cols[idx]:
+                                if f"chart1_check_{channel}" not in st.session_state:
+                                    st.session_state[f"chart1_check_{channel}"] = True
+                                
+                                is_selected = st.session_state[f"chart1_check_{channel}"]
+                                button_type = "primary" if is_selected else "secondary"
+                                button_label = f"✓ {channel}" if is_selected else channel
+                                
+                                if st.button(button_label, key=f"chart1_btn_{channel}", 
+                                           use_container_width=True, type=button_type):
+                                    st.session_state[f"chart1_check_{channel}"] = not is_selected
+                                    st.rerun()
+                                
+                                if st.session_state[f"chart1_check_{channel}"]:
+                                    chart1_selected.append(channel)
+                
+                # Filter and display chart
+                if chart1_selected:
+                    chart1_data = filtered_spend_chan[filtered_spend_chan['channel'].isin(chart1_selected)]
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        channel_totals = chart1_data.groupby('channel')['spend_amount'].sum().sort_values(ascending=False)
+                        fig = px.bar(x=channel_totals.index, y=channel_totals.values,
+                                   labels={'x': 'Channel', 'y': 'Total Spend ($)'},
+                                   title='Total Spend by Channel',
+                                   color=channel_totals.values,
+                                   color_continuous_scale='RdYlGn_r',
+                                   log_y=st.session_state.chart1_log_scale)
+                        fig.update_layout(height=400, showlegend=False)
+                        st.plotly_chart(fig, use_container_width=True, key="channel_bar_chart")
+                    
+                    with col2:
+                        fig = px.pie(values=channel_totals.values, names=channel_totals.index,
+                                   title='Channel Spend Share')
+                        fig.update_traces(textposition='inside', textinfo='percent+label')
+                        fig.update_layout(height=400)
+                        st.plotly_chart(fig, use_container_width=True, key="channel_pie_chart")
+                else:
+                    st.info("No channels selected. Click '✓ Select All' to select all channels.")
+                
+                st.divider()
+                
+                # CHART 2 - Trend Chart
+                st.markdown("""
+                <div class="section-header">
+                    <h3>📈 Channel Spend Trends</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Use container with border
+                filter_container2 = st.container(border=True)
+                
+                with filter_container2:
+                    # Row 1: Action buttons
+                    btn_col1, btn_col2, btn_col3 = st.columns(3)
+                    with btn_col1:
+                        if st.button("✓ All", key="chart2_all", use_container_width=True):
+                            for channel in available_channels:
+                                st.session_state[f"chart2_check_{channel}"] = True
+                            st.rerun()
+                    with btn_col2:
+                        if st.button("✗ Clear", key="chart2_none", use_container_width=True):
+                            for channel in available_channels:
+                                st.session_state[f"chart2_check_{channel}"] = False
+                            st.rerun()
+                    with btn_col3:
+                        if 'chart2_log_scale' not in st.session_state:
+                            st.session_state.chart2_log_scale = False
+                        if st.button("📊 " + ("Log" if not st.session_state.chart2_log_scale else "Linear"), 
+                                   key="chart2_log_toggle", use_container_width=True):
+                            st.session_state.chart2_log_scale = not st.session_state.chart2_log_scale
+                            st.rerun()
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Channel toggle buttons - FORCE multi-row layout (same as Chart 1)
+                    num_channels = len(available_channels)
+                    channels_per_row = 4  # Force 4 buttons per row
+                    
+                    chart2_selected = []
+                    
+                    # Create rows explicitly
+                    for row_start in range(0, num_channels, channels_per_row):
+                        row_end = min(row_start + channels_per_row, num_channels)
+                        row_channels = available_channels[row_start:row_end]
+                        
+                        # Create columns for this row
+                        row_cols = st.columns(len(row_channels))
+                        
+                        for idx, channel in enumerate(row_channels):
+                            with row_cols[idx]:
+                                if f"chart2_check_{channel}" not in st.session_state:
+                                    st.session_state[f"chart2_check_{channel}"] = True
+                                
+                                is_selected = st.session_state[f"chart2_check_{channel}"]
+                                button_type = "primary" if is_selected else "secondary"
+                                button_label = f"✓ {channel}" if is_selected else channel
+                                
+                                if st.button(button_label, key=f"chart2_btn_{channel}", 
+                                           use_container_width=True, type=button_type):
+                                    st.session_state[f"chart2_check_{channel}"] = not is_selected
+                                    st.rerun()
+                                
+                                if st.session_state[f"chart2_check_{channel}"]:
+                                    chart2_selected.append(channel)
+                
+                # Filter and display chart
+                if chart2_selected:
+                    chart2_data = filtered_spend_chan[filtered_spend_chan['channel'].isin(chart2_selected)]
+                    monthly_channel = chart2_data.groupby(['month_date', 'channel'])['spend_amount'].sum().reset_index()
+                    
+                    if not monthly_channel.empty:
+                        fig = px.line(monthly_channel, x='month_date', y='spend_amount', color='channel',
+                                    title='Monthly Spend by Channel',
+                                    labels={'month_date': 'Month', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
+                                    markers=True,
+                                    log_y=st.session_state.chart2_log_scale)
+                        fig.update_layout(height=450, hovermode='x unified')
+                        st.plotly_chart(fig, use_container_width=True, key="channel_trend_chart")
+                else:
+                    st.info("No channels selected. Click '✓ Select All' to select all channels.")
+                
+                st.divider()
+                
+                # CHART 3: Summary Table (NO FILTERS)
+                st.markdown("""
+                <div class="section-header">
+                    <h3>📋 Channel Performance Summary</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                channel_spend_summary = filtered_spend_chan.groupby('channel').agg({
+                    'spend_amount': 'sum',
+                    'program': 'nunique',
+                    'month_date': 'nunique'
+                }).reset_index()
+                channel_spend_summary.columns = ['Channel', 'Total Spend', 'Programs', 'Months']
+                
+                st.dataframe(
+                    channel_spend_summary.sort_values('Total Spend', ascending=False).style.background_gradient(
+                        subset=['Total Spend'], cmap='RdYlGn_r'
+                    ).format({
+                        'Total Spend': '${:,.2f}'
+                    }),
+                    use_container_width=True
+                )
+        
+        with notes_tab:
+            # Use globally filtered data
+            notes_filtered = filtered_spend_global.copy()
+            notes_filtered['month_name'] = notes_filtered['month_date'].dt.strftime('%B %Y')
+            
+            # Extract notes
+            notes_df = notes_filtered[notes_filtered['extra_notes'].notna()].copy()
+            unique_notes = []
+            
+            if not notes_df.empty:
+                for _, row in notes_df.iterrows():
+                    try:
+                        import json
+                        notes_list = json.loads(row['extra_notes'])
+                        for note in notes_list:
+                            note_key = f"{row['program']}_{row['month_date'].strftime('%Y-%m')}_{note[:50]}"
+                            if not any(existing['key'] == note_key for existing in unique_notes):
+                                unique_notes.append({
+                                    'key': note_key,
+                                    'program': row['program'],
+                                    'month': row['month_date'].strftime('%B %Y'),
+                                    'year': row['month_date'].year,
+                                    'month_num': row['month_date'].month,
+                                    'fiscal_year': row['fiscal_year'],
+                                    'note': note
+                                })
+                    except:
+                        pass
+            
+            if unique_notes:
+                notes_display_df = pd.DataFrame(unique_notes)
+                notes_display_df = notes_display_df.sort_values(['year', 'month_num'], ascending=[False, False])
+                
+                # NOTES SECTION HEADER
+                st.markdown("""
+                <div class="section-header">
+                    <h3>📋 Incremental Notes</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown(f"**Found {len(notes_display_df)} notes**")
+                
+                # Scrollable container
+                notes_container = st.container(height=450)
+                with notes_container:
+                    for i, (_, note_row) in enumerate(notes_display_df.iterrows()):
+                        with st.expander(f"📅 {note_row['program']} - {note_row['month']} ({note_row['fiscal_year']})", expanded=(i < 3)):
+                            st.markdown(f"**Note:** {note_row['note']}")
+            else:
+                st.info("No notes available for selected filters.")
+    
+    # Footer for Marketing Analysis page
+    st.divider()
+    footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
+    with footer_col1:
+        st.markdown(f"""
+        <div class="footer-left footer-content" style="text-align: left;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with footer_col2:
+        st.components.v1.html("""
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
+            <button onclick="window.top.print()" 
+                    style="background-color: white;
+                           color: #500000;
+                           border: 2px solid #e0e0e0;
+                           border-radius: 8px;
+                           padding: 0.6rem 1.2rem;
+                           font-size: 0.95rem;
+                           font-weight: 600;
+                           cursor: pointer;
+                           transition: all 0.3s ease;
+                           width: 100%;
+                           min-height: 45px;
+                           font-family: 'Source Sans Pro', sans-serif;"
+                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
+                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
+                🖨️ Print Page
+            </button>
+        </div>
+        """, height=70)
+    with footer_col3:
+        st.markdown("""
+        <div class="footer-right footer-content" style="text-align: right;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif st.session_state.current_page == 'Database':
+    # DATA EXPLORER - Styled like Marketing Analysis
     
     # Define searchable content for each table
     table_search_content = {
@@ -2501,40 +4670,19 @@ elif st.session_state.current_page == 'Database':
         }
     }
     
-    # Show guiding questions if requested or if search matches
-    if show_all_questions or keyword_search:
-        st.markdown("#### 💡 What Questions Can Our Data Answer?")
-        
-        if keyword_search:
-            # Filter tables based on search
-            matching_tables = []
-            search_lower = keyword_search.lower()
-            
-            for table, content in table_search_content.items():
-                # Check if search term matches keywords or questions
-                keyword_match = any(search_lower in keyword.lower() for keyword in content['keywords'])
-                question_match = any(search_lower in question.lower() for question in content['questions'])
-                table_match = search_lower in table.lower()
-                
-                if keyword_match or question_match or table_match:
-                    matching_tables.append(table)
-            
-            if matching_tables:
-                st.success(f"Found {len(matching_tables)} relevant table(s) for '{keyword_search}':")
-                for table in matching_tables:
-                    if table in table_search_content:
-                        content = table_search_content[table]
-                        st.markdown(f"""
-                        **📊 {table.replace('_', ' ').title()}**
-                        - {' • '.join(content['questions'][:2])}...
-                        """)
-            else:
-                st.warning(f"No tables found matching '{keyword_search}'. Try terms like: applications, marketing, programs, inquiries")
-        else:
-            # Show all questions in a compact format
-            for table, content in table_search_content.items():
-                if table != 'sqlite_sequence':  # Skip system table
-                    st.markdown(f"**📊 {table.replace('_', ' ').title()}:** {content['questions'][0]}")
+    # FULL-WIDTH KEYWORD SEARCH - Centered
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h4 style="color: #500000; margin-bottom: 10px;">🔍 Find Your Data</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    keyword_search = st.text_input(
+        "Search tables, questions, or data types",
+        placeholder="Type keywords like 'applications', 'marketing', 'programs', 'inquiries'...",
+        key="table_keyword_search",
+        label_visibility="collapsed"
+    )
     
     try:
         conn = get_connection()
@@ -2563,7 +4711,7 @@ elif st.session_state.current_page == 'Database':
             
             if filtered_tables:
                 available_tables = filtered_tables
-                st.info(f"Showing {len(filtered_tables)} table(s) matching '{keyword_search}'")
+                st.success(f"✓ Found {len(filtered_tables)} table(s) matching '{keyword_search}'")
             else:
                 st.warning(f"No tables match '{keyword_search}'. Showing all tables.")
         
@@ -2571,39 +4719,301 @@ elif st.session_state.current_page == 'Database':
             st.warning("No tables found in the database.")
             st.info("Please ensure the ETL pipeline has been run to populate the database.")
         else:
-            # Create tabs for each table - no dropdown needed
-            if len(available_tables) == 1:
-                # If only one table, show it directly
-                selected_table = available_tables[0]
-                st.markdown(f"**Table:** `{selected_table}`")
+            # Chrome-style CSS for tabs with always-visible scrollbar when needed
+            st.markdown("""
+            <style>
+            /* Chrome-style tabs for Data Explorer */
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 2px !important;
+                justify-content: center !important;
+                background-color: transparent !important;
+                padding: 0px 20px !important;
+                border-bottom: none !important;
+                margin-bottom: 30px !important;
+                margin-top: 20px !important;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: thin !important;
+                scrollbar-color: #500000 #f0f0f0 !important;
+                box-sizing: border-box !important;
+            }
+            
+            /* Always show scrollbar when content overflows */
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+                height: 10px !important;
+                display: block !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+                background: #f0f0f0 !important;
+                border-radius: 5px !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+                background: #500000 !important;
+                border-radius: 5px !important;
+                min-width: 50px !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
+                background: #700000 !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                height: 45px !important;
+                padding: 0px 32px !important;
+                background-color: #f5f5f5 !important;
+                border-radius: 8px 8px 0px 0px !important;
+                font-weight: 500 !important;
+                font-size: 15px !important;
+                border: none !important;
+                border-bottom: 3px solid transparent !important;
+                color: #666 !important;
+                margin-bottom: -2px !important;
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+                min-width: fit-content !important;
+                box-sizing: border-box !important;
+            }
+            
+            .stTabs [aria-selected="true"] {
+                background-color: white !important;
+                color: #500000 !important;
+                border-bottom: 3px solid #500000 !important;
+            }
+            
+            .stTabs [data-baseweb="tab"]:hover {
+                background-color: #e8e8e8 !important;
+                color: #500000 !important;
+            }
+            
+            .stTabs [aria-selected="true"]:hover {
+                background-color: white !important;
+            }
+            
+            /* Tablet adjustments - switch to left-aligned */
+            @media screen and (max-width: 1024px) {
+                .stTabs [data-baseweb="tab-list"] {
+                    justify-content: flex-start !important;
+                    padding: 0px 15px !important;
+                }
                 
-                # Get row count
-                count_query = f"SELECT COUNT(*) as count FROM {selected_table}"
-                row_count = pd.read_sql(count_query, conn)['count'].iloc[0]
-                st.markdown(f"**Rows:** {row_count:,}")
+                .stTabs [data-baseweb="tab"] {
+                    padding: 0px 24px !important;
+                    font-size: 14px !important;
+                }
                 
-                # Process the table
-                process_table_display(conn, selected_table)
+                .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+                    height: 12px !important;
+                }
+            }
+            
+            /* Mobile adjustments - left-aligned */
+            @media screen and (max-width: 768px) {
+                .stTabs [data-baseweb="tab-list"] {
+                    justify-content: flex-start !important;
+                    padding: 0px 10px !important;
+                }
                 
-            else:
-                # Multiple tables - use tabs
-                tabs = st.tabs([f"📊 {table}" for table in available_tables])
+                .stTabs [data-baseweb="tab"] {
+                    padding: 0px 20px !important;
+                    font-size: 13px !important;
+                    height: 42px !important;
+                }
+            }
+            
+            /* Small mobile adjustments - left-aligned */
+            @media screen and (max-width: 480px) {
+                .stTabs [data-baseweb="tab-list"] {
+                    justify-content: flex-start !important;
+                    padding: 0px 10px !important;
+                }
                 
-                for i, table in enumerate(available_tables):
-                    with tabs[i]:
-                        # Get row count
-                        count_query = f"SELECT COUNT(*) as count FROM {table}"
-                        row_count = pd.read_sql(count_query, conn)['count'].iloc[0]
-                        st.markdown(f"**Rows:** {row_count:,}")
-                        
-                        # Process the table
-                        process_table_display(conn, table)
+                .stTabs [data-baseweb="tab"] {
+                    padding: 0px 16px !important;
+                    font-size: 12px !important;
+                    height: 40px !important;
+                }
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Create tabs for each table with icons
+            table_icons = {
+                'admissions_metrics': '📊',
+                'programs': '🎓',
+                'marketing_metrics': '📈',
+                'marketing_campaigns': '📢',
+                'marketing_spend': '💰',
+                'inquiry_sources': '🔍',
+                'sqlite_sequence': '⚙️'
+            }
+            
+            tab_labels = []
+            for table in available_tables:
+                icon = table_icons.get(table, '📋')
+                # Format table name nicely
+                display_name = table.replace('_', ' ').title()
+                tab_labels.append(f"{icon} {display_name}")
+            
+            tabs = st.tabs(tab_labels)
+            
+            for i, table in enumerate(available_tables):
+                with tabs[i]:
+                    # Process the table with new styling
+                    process_table_display(conn, table)
     
     except Exception as e:
         st.error(f"Database connection error: {str(e)}")
         st.info("Please check if the database file exists and is accessible.")
 
-# Footer
-st.divider()
-st.caption(f"📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}")
-st.caption("💡 **Navigation**: Use the buttons above to switch between different analytics views")
+# Footer with Print Button
+# Add print-specific CSS - simplified approach with proper margins
+st.markdown("""
+<style>
+@media print {
+    /* Hide Streamlit UI */
+    header[data-testid="stHeader"],
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    .stDeployButton {
+        display: none !important;
+    }
+    
+    /* Hide navigation */
+    #nav-buttons-container {
+        display: none !important;
+    }
+    
+    /* Hide footer */
+    hr:last-of-type,
+    hr:last-of-type ~ * {
+        display: none !important;
+    }
+    
+    /* Clean layout with proper margins */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .main .block-container {
+        padding: 1.5cm 1cm 2cm 1cm !important;
+        max-width: 100% !important;
+        border: none !important;
+    }
+    
+    /* Scale down and left-align charts to fit page width - default for all charts */
+    .js-plotly-plot,
+    .plotly {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 15px 0 15px -24px !important;
+        padding: 0 !important;
+        display: block !important;
+        page-break-inside: avoid;
+        overflow: visible !important;
+        transform: scale(0.84) !important;
+        transform-origin: left top !important;
+        position: relative !important;
+        left: -24px !important;
+    }
+    
+    /* Specific styling for funnel charts - more left and larger scale */
+    .js-plotly-plot:has(g.funnellayer),
+    .plotly:has(g.funnellayer) {
+        transform: scale(0.85) !important;
+        margin-left: -30px !important;
+        left: -30px !important;
+    }
+    
+    div[data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+        margin: 15px 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        text-align: left !important;
+        position: relative !important;
+    }
+    
+    /* Force SVG charts to scale down and fit */
+    .js-plotly-plot svg,
+    .plotly svg {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Force plotly containers to respect width and remove padding */
+    .plotly-graph-div {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Remove plotly's internal margins */
+    .main-svg {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Ensure metric boxes fit properly */
+    .metrics-container {
+        max-width: 100% !important;
+        margin: 15px 0 !important;
+        gap: 0.8rem !important;
+    }
+    
+    .metric-box {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        padding: 1rem !important;
+    }
+    
+    /* Section headers - keep readable */
+    div[style*="background: #e9ecef"],
+    div[style*="background:#e9ecef"] {
+        background: #f5f5f5 !important;
+        border: 1px solid #ddd !important;
+        page-break-after: avoid;
+        padding: 12px !important;
+    }
+    
+    /* Keep text readable */
+    body, p, div, span {
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+    }
+    
+    h1 { font-size: 18pt !important; }
+    h2 { font-size: 16pt !important; }
+    h3 { font-size: 14pt !important; }
+    
+    /* Prevent orphaned headers */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+    
+    /* Print colors */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Page setup with margins */
+    @page {
+        margin: 1.5cm 1cm;
+        size: A4 portrait;
+    }
+}
+</style>
+""", unsafe_allow_html=True)

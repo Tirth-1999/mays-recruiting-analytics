@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS marketing_metrics (
     cohort_year INTEGER,
     channel TEXT,
     campaign_id INTEGER,
+    is_active INTEGER DEFAULT 1,  -- 1 = campaign active for program/month, 0 = not active
     impressions INTEGER,
     clicks INTEGER,
     inquiries INTEGER,
