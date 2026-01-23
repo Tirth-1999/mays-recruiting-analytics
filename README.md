@@ -1,28 +1,64 @@
-# 📊 Mays Analytics - Flex Online Programs Analytics Platform
+<div align="center">
 
-**Last Updated**: January 23, 2026  
-**Version**: 3.0  
-**Status**: ✅ Production Ready - Fully Modular Architecture
+# 📊 Mays Analytics
+### Flex Online Programs Analytics Platform
+
+**Version 3.0** • **Production Ready** • **Last Updated: January 23, 2026**
 
 A comprehensive data analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
 
 ---
 
-## 📑 Quick Navigation
+### 🗂️ Navigate by Tab
 
-Jump to the section you need:
+<table>
+<tr>
+<td align="center" width="14.28%">
+<a href="#-quick-start">
+<img src="https://img.shields.io/badge/🚀_Quick_Start-500000?style=for-the-badge" alt="Quick Start"/>
+</a>
+</td>
+<td align="center" width="14.28%">
+<a href="#-home-dashboard">
+<img src="https://img.shields.io/badge/🏠_Home-500000?style=for-the-badge" alt="Home Dashboard"/>
+</a>
+</td>
+<td align="center" width="14.28%">
+<a href="#-executive-deep-dive">
+<img src="https://img.shields.io/badge/📊_Executive-500000?style=for-the-badge" alt="Executive Deep Dive"/>
+</a>
+</td>
+<td align="center" width="14.28%">
+<a href="#-comparison-tool">
+<img src="https://img.shields.io/badge/🔄_Compare-500000?style=for-the-badge" alt="Comparison Tool"/>
+</a>
+</td>
+</tr>
+<tr>
+<td align="center" width="14.28%">
+<a href="#-marketing-analysis">
+<img src="https://img.shields.io/badge/📢_Marketing-500000?style=for-the-badge" alt="Marketing Analysis"/>
+</a>
+</td>
+<td align="center" width="14.28%">
+<a href="#️-data-explorer">
+<img src="https://img.shields.io/badge/🗄️_Data-500000?style=for-the-badge" alt="Data Explorer"/>
+</a>
+</td>
+<td align="center" width="14.28%">
+<a href="#-predictive-analytics">
+<img src="https://img.shields.io/badge/🔮_Predictive-500000?style=for-the-badge" alt="Predictive Analytics"/>
+</a>
+</td>
+<td align="center" width="14.28%">
+<a href="#️-configuration">
+<img src="https://img.shields.io/badge/⚙️_Config-500000?style=for-the-badge" alt="Configuration"/>
+</a>
+</td>
+</tr>
+</table>
 
-| Section | Description |
-|---------|-------------|
-| [🚀 Quick Start](#-quick-start) | Get up and running in minutes |
-| [🏠 Home Dashboard](#-home-dashboard) | Overview and key metrics |
-| [📊 Executive Deep Dive](#-executive-deep-dive) | Comprehensive cohort analysis |
-| [🔄 Comparison Tool](#-comparison-tool) | Year-over-year comparisons |
-| [📢 Marketing Analysis](#-marketing-analysis) | Marketing spend and ROI |
-| [🗄️ Data Explorer](#️-data-explorer) | Raw data access and export |
-| [🔮 Predictive Analytics](#-predictive-analytics) | Forecasting and optimization |
-| [⚙️ Configuration](#️-configuration) | Setup and customization |
-| [🛠️ Troubleshooting](#️-troubleshooting) | Common issues and solutions |
+</div>
 
 ---
 
