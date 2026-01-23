@@ -8,70 +8,181 @@
 A comprehensive data analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with advanced machine learning capabilities.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-4.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0-blue.svg)](VERSIONING.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io/)
 
-### 📚 [Complete Documentation](docs/README.md) | [Quick Start](docs/QUICK_START.md) | [Changelog](CHANGELOG.md)
+### 📚 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Version History](VERSIONING.md) • [Changelog](CHANGELOG.md)
+
+</div>
 
 ---
 
-## 🗂️ Page Documentation
+## 🎯 What is Mays Analytics?
 
-Detailed guides for each platform page:
+Mays Analytics is an AI-powered analytics platform designed for Texas A&M Mays Business School to track, analyze, and predict admissions performance across 7 graduate programs. The platform combines real-time data visualization with machine learning to provide actionable insights for enrollment planning and marketing optimization.
+
+### Key Capabilities
+- **📊 Real-time Analytics**: Track admissions metrics across cohorts and programs
+- **🔮 Predictive Forecasting**: AI-powered predictions with 95% confidence intervals
+- **📢 Marketing ROI**: Comprehensive spend analysis and channel optimization
+- **🔄 Year-over-Year Comparisons**: Detailed cohort performance analysis
+- **🗄️ Data Export**: Full data access and CSV export capabilities
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/Tirth-1999/mays-recruiting-analytics.git
+cd mays-recruiting-analytics
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Load data
+python3 etl_pipeline.py
+python3 marketing_etl.py
+
+# 4. Run dashboard
+streamlit run main_app.py
+```
+
+Dashboard opens at `http://localhost:8501`
+
+**Need help?** See the [Complete Setup Guide](docs/QUICK_START.md)
+
+---
+
+## 📊 Platform Pages
 
 <table>
 <tr>
 <td align="center" width="33%">
 <a href="docs/HOME_DASHBOARD.md">
-<img src="https://img.shields.io/badge/🏠_Home_Dashboard-500000?style=for-the-badge" alt="Home Dashboard"/>
+<img src="https://img.shields.io/badge/🏠_Home-500000?style=for-the-badge" alt="Home"/>
 </a>
-<br/>
-<sub>Overview & Key Metrics</sub>
+<br/><sub>Overview & Metrics</sub>
 </td>
 <td align="center" width="33%">
 <a href="docs/EXECUTIVE_DEEP_DIVE.md">
-<img src="https://img.shields.io/badge/📊_Executive_Deep_Dive-500000?style=for-the-badge" alt="Executive Deep Dive"/>
+<img src="https://img.shields.io/badge/�_Executive-500000?style=for-the-badge" alt="Executive"/>
 </a>
-<br/>
-<sub>Comprehensive Analysis</sub>
+<br/><sub>Deep Analysis</sub>
 </td>
 <td align="center" width="33%">
 <a href="docs/COMPARISON_TOOL.md">
-<img src="https://img.shields.io/badge/🔄_Comparison_Tool-500000?style=for-the-badge" alt="Comparison Tool"/>
+<img src="https://img.shields.io/badge/🔄_Compare-500000?style=for-the-badge" alt="Compare"/>
 </a>
-<br/>
-<sub>Year-over-Year</sub>
+<br/><sub>YoY Analysis</sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
 <a href="docs/MARKETING_ANALYSIS.md">
-<img src="https://img.shields.io/badge/📢_Marketing_Analysis-500000?style=for-the-badge" alt="Marketing Analysis"/>
+<img src="https://img.shields.io/badge/📢_Marketing-500000?style=for-the-badge" alt="Marketing"/>
 </a>
-<br/>
-<sub>Spend & ROI Tracking</sub>
+<br/><sub>Spend & ROI</sub>
 </td>
 <td align="center" width="33%">
 <a href="docs/DATA_EXPLORER.md">
-<img src="https://img.shields.io/badge/🗄️_Data_Explorer-500000?style=for-the-badge" alt="Data Explorer"/>
+<img src="https://img.shields.io/badge/🗄️_Data-500000?style=for-the-badge" alt="Data"/>
 </a>
-<br/>
-<sub>Raw Data Access</sub>
+<br/><sub>Raw Data</sub>
 </td>
 <td align="center" width="33%">
 <a href="docs/PREDICTIVE_ANALYTICS.md">
-<img src="https://img.shields.io/badge/🔮_Predictive_Analytics-500000?style=for-the-badge" alt="Predictive Analytics"/>
+<img src="https://img.shields.io/badge/🔮_Predictive-500000?style=for-the-badge" alt="Predictive"/>
 </a>
-<br/>
-<sub>AI & Forecasting</sub>
+<br/><sub>AI & ML</sub>
 </td>
 </tr>
 </table>
 
-</div>
+[View Complete Documentation →](docs/README.md)
 
 ---
+
+## 🎉 What's New in Version 4.0
+
+### Predictive Analytics & Machine Learning
+- **🔮 Time Series Forecasting**: Predict future inquiries, applications, and enrollments
+- **📢 Channel Optimization**: AI-powered ROI analysis for marketing channels
+- **📅 Timing Analysis**: Identify optimal months for marketing investments
+- **💰 Budget Allocation**: Data-driven budget distribution recommendations
+- **🎯 Model Performance**: Real-time accuracy tracking with MAPE, RMSE, MAE
+
+### Advanced ML Models
+- Prophet, ARIMA, and Linear Regression with automatic model selection
+- 95% confidence intervals for all forecasts
+- Comprehensive validation and performance monitoring
+
+[View Full Version History →](VERSIONING.md)
+
+---
+
+## 📈 Platform Statistics
+
+- **Pages**: 6 comprehensive analytics pages
+- **Programs**: 7 (MBA, MS ACCT, MS ENLD, MS HRM, MS MISY, MS MKTG, MS SPBA)
+- **Cohorts**: Class of 2026, 2027, 2028
+- **ML Models**: 3 (Prophet, ARIMA, Linear Regression)
+- **Data Points**: 2,037 admissions records, 76 marketing spend records
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend**: Streamlit 1.28+
+- **Visualization**: Plotly
+- **ML/AI**: Prophet, statsmodels (ARIMA), scikit-learn
+- **Database**: SQLite
+- **Language**: Python 3.8+
+- **Data Processing**: Pandas, NumPy
+
+[View Technical Architecture →](docs/TECHNICAL_ARCHITECTURE.md)
+
+---
+
+## 📚 Documentation
+
+- **[Complete Documentation](docs/README.md)** - Central documentation hub
+- **[Quick Start Guide](docs/QUICK_START.md)** - Installation and setup
+- **[Version History](VERSIONING.md)** - Complete development timeline
+- **[Changelog](CHANGELOG.md)** - Detailed change log
+- **[Security Policy](SECURITY.md)** - Security guidelines
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Code of Conduct](CODE_OF_CONDUCT.md) for guidelines.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📧 Contact
+
+- **GitHub**: [@Tirth-1999](https://github.com/Tirth-1999)
+- **Repository**: [mays-recruiting-analytics](https://github.com/Tirth-1999/mays-recruiting-analytics)
+- **Issues**: [Report a bug](https://github.com/Tirth-1999/mays-recruiting-analytics/issues)
+
+---
+
+<div align="center">
+
+**Mays Analytics Platform** • Version 4.0 • Built with ❤️ for Texas A&M Mays Business School
+
+</div>
 
 ## 🎉 What's New in Version 4.0
 
