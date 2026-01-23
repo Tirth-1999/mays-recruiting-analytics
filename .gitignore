@@ -54,9 +54,19 @@ Thumbs.db
 # Logs
 *.log
 
-# Kiro IDE files
-.kiro/
+# Kiro IDE files (keep specs for documentation)
+.kiro/settings/
+.kiro/hooks/
 
-# Large dataset files (keep smaller ones for demo)
+# Cache directories
+.cache/
+.pytest_cache/
+.hypothesis/
+
+# Dataset files (too large for GitHub)
 Dataset/*.xlsx
 Dataset/*.pdf
+Dataset/.DS_Store
+
+# Database file (contains sensitive data)
+edulytix.db

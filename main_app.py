@@ -338,6 +338,11 @@ with st.sidebar:
         st.session_state.current_page = 'Database'
         st.rerun()
     
+    if st.button("Predictive Analytics", key="sidebar_nav_predictive", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Predictive_Analytics' else "secondary"):
+        st.session_state.current_page = 'Predictive_Analytics'
+        st.rerun()
+    
     st.markdown('<div style="margin: 15px 0; border-top: 1px solid #e0e0e0;"></div>', unsafe_allow_html=True)
     
     if st.button("Help & Documentation", key="sidebar_nav_help", use_container_width=True,
@@ -359,6 +364,7 @@ current_page_info = {
     'Comparison_Tool': {'icon': '🔄', 'title': 'Comparison Tool'},
     'Marketing_Analysis': {'icon': '📢', 'title': 'Marketing Analysis'},
     'Database': {'icon': '🗄️', 'title': 'Data Explorer'},
+    'Predictive_Analytics': {'icon': '🔮', 'title': 'Predictive Analytics'},
     'Help': {'icon': '📖', 'title': 'Help & Documentation'}
 }
 
@@ -394,6 +400,11 @@ elif st.session_state.current_page == 'Database':
     # DATA EXPLORER PAGE
     from pages import database
     database.render()
+
+elif st.session_state.current_page == 'Predictive_Analytics':
+    # PREDICTIVE ANALYTICS PAGE
+    from pages import predictive_analytics
+    predictive_analytics.render()
 
 elif st.session_state.current_page == 'Help':
     # HELP & DOCUMENTATION PAGE

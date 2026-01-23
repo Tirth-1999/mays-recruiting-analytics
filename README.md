@@ -1,10 +1,714 @@
-# Mays Analytics - Flex Online Programs Analytics Platform
+# 📊 Mays Analytics - Flex Online Programs Analytics Platform
 
 **Last Updated**: January 23, 2026  
 **Version**: 3.0  
 **Status**: ✅ Production Ready - Fully Modular Architecture
 
 A comprehensive data analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
+
+---
+
+## 📑 Quick Navigation
+
+Jump to the section you need:
+
+| Section | Description |
+|---------|-------------|
+| [🚀 Quick Start](#-quick-start) | Get up and running in minutes |
+| [🏠 Home Dashboard](#-home-dashboard) | Overview and key metrics |
+| [📊 Executive Deep Dive](#-executive-deep-dive) | Comprehensive cohort analysis |
+| [🔄 Comparison Tool](#-comparison-tool) | Year-over-year comparisons |
+| [📢 Marketing Analysis](#-marketing-analysis) | Marketing spend and ROI |
+| [🗄️ Data Explorer](#️-data-explorer) | Raw data access and export |
+| [🔮 Predictive Analytics](#-predictive-analytics) | Forecasting and optimization |
+| [⚙️ Configuration](#️-configuration) | Setup and customization |
+| [🛠️ Troubleshooting](#️-troubleshooting) | Common issues and solutions |
+
+---
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Virtual environment activated
+- SQLite database
+
+### Installation & Setup
+
+```bash
+# 1. Activate virtual environment
+source venv/bin/activate
+
+# 2. Install dependencies (if needed)
+pip install -r requirements.txt
+
+# 3. Load data into database
+python3 etl_pipeline.py          # Load admissions data
+python3 marketing_etl.py         # Load marketing data
+
+# 4. Run the dashboard
+streamlit run main_app.py
+# Or use: ./run_dashboard.sh
+```
+
+The dashboard will open at `http://localhost:8501`
+
+---
+
+## 🏠 Home Dashboard
+
+**Purpose**: Quick overview of cohort performance with key metrics and trends.
+
+### Features
+
+#### 📊 Current Stats
+- **Enrolled Students**: Total anticipated cohort size
+- **Total Applications**: All applications submitted
+- **Total Inquiries**: All inquiries received
+- **Conversion Rate**: Inquiry → Application percentage
+
+#### 🎯 Admissions Funnel
+- Visual flow from inquiries to enrollment
+- Toggle between linear and log scale
+- Interactive chart with hover details
+
+#### 📈 Program Comparison
+- Side-by-side performance across all 7 programs
+- Toggle metrics: Inquiries, Applications, Accepted, Cohort Size
+- Log scale option for better visualization
+
+#### 📉 Trend Analysis
+- Application & inquiry trends over time
+- Conversion rates tracking
+- Toggle buttons to show/hide specific metrics
+
+### How to Use
+
+1. **Select Cohort**: Choose Class of 2026, 2027, or 2028
+2. **Select Program**: Choose specific program or "All Programs"
+3. **View Metrics**: Key performance indicators update automatically
+4. **Explore Charts**: Use toggle buttons to customize views
+5. **Export**: Print page for reports
+
+### Configuration
+
+```python
+# Filter Options
+cohort_options = [2028, 2027, 2026]
+program_options = ['All Programs', 'MBA', 'MS ACCT', 'MS ENLD', 
+                   'MS HRM', 'MS MISY', 'MS MKTG', 'MS SPBA']
+
+# Chart Options
+- Linear/Log scale toggle
+- Metric visibility toggles
+- Interactive hover details
+```
+
+### Tips
+- Use log scale when values vary widely
+- Toggle metrics off to focus on specific data
+- Hover over charts for exact values and dates
+- Print page for stakeholder presentations
+
+---
+
+## 📊 Executive Deep Dive
+
+**Purpose**: Comprehensive analytics suite for deep cohort performance analysis.
+
+### Features
+
+#### 📈 Performance Analysis Tab
+- **Complete Conversion Funnel**: 6-stage funnel with log scale option
+- **Performance Radar**: Multi-dimensional performance visualization
+- **Correlation Matrix**: Identify relationships between metrics
+- **Performance Benchmarks**: Compare against targets
+
+#### 📉 Trend Analysis Tab
+- **Multi-line Time Series**: Track 4 key metrics over time
+- **Growth Rate Analysis**: Month-over-month changes
+- **Toggle Controls**: Show/hide specific metrics
+- **Interactive Charts**: Hover for exact values
+
+#### 🎓 Program Deep Dive Tab
+- **Split Metrics**: Applications (11 metrics) and Admissions (9 metrics)
+- **Chart Type Toggle**: Switch between Line and Bar charts
+- **Log Scale Option**: Better visualization for wide-ranging values
+- **Data Labels**: Exact numbers on all data points
+
+#### 📋 Data Tables Tab
+- **Exportable Data**: Download complete metric breakdowns
+- **Program-level Details**: Drill down by program
+- **CSV Export**: For further analysis
+- **Sortable Columns**: Organize data your way
+
+### How to Use
+
+1. **Select Primary Cohort**: Choose the class year to analyze
+2. **Select Program Focus**: Filter by specific program or view all
+3. **Navigate Tabs**: Explore different analysis views
+4. **Use Interactive Features**:
+   - Toggle buttons to show/hide metrics
+   - Switch between chart types
+   - Enable log scale for better visualization
+   - Export data tables
+
+### Configuration
+
+```python
+# Available Metrics
+applications_metrics = [
+    'inquiries_received', 'applications_in_progress', 
+    'applications_received', 'applications_complete',
+    'applications_manual', 'applications_verified',
+    'applications_on_hold', 'applications_undelivered',
+    'applications_deferral', 'total_applications',
+    'admissions_pre_admission'
+]
+
+admissions_metrics = [
+    'admissions_offered', 'admissions_denied',
+    'admissions_accepted', 'admissions_declined',
+    'admissions_deferred_to_next', 'admissions_deferred_from_last',
+    'admissions_moved_to_other', 'admissions_withdrawn',
+    'anticipated_cohort_size'
+]
+
+# Chart Options
+- Line vs Bar chart toggle
+- Log scale toggle
+- Metric multi-select
+- Bottom legend positioning
+```
+
+### Tips
+- Use Performance Analysis for high-level overview
+- Trend Analysis shows patterns over time
+- Program Deep Dive for detailed metric exploration
+- Export Data Tables for offline analysis
+
+---
+
+## 🔄 Comparison Tool
+
+**Purpose**: Dedicated year-over-year analysis for comparing cohort performance.
+
+### Features
+
+#### 📊 Side-by-Side Comparison
+- **Time Series Charts**: Compare trends for both cohorts
+- **Program Breakdown**: Expandable details by program
+- **Metric Selector**: Choose which metrics to compare
+- **Data Tables**: Detailed program-level breakdowns
+
+#### 📈 Percentage Change Analysis
+- **Full-width Bar Chart**: Visual comparison of all metrics
+- **Color Indicators**: Green (growth), Red (decline), Gray (stable)
+- **Smart Filtering**: Excludes metrics with no data
+
+#### 📋 Comprehensive Table
+- **All Metrics**: Complete comparison with variance analysis
+- **Statistical Metrics**: Variance, Standard Deviation, Coefficient of Variation
+- **Performance Indicators**: Descriptive labels for each metric
+- **Export Options**: Download comparison or individual cohort data
+
+### How to Use
+
+1. **Select Primary Cohort**: Main cohort for analysis
+2. **Select Comparison Cohort**: Cohort to compare against
+3. **Select Program Filter**: Focus on specific program or view all
+4. **Explore Metrics**:
+   - Use metric selector to choose which to visualize
+   - Click "Show Data Table" for program breakdowns
+   - Review percentage change chart
+5. **Export Data**: Download tables for further analysis
+
+### Configuration
+
+```python
+# Comparison Options
+primary_cohort = [2028, 2027, 2026]
+comparison_cohort = [cohorts excluding primary]
+program_filter = ['All Programs', 'MBA', 'MS ACCT', ...]
+
+# Statistical Calculations
+Variance = ((Primary - Mean)² + (Comparison - Mean)²) / 2
+Std Deviation = √Variance
+Coefficient of Variation = (Std Dev / Mean) × 100
+
+# Performance Indicators
+- Strong Growth: % Change > 15%
+- Moderate Growth: % Change 5-15%
+- Stable: % Change -5% to 5%
+- Decline: % Change < -5%
+- New Metric: Comparison cohort has no data
+```
+
+### Tips
+- Use time series to identify trend differences
+- Review percentage change for quick insights
+- Check variance metrics for consistency
+- Export data for stakeholder presentations
+
+---
+
+## 📢 Marketing Analysis
+
+**Purpose**: Comprehensive marketing spend analysis with ROI tracking.
+
+### Features
+
+#### 📊 Overview Tab
+- **Key ROI Metrics**: Total Spend, CPI, CPA, Conversion Rate
+- **Spend by Program**: Bar chart with log scale option
+- **Spend by Channel**: Pie and bar chart views
+- **Quick Snapshot**: Performance across all dimensions
+
+#### 🔬 Advanced Analytics Tab
+- **ROI Summary**: CPI, CPA, CPAd, Conversion Rate
+- **Spend vs Outcomes**: Dual-axis correlation chart
+- **Detailed ROI Table**: Program-by-program comparison
+- **Deep-dive Analysis**: Connect spend to outcomes
+
+#### 📢 Channel Analytics Tab
+- **Spend Distribution**: Bar and pie charts
+- **Channel Trends**: Monthly trend lines
+- **Performance Summary**: Total spend, program count, activity months
+- **Channel Comparison**: Side-by-side performance
+
+#### 📝 Incremental Notes Tab
+- **Campaign Documentation**: Track changes and events
+- **Searchable Database**: Organized by program, month, fiscal year
+- **Expandable Cards**: Easy browsing
+- **Historical Context**: Understand data anomalies
+
+### How to Use
+
+1. **Set Global Filters**:
+   - Fiscal Year: Select one or multiple years
+   - Program: Choose specific programs
+   - Channel: Filter by marketing channel
+2. **Navigate Tabs**: Explore different analysis views
+3. **Interact with Charts**:
+   - Toggle between chart types
+   - Enable log scale for better visualization
+   - Hover for exact values
+4. **Export Data**: Download filtered data for analysis
+
+### Configuration
+
+```python
+# Global Filters (Apply to All Tabs)
+fiscal_years = ['FY24', 'FY25', ...]
+programs = ['MBA', 'MS ACCT', 'MS ENLD', ...]
+channels = ['Search', 'Display', 'LinkedIn', 'Meta', ...]
+
+# ROI Calculations
+CPI = Total Spend / Total Inquiries
+CPA = Total Spend / Total Applications
+CPAd = Total Spend / Total Admissions
+Conversion Rate = (Applications / Inquiries) × 100
+
+# Chart Options
+- Pie vs Bar chart toggle
+- Log scale toggle
+- Multi-select filters
+- Dynamic updates
+```
+
+### Tips
+- Use Overview for quick insights
+- Advanced Analytics for ROI deep-dive
+- Channel Analytics for performance comparison
+- Document campaigns in Incremental Notes
+
+---
+
+## 🗄️ Data Explorer
+
+**Purpose**: Professional data exploration with advanced filtering and export.
+
+### Features
+
+#### 📊 Seven Database Tables
+- **Admissions Metrics**: Core admissions data
+- **Inquiry Sources**: Lead generation tracking
+- **Marketing Campaigns**: Campaign management
+- **Marketing Spend**: Spend tracking
+- **Marketing Spend Totals**: Aggregated spend
+- **Metadata Programs**: Program information
+- **SQLite Sequence**: Database internals
+
+#### 🔍 Advanced Filtering
+- **Column Selection**: Multi-select columns to display
+- **Row Limits**: 10, 25, 50, 100, 500, All
+- **Sort Options**: Any column, ascending/descending
+- **Text Search**: Filter across all columns
+- **Real-time Updates**: Instant filtering
+
+#### 📈 Data Analysis
+- **Quick Statistics**: Count, mean, std, min, max, quartiles
+- **CSV Export**: Download filtered data
+- **Interactive Display**: Pagination support
+- **Data Availability**: Clear indicators
+
+### How to Use
+
+1. **Select Table**: Click tab for desired table
+2. **Read Description**: Understand table purpose
+3. **Configure Filters**:
+   - Select columns to display
+   - Set row limit
+   - Choose sort column and direction
+   - Enter search text
+4. **View Data**: Interactive table with pagination
+5. **Export**: Download as CSV for analysis
+
+### Configuration
+
+```python
+# Table Options
+tables = [
+    'admissions_metrics',
+    'inquiry_sources',
+    'marketing_campaigns',
+    'marketing_spend',
+    'marketing_spend_totals',
+    'programs',
+    'sqlite_sequence'
+]
+
+# Filter Options
+row_limits = [10, 25, 50, 100, 500, 'All']
+sort_order = ['Ascending', 'Descending']
+column_selection = 'Multi-select dropdown'
+text_search = 'Search across all columns'
+
+# Export Options
+- CSV format
+- Filtered data only
+- All columns included
+```
+
+### Tips
+- Use column selection to focus on relevant data
+- Text search works across all columns
+- Export filtered data for offline analysis
+- Review table descriptions for context
+
+---
+
+## 🔮 Predictive Analytics
+
+**Purpose**: Data-driven forecasting, optimization, and recommendations for enrollment planning.
+
+### Features
+
+#### 📈 Forecasting Tab
+- **Time Series Predictions**: Forecast inquiries, applications, enrollments
+- **Confidence Intervals**: 95% confidence ranges
+- **Model Selection**: Automatic best model selection (Prophet, ARIMA, Linear)
+- **Accuracy Metrics**: MAPE, RMSE, MAE tracking
+
+#### 📢 Channel Optimization Tab
+- **ROI Analysis**: Identify most effective channels
+- **Effectiveness Scores**: Composite performance metrics
+- **Performance History**: Track channel performance over time
+- **Recommendations**: Top channels ranked by effectiveness
+
+#### 📅 Timing Analysis Tab
+- **Seasonal Patterns**: Identify optimal months for marketing
+- **Conversion Heatmap**: Visualize patterns across years
+- **Timing Recommendations**: Ranked months by effectiveness
+- **Consistency Scores**: Reliability of seasonal patterns
+
+#### 💰 Budget Allocation Tab
+- **Optimization**: Data-driven budget distribution
+- **Expected Outcomes**: Predicted inquiries, applications, enrollments
+- **Sensitivity Analysis**: Impact of budget changes
+- **Constraint Management**: Minimum/maximum allocations
+
+#### 🎯 Model Performance Tab
+- **Accuracy Tracking**: Monitor prediction accuracy over time
+- **Model Health**: Status indicators (Healthy, Warning, Needs Retraining)
+- **Trend Analysis**: Identify performance degradation
+- **Comparison**: Multiple model evaluation
+
+### How to Use
+
+#### Forecasting
+1. **Select Program**: Choose program to forecast
+2. **Select Cohort**: Choose cohort year (optional)
+3. **Select Metric**: Choose what to forecast
+4. **Select Horizon**: Choose forecast period (3-24 months)
+5. **Generate Forecast**: View predictions with confidence intervals
+
+#### Channel Optimization
+1. **Select Program**: Choose program to analyze
+2. **Analyze Channels**: View top performing channels
+3. **Review Metrics**: ROI, effectiveness scores, performance history
+4. **Apply Insights**: Allocate budget to top channels
+
+#### Timing Analysis
+1. **Select Program**: Choose program to analyze
+2. **Analyze Timing**: View seasonal patterns
+3. **Review Heatmap**: Identify optimal months
+4. **Plan Campaigns**: Schedule marketing in high-conversion months
+
+#### Budget Allocation
+1. **Enter Total Budget**: Specify available budget
+2. **Select Programs**: Choose programs to include
+3. **Set Constraints**: Minimum/maximum allocations (optional)
+4. **Generate Allocation**: View recommended distribution
+5. **Review Sensitivity**: Understand budget flexibility
+
+### Configuration
+
+```python
+# Forecasting Options
+forecast_horizons = [3, 6, 9, 12, 18, 24]  # months
+metrics = [
+    'inquiries_received',
+    'applications_received',
+    'anticipated_cohort_size'
+]
+models = ['Prophet', 'ARIMA', 'Linear Regression']
+
+# Model Selection Logic
+if data_points >= 24:
+    use Prophet (with seasonality)
+elif data_points >= 12:
+    use ARIMA or Linear
+else:
+    use Simple Moving Average
+
+# ROI Calculation
+ROI = (Admissions Value - Marketing Spend) / Marketing Spend
+Admissions Value = Admissions × Tuition Estimate
+
+# Effectiveness Score Components
+Channel Effectiveness:
+- ROI: 40%
+- Conversion Rate: 30%
+- Consistency: 20%
+- Data Confidence: 10%
+
+Timing Effectiveness:
+- Conversion Rate: 60%
+- Consistency: 40%
+
+# Accuracy Thresholds
+MAPE < 10%: Excellent
+MAPE 10-15%: Good
+MAPE > 15%: Needs attention
+```
+
+### Tips
+- Use 12+ months of data for reliable forecasts
+- Review model performance regularly
+- Combine channel and timing insights
+- Test budget scenarios with sensitivity analysis
+- Monitor accuracy metrics monthly
+
+---
+
+## ⚙️ Configuration
+
+### Database Setup
+
+```bash
+# Initialize database
+python3 etl_pipeline.py          # Admissions data
+python3 marketing_etl.py         # Marketing data
+
+# Database location
+edulytix.db                      # SQLite database file
+
+# Schema files
+marketing_schema.sql             # Marketing tables schema
+```
+
+### Environment Variables
+
+```bash
+# Optional configuration
+STREAMLIT_SERVER_PORT=8501       # Default port
+STREAMLIT_SERVER_ADDRESS=localhost
+```
+
+### Data Sources
+
+```
+Dataset/
+├── MBS-Flex-Online-Admissions-2024-04-30.xlsx
+├── MBS-Flex-Online-Admissions-2024-05-31.xlsx
+├── MBS-Flex-Online-Admissions-2024-07-31.xlsx
+├── MBS-Flex-Online-Admissions-2025-07-31.xlsx
+├── MBS-Flex-Online-Admissions-2025-10-31.xlsx
+├── MBS-Flex-Online-Admissions-2025-11-30.xlsx
+├── MBS-Flex-Online-Admissions-2025-12-31.xlsx
+└── Mays Flex Online Ad Spend Year 1.xlsx
+```
+
+### Version Management
+
+```python
+# Update version in ONE file
+version.py
+
+# Version format
+VERSION_MAJOR = 3
+VERSION_MINOR = 0
+VERSION_PATCH = 0
+VERSION_FULL = f"v{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}"
+
+# Automatically propagates to:
+- Sidebar footer
+- Help page footer
+- Troubleshooting section
+```
+
+### Customization
+
+#### Colors
+```python
+# Mays Business School brand colors
+maroon = '#500000'
+gold = '#C5A572'
+dark_maroon = '#700000'
+light_maroon = '#B00000'
+```
+
+#### Filters
+```python
+# Cohort options
+cohort_options = [2028, 2027, 2026]
+
+# Program options
+program_options = ['All Programs', 'MBA', 'MS ACCT', 
+                   'MS ENLD', 'MS HRM', 'MS MISY', 
+                   'MS MKTG', 'MS SPBA']
+```
+
+---
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+#### Database Errors
+
+**"No data available"**
+```bash
+# Solution: Run ETL pipeline
+python3 etl_pipeline.py
+python3 marketing_etl.py
+```
+
+**"Database connection failed"**
+```bash
+# Check database file exists
+ls -la edulytix.db
+
+# Check permissions
+chmod 644 edulytix.db
+```
+
+#### Display Issues
+
+**"Charts not rendering"**
+```bash
+# Clear Streamlit cache
+streamlit cache clear
+
+# Restart application
+streamlit run main_app.py
+```
+
+**"Filters not working"**
+```bash
+# Reset session state
+# Refresh browser (Ctrl+R or Cmd+R)
+```
+
+#### Performance Issues
+
+**"Slow loading"**
+```bash
+# Check database size
+du -h edulytix.db
+
+# Filter data before exporting
+# Close unused browser tabs
+```
+
+**"Memory errors"**
+```bash
+# Reduce row limits in Data Explorer
+# Filter data before exporting
+# Close unused browser tabs
+```
+
+#### Predictive Analytics Issues
+
+**"Insufficient data for forecasting"**
+- Need at least 6 months of historical data
+- Wait for more data or use simpler methods
+
+**"Model training failed"**
+- Check data quality (missing values, outliers)
+- Review logs for specific errors
+- Ensure ETL pipeline completed successfully
+
+**"High MAPE (> 15%)"**
+- Model may need retraining
+- Patterns may have changed
+- Consider collecting more data
+
+### Getting Help
+
+1. **Check Logs**: Review console output for errors
+2. **Verify Data**: Ensure ETL pipeline completed
+3. **Clear Cache**: `streamlit cache clear`
+4. **Restart App**: Stop and restart Streamlit
+5. **Contact Support**: Provide error message and steps to reproduce
+
+### Debug Mode
+
+```bash
+# Run with debug logging
+streamlit run main_app.py --logger.level=debug
+
+# Check Python version
+python3 --version  # Should be 3.8+
+
+# Check dependencies
+pip list | grep streamlit
+pip list | grep pandas
+pip list | grep plotly
+```
+
+---
+
+## 📚 Additional Resources
+
+### Documentation
+- [Streamlit Documentation](https://docs.streamlit.io/)
+- [Plotly Documentation](https://plotly.com/python/)
+- [Pandas Documentation](https://pandas.pydata.org/docs/)
+
+### Project Files
+- `Context/EXECUTIVE_SUMMARY.md` - Project overview
+- `Context/TECH_STACK_AND_TIMELINE.md` - Technical details
+- `Context/EDULYTIX_DATA_ANALYSIS.md` - Data analysis guide
+- `.kiro/specs/predictive-analytics/USER_GUIDE.md` - Predictive analytics guide
+
+### Support
+- GitHub Issues: Report bugs and request features
+- Email: Contact project maintainers
+- Documentation: Check this README first
 
 ---
 
