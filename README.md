@@ -12,7 +12,62 @@ A comprehensive data analytics platform for Texas A&M Mays Business School's Fle
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io/)
 
-[Quick Start](docs/QUICK_START.md) • [Changelog](CHANGELOG.md) • [Security](SECURITY.md) • [Contributing](CODE_OF_CONDUCT.md)
+### 📚 [Complete Documentation](docs/README.md) | [Quick Start](docs/QUICK_START.md) | [Changelog](CHANGELOG.md)
+
+---
+
+## 🗂️ Page Documentation
+
+Detailed guides for each platform page:
+
+<table>
+<tr>
+<td align="center" width="33%">
+<a href="docs/HOME_DASHBOARD.md">
+<img src="https://img.shields.io/badge/🏠_Home_Dashboard-500000?style=for-the-badge" alt="Home Dashboard"/>
+</a>
+<br/>
+<sub>Overview & Key Metrics</sub>
+</td>
+<td align="center" width="33%">
+<a href="docs/EXECUTIVE_DEEP_DIVE.md">
+<img src="https://img.shields.io/badge/📊_Executive_Deep_Dive-500000?style=for-the-badge" alt="Executive Deep Dive"/>
+</a>
+<br/>
+<sub>Comprehensive Analysis</sub>
+</td>
+<td align="center" width="33%">
+<a href="docs/COMPARISON_TOOL.md">
+<img src="https://img.shields.io/badge/🔄_Comparison_Tool-500000?style=for-the-badge" alt="Comparison Tool"/>
+</a>
+<br/>
+<sub>Year-over-Year</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+<a href="docs/MARKETING_ANALYSIS.md">
+<img src="https://img.shields.io/badge/📢_Marketing_Analysis-500000?style=for-the-badge" alt="Marketing Analysis"/>
+</a>
+<br/>
+<sub>Spend & ROI Tracking</sub>
+</td>
+<td align="center" width="33%">
+<a href="docs/DATA_EXPLORER.md">
+<img src="https://img.shields.io/badge/🗄️_Data_Explorer-500000?style=for-the-badge" alt="Data Explorer"/>
+</a>
+<br/>
+<sub>Raw Data Access</sub>
+</td>
+<td align="center" width="33%">
+<a href="docs/PREDICTIVE_ANALYTICS.md">
+<img src="https://img.shields.io/badge/🔮_Predictive_Analytics-500000?style=for-the-badge" alt="Predictive Analytics"/>
+</a>
+<br/>
+<sub>AI & Forecasting</sub>
+</td>
+</tr>
+</table>
 
 </div>
 
