@@ -1,0 +1,421 @@
+"""
+Database/Data Explorer Page Module
+Extracted from main_app.py as part of Phase 4 refactoring
+"""
+
+import streamlit as st
+import pandas as pd
+
+# Import utility functions
+from utils.database import get_connection
+from utils.table_display import process_table_display
+
+
+def render():
+    """Render the Database/Data Explorer page"""
+    
+    # Define searchable content for each table
+    table_search_content = {
+        'admissions_metrics': {
+            'keywords': ['applications', 'admissions', 'inquiries', 'enrollment', 'conversion', 'cohort', 'metrics', 'performance'],
+            'questions': [
+                'How many applications did we receive by program and cohort?',
+                'What are the conversion rates from inquiry to application?',
+                'Which programs have the highest enrollment numbers?',
+                'How do our metrics trend over time?'
+            ]
+        },
+        'programs': {
+            'keywords': ['programs', 'degrees', 'mba', 'masters', 'active', 'codes'],
+            'questions': [
+                'What programs do we currently offer?',
+                'Which programs are active vs inactive?',
+                'What are the program codes and full names?',
+                'How are programs categorized?'
+            ]
+        },
+        'marketing_metrics': {
+            'keywords': ['marketing', 'spend', 'cost', 'channels', 'roi', 'campaigns', 'budget'],
+            'questions': [
+                'How much are we spending on each marketing channel?',
+                'What\'s our cost per inquiry by channel?',
+                'Which marketing channels are most effective?',
+                'How do click-through rates compare across channels?'
+            ]
+        },
+        'marketing_campaigns': {
+            'keywords': ['campaigns', 'marketing', 'budget', 'timeline', 'targets', 'performance'],
+            'questions': [
+                'What marketing campaigns are currently running?',
+                'Which campaigns target which programs?',
+                'What are the campaign budgets and timelines?',
+                'How do campaigns perform against targets?'
+            ]
+        },
+        'marketing_spend': {
+            'keywords': ['spend', 'budget', 'allocation', 'roi', 'channels', 'cost'],
+            'questions': [
+                'How much did we spend on each marketing channel?',
+                'What\'s our monthly marketing budget allocation?',
+                'Which channels have the highest ROI?',
+                'How does actual spend compare to budget?'
+            ]
+        },
+        'inquiry_sources': {
+            'keywords': ['sources', 'leads', 'inquiries', 'conversion', 'quality', 'channels'],
+            'questions': [
+                'Where are our inquiries coming from?',
+                'Which sources generate the most qualified leads?',
+                'How do different sources convert to applications?',
+                'What\'s the quality score by source?'
+            ]
+        }
+    }
+    
+    # FULL-WIDTH KEYWORD SEARCH - Centered
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h4 style="color: #500000; margin-bottom: 10px;">🔍 Find Your Data</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    keyword_search = st.text_input(
+        "Search tables, questions, or data types",
+        placeholder="Type keywords like 'applications', 'marketing', 'programs', 'inquiries'...",
+        key="table_keyword_search",
+        label_visibility="collapsed"
+    )
+    
+    try:
+        conn = get_connection()
+        
+        # Get available tables
+        tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        tables_df = pd.read_sql(tables_query, conn)
+        available_tables = tables_df['name'].tolist()
+        
+        # Filter tables based on search if provided
+        if keyword_search:
+            filtered_tables = []
+            search_lower = keyword_search.lower()
+            
+            for table in available_tables:
+                if table in table_search_content:
+                    content = table_search_content[table]
+                    keyword_match = any(search_lower in keyword.lower() for keyword in content['keywords'])
+                    question_match = any(search_lower in question.lower() for question in content['questions'])
+                    table_match = search_lower in table.lower()
+                    
+                    if keyword_match or question_match or table_match:
+                        filtered_tables.append(table)
+                elif search_lower in table.lower():
+                    filtered_tables.append(table)
+            
+            if filtered_tables:
+                available_tables = filtered_tables
+                st.success(f"✓ Found {len(filtered_tables)} table(s) matching '{keyword_search}'")
+            else:
+                st.warning(f"No tables match '{keyword_search}'. Showing all tables.")
+        
+        if not available_tables:
+            st.warning("No tables found in the database.")
+            st.info("Please ensure the ETL pipeline has been run to populate the database.")
+        else:
+            # Chrome-style CSS for tabs with always-visible scrollbar when needed
+            st.markdown("""
+            <style>
+            /* Chrome-style tabs for Data Explorer */
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 2px !important;
+                justify-content: center !important;
+                background-color: transparent !important;
+                padding: 0px 20px !important;
+                border-bottom: none !important;
+                margin-bottom: 30px !important;
+                margin-top: 20px !important;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: thin !important;
+                scrollbar-color: #500000 #f0f0f0 !important;
+                box-sizing: border-box !important;
+            }
+            
+            /* Always show scrollbar when content overflows */
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+                height: 10px !important;
+                display: block !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+                background: #f0f0f0 !important;
+                border-radius: 5px !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+                background: #500000 !important;
+                border-radius: 5px !important;
+                min-width: 50px !important;
+            }
+            
+            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
+                background: #700000 !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                height: 45px !important;
+                padding: 0px 32px !important;
+                background-color: #f5f5f5 !important;
+                border-radius: 8px 8px 0px 0px !important;
+                font-weight: 500 !important;
+                font-size: 15px !important;
+                border: none !important;
+                border-bottom: 3px solid transparent !important;
+                color: #666 !important;
+                margin-bottom: -2px !important;
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+                min-width: fit-content !important;
+                box-sizing: border-box !important;
+            }
+            
+            .stTabs [aria-selected="true"] {
+                background-color: white !important;
+                color: #500000 !important;
+                border-bottom: 3px solid #500000 !important;
+            }
+            
+            .stTabs [data-baseweb="tab"]:hover {
+                background-color: #e8e8e8 !important;
+                color: #500000 !important;
+            }
+            
+            .stTabs [aria-selected="true"]:hover {
+                background-color: white !important;
+            }
+            
+            /* Tablet adjustments - switch to left-aligned */
+            @media screen and (max-width: 1024px) {
+                .stTabs [data-baseweb="tab-list"] {
+                    justify-content: flex-start !important;
+                    padding: 0px 15px !important;
+                }
+                
+                .stTabs [data-baseweb="tab"] {
+                    padding: 0px 24px !important;
+                    font-size: 14px !important;
+                }
+                
+                .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+                    height: 12px !important;
+                }
+            }
+            
+            /* Mobile adjustments - left-aligned */
+            @media screen and (max-width: 768px) {
+                .stTabs [data-baseweb="tab-list"] {
+                    justify-content: flex-start !important;
+                    padding: 0px 10px !important;
+                }
+                
+                .stTabs [data-baseweb="tab"] {
+                    padding: 0px 20px !important;
+                    font-size: 13px !important;
+                    height: 42px !important;
+                }
+            }
+            
+            /* Small mobile adjustments - left-aligned */
+            @media screen and (max-width: 480px) {
+                .stTabs [data-baseweb="tab-list"] {
+                    justify-content: flex-start !important;
+                    padding: 0px 10px !important;
+                }
+                
+                .stTabs [data-baseweb="tab"] {
+                    padding: 0px 16px !important;
+                    font-size: 12px !important;
+                    height: 40px !important;
+                }
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Create tabs for each table with icons
+            table_icons = {
+                'admissions_metrics': '📊',
+                'programs': '🎓',
+                'marketing_metrics': '📈',
+                'marketing_campaigns': '📢',
+                'marketing_spend': '💰',
+                'inquiry_sources': '🔍',
+                'sqlite_sequence': '⚙️'
+            }
+            
+            tab_labels = []
+            for table in available_tables:
+                icon = table_icons.get(table, '📋')
+                # Format table name nicely
+                display_name = table.replace('_', ' ').title()
+                tab_labels.append(f"{icon} {display_name}")
+            
+            tabs = st.tabs(tab_labels)
+            
+            for i, table in enumerate(available_tables):
+                with tabs[i]:
+                    # Process the table with new styling
+                    process_table_display(conn, table)
+    
+    except Exception as e:
+        st.error(f"Database connection error: {str(e)}")
+        st.info("Please check if the database file exists and is accessible.")
+
+    # Footer with Print Button
+    # Add print-specific CSS - simplified approach with proper margins
+    st.markdown("""
+    <style>
+    @media print {
+    /* Hide Streamlit UI */
+    header[data-testid="stHeader"],
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    .stDeployButton {
+        display: none !important;
+    }
+    
+    /* Hide navigation */
+    #nav-buttons-container {
+        display: none !important;
+    }
+    
+    /* Hide footer */
+    hr:last-of-type,
+    hr:last-of-type ~ * {
+        display: none !important;
+    }
+    
+    /* Clean layout with proper margins */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .main .block-container {
+        padding: 1.5cm 1cm 2cm 1cm !important;
+        max-width: 100% !important;
+        border: none !important;
+    }
+    
+    /* Scale down and left-align charts to fit page width - default for all charts */
+    .js-plotly-plot,
+    .plotly {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 15px 0 15px -24px !important;
+        padding: 0 !important;
+        display: block !important;
+        page-break-inside: avoid;
+        overflow: visible !important;
+        transform: scale(0.84) !important;
+        transform-origin: left top !important;
+        position: relative !important;
+        left: -24px !important;
+    }
+    
+    /* Specific styling for funnel charts - more left and larger scale */
+    .js-plotly-plot:has(g.funnellayer),
+    .plotly:has(g.funnellayer) {
+        transform: scale(0.85) !important;
+        margin-left: -30px !important;
+        left: -30px !important;
+    }
+    
+    div[data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+        margin: 15px 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        text-align: left !important;
+        position: relative !important;
+    }
+    
+    /* Force SVG charts to scale down and fit */
+    .js-plotly-plot svg,
+    .plotly svg {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Force plotly containers to respect width and remove padding */
+    .plotly-graph-div {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Remove plotly's internal margins */
+    .main-svg {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Ensure metric boxes fit properly */
+    .metrics-container {
+        max-width: 100% !important;
+        margin: 15px 0 !important;
+        gap: 0.8rem !important;
+    }
+    
+    .metric-box {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        padding: 1rem !important;
+    }
+    
+    /* Section headers - keep readable */
+    div[style*="background: #e9ecef"],
+    div[style*="background:#e9ecef"] {
+        background: #f5f5f5 !important;
+        border: 1px solid #ddd !important;
+        page-break-after: avoid;
+        padding: 12px !important;
+    }
+    
+    /* Keep text readable */
+    body, p, div, span {
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+    }
+    
+    h1 { font-size: 18pt !important; }
+    h2 { font-size: 16pt !important; }
+    h3 { font-size: 14pt !important; }
+    
+    /* Prevent orphaned headers */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+    
+    /* Print colors */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Page setup with margins */
+    @page {
+        margin: 1.5cm 1cm;
+        size: A4 portrait;
+    }
+    }
+    </style>
+    """, unsafe_allow_html=True)
