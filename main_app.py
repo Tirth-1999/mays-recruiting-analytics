@@ -18,18 +18,12 @@ st.set_page_config(
     page_title="Mays Online Flex Recruiting Analytics Platform",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# Hide sidebar completely and remove top padding
+# Remove top padding and adjust layout for sidebar
 st.markdown("""
 <style>
-    .css-1d391kg {display: none}
-    .css-1rs6os {display: none}
-    .css-17eq0hr {display: none}
-    section[data-testid="stSidebar"] {display: none !important;}
-    .css-1lcbmhc {margin-left: 0rem !important;}
-    .css-1outpf7 {margin-left: 0rem !important;}
     .main .block-container {
         padding-left: 1rem !important; 
         padding-right: 1rem !important;
@@ -680,32 +674,24 @@ st.markdown("""
 
 # Professional Mays Business School Banner
 st.markdown("""
-<div style="background: linear-gradient(135deg, #500000 0%, #700000 100%); 
-            padding: 20px 30px; border-radius: 12px; margin-bottom: 10px; color: white; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center;">
-            <div style="background: white; border-radius: 50%; width: 60px; height: 60px; 
-                        display: flex; align-items: center; justify-content: center; margin-right: 20px;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
-                <span style="color: #500000; font-weight: bold; font-size: 18px;">A&M</span>
-            </div>
-            <div>
-                <h1 style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: -1px;">
-                    Mays Online Flex Recruiting Analytics Platform
-                </h1>
-                <h2 style="margin: 5px 0 0 0; font-size: 16px; font-weight: 300; opacity: 0.9;">
-                    Real-time Admissions Analytics & Strategic Insights
-                </h2>
-            </div>
-        </div>
-    </div>
-    <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
-        <div style="font-size: 12px; opacity: 0.8; text-align: center;">
+    <div style='background: linear-gradient(135deg, #500000 0%, #700000 50%, #500000 100%); 
+                padding: 1.5rem 2rem; 
+                border-radius: 10px; 
+                text-align: center;
+                border: 3px solid #C5A572;
+                margin-bottom: 1rem;'>
+        <img src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICM1MDAwMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMSwgLmNscy0yLCAuY2xzLTMgewogICAgICAgIHN0cm9rZS13aWR0aDogMHB4OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNiMWIzYjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyMDEuMjgiIHk9IjIyMi41NyIgd2lkdGg9IjYyOS43OSIgaGVpZ2h0PSI2MzQuNzkiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iNzQ3LjQ0IDQ3NS4yMiA3MDAuNjcgNDc1LjIyIDY5Ny45NyA0NzUuMjIgNjk2Ljc1IDQ3Ny42NyA2NjIuODQgNTQ4LjI3IDYyOC44IDQ3Ny42MyA2MjcuNjEgNDc1LjIyIDYyNC45MiA0NzUuMjIgNTc5LjcxIDQ3NS4yMiA1NzUuNDQgNDc1LjIyIDU3NS40NCA0NzkuNTIgNTc1LjQ0IDUwMy41OSA1NzUuNDQgNTA3LjkgNTc5LjcxIDUwNy45IDU4Ny40NCA1MDcuOSA1ODcuNDQgNjA5LjAxIDU3OS4wOCA2MDkuMDEgNTc0Ljc4IDYwOS4wMSA1NzQuNzggNjEzLjMyIDU3NC43OCA2MzcuMzkgNTc0Ljc4IDY0MS42OSA1NzkuMDggNjQxLjY5IDYyOS44NSA2NDEuNjkgNjM0LjE1IDY0MS42OSA2MzQuMTUgNjM3LjM5IDYzNC4xNSA2MTMuMzIgNjM0LjE1IDYwOS4wMSA2MjkuODUgNjA5LjAxIDYyMS4wNyA2MDkuMDEgNjIxLjA3IDUzNy4yNSA2NTguOTkgNjE1LjQ1IDY2Mi44NCA2MjMuNDMgNjY2Ljc2IDYxNS40NSA3MDUuMDcgNTM3LjA4IDcwNS4wNyA2MDkuMDEgNjk2LjcxIDYwOS4wMSA2OTIuMzcgNjA5LjAxIDY5Mi4zNyA2MTMuMzIgNjkyLjM3IDYzNy4zOSA2OTIuMzcgNjQxLjY5IDY5Ni43MSA2NDEuNjkgNzQ3LjQ0IDY0MS42OSA3NTEuNzUgNjQxLjY5IDc1MS43NSA2MzcuMzkgNzUxLjc1IDYxMy4zMiA3NTEuNzUgNjA5LjAxIDc0Ny40NCA2MDkuMDEgNzM4LjcgNjA5LjAxIDczOC43IDUwNy45IDc0Ny40NCA1MDcuOSA3NTEuNzUgNTA3LjkgNzUxLjc1IDUwMy41OSA3NTEuNzUgNDc5LjUyIDc1MS43NSA0NzUuMjIgNzQ3LjQ0IDQ3NS4yMiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTQ1Mi42LDYwOC45MWgtMTMuNTFsLTQzLjk1LTEwMS40N2g4LjQ3di0zMi44MmgtNzAuNTR2MzIuNzFoOS43M2wtNDMuOTEsMTAxLjQ3aC0xOC4zdjMyLjcxaDY0LjAzdi0zMi43MWgtOS4zMWw3LjMxLTE2LjloNTIuODNsNy4yOCwxNi45aC05LjgzdjMyLjcxaDY0LjA2di0zMi43MWwtNC4zNy4xMVpNMzgxLjI5LDU1OS4zM2gtMjQuNDlsMTIuMjUtMjguMzgsMTIuMjUsMjguMzhaIi8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjY5My43IDM0OC4yNSAzMzcuNDkgMzQ4LjI1IDMzMi41NiAzNDguMjUgMzMyLjU2IDM1My4xOCAzMzIuNTYgNDQ4LjM1IDMzMi41NiA0NTMuMjggMzM3LjQ5IDQ1My4yOCAzOTkgNDUzLjI4IDQwMy45MyA0NTMuMjggNDAzLjkzIDQ0OC4zNSA0MDMuOTMgNDEzLjAxIDQ3OS45MyA0MTMuMDEgNDc5LjkzIDY2My43NyA0NDQuNTUgNjYzLjc3IDQzOS42NSA2NjMuNzcgNDM5LjY1IDY2OC43IDQzOS42NSA3MzAuMjEgNDM5LjY1IDczNS4xNSA0NDQuNTUgNzM1LjE1IDU4Ni42IDczNS4xNSA1OTEuNTQgNzM1LjE1IDU5MS41NCA3MzAuMjEgNTkxLjU0IDY2OC43IDU5MS41NCA2NjMuNzcgNTg2LjYgNjYzLjc3IDU1MS4zIDY2My43NyA1NTEuMyA0MTMuMDEgNjI2Ljg0IDQxMy4wMSA2MjYuODQgNDQ3Ljg5IDYyNi44NCA0NTIuODMgNjMxLjc3IDQ1Mi44MyA2OTMuNyA0NTIuODMgNjk4LjY0IDQ1Mi44MyA2OTguNjQgNDQ3Ljg5IDY5OC42NCAzNTMuMTggNjk4LjY0IDM0OC4yNSA2OTMuNyAzNDguMjUiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iNTYxLjgzIDY5My4wNiA1NzYuODggNjc3LjU2IDU3Ni44OCA3MjAuMDMgNTYxLjgzIDcwNS42NSA1NjEuODMgNjkzLjA2Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjUzNi43OCA2NzguNjggNTIxLjcgNjkzLjUxIDUyMS43IDM4My40NSA1MzYuNzggMzk4LjQ2IDUzNi43OCA2NzguNjgiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMzYyLjcyIDM3Ny45OSAzNDcuMjUgMzYyLjk0IDY3Ni40NSAzNjIuOTQgNjU3IDM3Ny45OSAzNjIuNzIgMzc3Ljk5Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjY4NC40MyA0MzkuMDQgNjY5LjM5IDQyNC42NiA2NjkuMzkgMzg2LjM4IDY4NC40MyAzNzAuOTIgNjg0LjQzIDQzOS4wNCIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1My40Niw4NDQuOGMwLTYuOTgsNS42NS0xMi42MywxMi42My0xMi42M3MxMi42Myw1LjY1LDEyLjYzLDEyLjYzLTUuNjUsMTIuNjMtMTIuNjMsMTIuNjMtMTIuNjMtNS42NS0xMi42My0xMi42M2gwWk04NzUuNjQsODQ0LjhjLS4zNS01LjI2LTQuOS05LjI1LTEwLjE2LTguOS01LjI2LjM1LTkuMjUsNC45LTguOSwxMC4xNi4zMyw1LjAxLDQuNDksOC45MSw5LjUxLDguOTIsNS4zNS0uMDcsOS42My00LjQ3LDkuNTYtOS44MiwwLS4xMiwwLS4yNC0uMDEtLjM2Wk04NjEuMjMsODM3LjU5aDUuMzJjMy41LDAsNS4yOCwxLjE5LDUuMjgsNC4yLjIsMS45Mi0xLjIsMy42NC0zLjEyLDMuODQtLjIxLjAyLS40Mi4wMi0uNjIsMGwzLjg1LDYuMjZoLTIuNzNsLTMuNzQtNi4yM2gtMS42MXY2LjEyaC0yLjY2bC4wNC0xNC4yMVpNODYzLjg4LDg0My43MWgyLjM0YzEuNTcsMCwyLjk0LS4yMSwyLjk0LTIuMTNzLTEuNTQtMS45Ni0yLjktMS45NmgtMi4zOHY0LjA5WiIvPgo8L3N2Zz4=' 
+             style='width: 90px; height: 90px; margin-bottom: 0.5rem;' />
+        <h1 style='color: white; margin: 0.3rem 0; font-size: 2.5rem; font-weight: bold;'>
+            Mays Online Flex Recruiting Analytics Platform
+        </h1>
+        <p style='color: #C5A572; margin: 0.3rem 0; font-size: 1.1rem;'>
+            Admissions Analytics & Strategic Insights
+        </p>
+        <p style='color: white; margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;'>
             MBA • MS ACCT • MS HRM • MS MISY • MS MKTG • MS ENLD • MS SPBA
-        </div>
+        </p>
     </div>
-</div>
 """, unsafe_allow_html=True)
 
 # Navigation Menu with forced equal heights using aggressive CSS
@@ -725,121 +711,178 @@ div[data-testid="stButton"] button[kind="secondary"] {
 </style>
 """, unsafe_allow_html=True)
 
-# Wrap navigation in a container div with ID for targeting
-st.markdown('<div id="nav-buttons-container">', unsafe_allow_html=True)
-
-# Navigation buttons with active state - 5 tabs now
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns(5)
-
-with nav_col1:
-    if st.button("Home Dashboard    ", key="nav_home", use_container_width=True, 
+# Sidebar Navigation with elegant design
+with st.sidebar:
+    st.markdown("""
+    <style>
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    
+    /* Reduce top padding of sidebar */
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 1rem;
+    }
+    
+    /* Elegant logo/brand section - more compact */
+    .sidebar-brand {
+        text-align: center;
+        padding: 10px 10px 15px 10px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #C5A572;
+    }
+    
+    .sidebar-brand-title {
+        color: #500000;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 8px 0 3px 0;
+    }
+    
+    .sidebar-brand-subtitle {
+        color: #666;
+        font-size: 11px;
+        margin: 0;
+    }
+    
+    /* Navigation section divider */
+    .nav-section-title {
+        color: #500000;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 20px 0 10px 0;
+        padding-left: 5px;
+        opacity: 0.7;
+    }
+    
+    /* Style sidebar buttons - elegant and minimal */
+    [data-testid="stSidebar"] .stButton > button {
+        width: 100% !important;
+        text-align: left !important;
+        padding: 10px 15px !important;
+        margin: 2px 0 !important;
+        border-radius: 8px !important;
+        border: none !important;
+        background: transparent !important;
+        color: #495057 !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: #f0f2f6 !important;
+        color: #500000 !important;
+        transform: translateX(3px) !important;
+    }
+    
+    /* Active/Primary button styling - elegant highlight */
+    [data-testid="stSidebar"] .stButton > button[kind="primary"] {
+        background: linear-gradient(90deg, #500000 0%, #700000 100%) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(80, 0, 0, 0.2) !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
+        transform: translateX(3px) !important;
+        box-shadow: 0 4px 12px rgba(80, 0, 0, 0.3) !important;
+    }
+    
+    /* Info cards in sidebar */
+    .sidebar-info-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 15px 0;
+        font-size: 12px;
+    }
+    
+    .sidebar-info-card strong {
+        color: #500000;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .sidebar-stat {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-left: 3px solid #C5A572;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 4px;
+        font-size: 11px;
+    }
+    
+    .sidebar-stat-value {
+        color: #500000;
+        font-size: 18px;
+        font-weight: bold;
+        display: block;
+    }
+    
+    .sidebar-stat-label {
+        color: #666;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Brand/Logo Section - more compact
+    st.markdown("""
+    <div class="sidebar-brand">
+        <img src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICM1MDAwMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMSwgLmNscy0yLCAuY2xzLTMgewogICAgICAgIHN0cm9rZS13aWR0aDogMHB4OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNiMWIzYjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyMDEuMjgiIHk9IjIyMi41NyIgd2lkdGg9IjYyOS43OSIgaGVpZ2h0PSI2MzQuNzkiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iNzQ3LjQ0IDQ3NS4yMiA3MDAuNjcgNDc1LjIyIDY5Ny45NyA0NzUuMjIgNjk2Ljc1IDQ3Ny42NyA2NjIuODQgNTQ4LjI3IDYyOC44IDQ3Ny42MyA2MjcuNjEgNDc1LjIyIDYyNC45MiA0NzUuMjIgNTc5LjcxIDQ3NS4yMiA1NzUuNDQgNDc1LjIyIDU3NS40NCA0NzkuNTIgNTc1LjQ0IDUwMy41OSA1NzUuNDQgNTA3LjkgNTc5LjcxIDUwNy45IDU4Ny40NCA1MDcuOSA1ODcuNDQgNjA5LjAxIDU3OS4wOCA2MDkuMDEgNTc0Ljc4IDYwOS4wMSA1NzQuNzggNjEzLjMyIDU3NC43OCA2MzcuMzkgNTc0Ljc4IDY0MS42OSA1NzkuMDggNjQxLjY5IDYyOS44NSA2NDEuNjkgNjM0LjE1IDY0MS42OSA2MzQuMTUgNjM3LjM5IDYzNC4xNSA2MTMuMzIgNjM0LjE1IDYwOS4wMSA2MjkuODUgNjA5LjAxIDYyMS4wNyA2MDkuMDEgNjIxLjA3IDUzNy4yNSA2NTguOTkgNjE1LjQ1IDY2Mi44NCA2MjMuNDMgNjY2Ljc2IDYxNS40NSA3MDUuMDcgNTM3LjA4IDcwNS4wNyA2MDkuMDEgNjk2LjcxIDYwOS4wMSA2OTIuMzcgNjA5LjAxIDY5Mi4zNyA2MTMuMzIgNjkyLjM3IDYzNy4zOSA2OTIuMzcgNjQxLjY5IDY5Ni43MSA2NDEuNjkgNzQ3LjQ0IDY0MS42OSA3NTEuNzUgNjQxLjY5IDc1MS43NSA2MzcuMzkgNzUxLjc1IDYxMy4zMiA3NTEuNzUgNjA5LjAxIDc0Ny40NCA2MDkuMDEgNzM4LjcgNjA5LjAxIDczOC43IDUwNy45IDc0Ny40NCA1MDcuOSA3NTEuNzUgNTA3LjkgNzUxLjc1IDUwMy41OSA3NTEuNzUgNDc5LjUyIDc1MS43NSA0NzUuMjIgNzQ3LjQ0IDQ3NS4yMiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTQ1Mi42LDYwOC45MWgtMTMuNTFsLTQzLjk1LTEwMS40N2g4LjQ3di0zMi44MmgtNzAuNTR2MzIuNzFoOS43M2wtNDMuOTEsMTAxLjQ3aC0xOC4zdjMyLjcxaDY0LjAzdi0zMi43MWgtOS4zMWw3LjMxLTE2LjloNTIuODNsNy4yOCwxNi45aC05LjgzdjMyLjcxaDY0LjA2di0zMi43MWwtNC4zNy4xMVpNMzgxLjI5LDU1OS4zM2gtMjQuNDlsMTIuMjUtMjguMzgsMTIuMjUsMjguMzhaIi8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjY5My43IDM0OC4yNSAzMzcuNDkgMzQ4LjI1IDMzMi41NiAzNDguMjUgMzMyLjU2IDM1My4xOCAzMzIuNTYgNDQ4LjM1IDMzMi41NiA0NTMuMjggMzM3LjQ5IDQ1My4yOCAzOTkgNDUzLjI4IDQwMy45MyA0NTMuMjggNDAzLjkzIDQ0OC4zNSA0MDMuOTMgNDEzLjAxIDQ3OS45MyA0MTMuMDEgNDc5LjkzIDY2My43NyA0NDQuNTUgNjYzLjc3IDQzOS42NSA2NjMuNzcgNDM5LjY1IDY2OC43IDQzOS42NSA3MzAuMjEgNDM5LjY1IDczNS4xNSA0NDQuNTUgNzM1LjE1IDU4Ni42IDczNS4xNSA1OTEuNTQgNzM1LjE1IDU5MS41NCA3MzAuMjEgNTkxLjU0IDY2OC43IDU5MS41NCA2NjMuNzcgNTg2LjYgNjYzLjc3IDU1MS4zIDY2My43NyA1NTEuMyA0MTMuMDEgNjI2Ljg0IDQxMy4wMSA2MjYuODQgNDQ3Ljg5IDYyNi44NCA0NTIuODMgNjMxLjc3IDQ1Mi44MyA2OTMuNyA0NTIuODMgNjk4LjY0IDQ1Mi44MyA2OTguNjQgNDQ3Ljg5IDY5OC42NCAzNTMuMTggNjk4LjY0IDM0OC4yNSA2OTMuNyAzNDguMjUiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iNTYxLjgzIDY5My4wNiA1NzYuODggNjc3LjU2IDU3Ni44OCA3MjAuMDMgNTYxLjgzIDcwNS42NSA1NjEuODMgNjkzLjA2Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjUzNi43OCA2NzguNjggNTIxLjcgNjkzLjUxIDUyMS43IDM4My40NSA1MzYuNzggMzk4LjQ2IDUzNi43OCA2NzguNjgiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMzYyLjcyIDM3Ny45OSAzNDcuMjUgMzYyLjk0IDY3Ni40NSAzNjIuOTQgNjU3IDM3Ny45OSAzNjIuNzIgMzc3Ljk5Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjY4NC40MyA0MzkuMDQgNjY5LjM5IDQyNC42NiA2NjkuMzkgMzg2LjM4IDY4NC40MyAzNzAuOTIgNjg0LjQzIDQzOS4wNCIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1My40Niw4NDQuOGMwLTYuOTgsNS42NS0xMi42MywxMi42My0xMi42M3MxMi42Myw1LjY1LDEyLjYzLDEyLjYzLTUuNjUsMTIuNjMtMTIuNjMsMTIuNjMtMTIuNjMtNS42NS0xMi42My0xMi42M2gwWk04NzUuNjQsODQ0LjhjLS4zNS01LjI2LTQuOS05LjI1LTEwLjE2LTguOS01LjI2LjM1LTkuMjUsNC45LTguOSwxMC4xNi4zMyw1LjAxLDQuNDksOC45MSw5LjUxLDguOTIsNS4zNS0uMDcsOS42My00LjQ3LDkuNTYtOS44MiwwLS4xMiwwLS4yNC0uMDEtLjM2Wk04NjEuMjMsODM3LjU5aDUuMzJjMy41LDAsNS4yOCwxLjE5LDUuMjgsNC4yLjIsMS45Mi0xLjIsMy42NC0zLjEyLDMuODQtLjIxLjAyLS40Mi4wMi0uNjIsMGwzLjg1LDYuMjZoLTIuNzNsLTMuNzQtNi4yM2gtMS42MXY2LjEyaC0yLjY2bC4wNC0xNC4yMVpNODYzLjg4LDg0My43MWgyLjM0YzEuNTcsMCwyLjk0LS4yMSwyLjk0LTIuMTNzLTEuNTQtMS45Ni0yLjktMS45NmgtMi4zOHY0LjA5WiIvPgo8L3N2Zz4=' 
+             style='width: 40px; height: 40px;' />
+        <div class="sidebar-brand-title">Mays Analytics</div>
+        <div class="sidebar-brand-subtitle">Flex Online Programs</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Navigation Section
+    
+    if st.button("Home Dashboard", key="sidebar_nav_home", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Home' else "secondary"):
         st.session_state.current_page = 'Home'
         st.rerun()
-
-with nav_col2:
-    if st.button("Executive Dive    ", key="nav_executive", use_container_width=True,
+    
+    if st.button("Executive Dive", key="sidebar_nav_executive", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Executive_Deep_Dive' else "secondary"):
         st.session_state.current_page = 'Executive_Deep_Dive'
         st.rerun()
-
-with nav_col3:
-    if st.button("Comparison Tool   ", key="nav_comparison", use_container_width=True,
+    
+    if st.button("Comparison Tool", key="sidebar_nav_comparison", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Comparison_Tool' else "secondary"):
         st.session_state.current_page = 'Comparison_Tool'
         st.rerun()
-
-with nav_col4:
-    if st.button("Marketing Analysis", key="nav_marketing", use_container_width=True,
+    
+    if st.button("Marketing Analysis", key="sidebar_nav_marketing", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Marketing_Analysis' else "secondary"):
         st.session_state.current_page = 'Marketing_Analysis'
         st.rerun()
-
-with nav_col5:
-    if st.button("Data Explorer     ", key="nav_database", use_container_width=True,
+    
+    if st.button("Data Explorer", key="sidebar_nav_database", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Database' else "secondary"):
         st.session_state.current_page = 'Database'
         st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Aggressive CSS to force equal button heights
-st.markdown("""
-<style>
-/* Target the navigation container specifically */
-#nav-buttons-container {
-    display: flex !important;
-    gap: 10px !important;
-    align-items: stretch !important;
-}
-
-#nav-buttons-container > div[data-testid="column"] {
-    flex: 1 !important;
-    display: flex !important;
-}
-
-#nav-buttons-container > div[data-testid="column"] > div {
-    width: 100% !important;
-    display: flex !important;
-}
-
-#nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] {
-    width: 100% !important;
-    display: flex !important;
-}
-
-#nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] > button {
-    width: 100% !important;
-    min-height: 50px !important;
-    height: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    white-space: nowrap !important;
-    text-align: center !important;
-    line-height: 1.3 !important;
-    padding: 0.75rem 0.5rem !important;
-    font-size: 0.95rem !important;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-    #nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] > button {
-        font-size: 0.85rem !important;
-    }
-}
-
-@media (max-width: 768px) {
-    #nav-buttons-container > div[data-testid="column"] > div > div[data-testid="stButton"] > button {
-        font-size: 0.8rem !important;
-        white-space: normal !important;
-        min-height: 60px !important;
-    }
-}
-</style>
-
-<script>
-// JavaScript to ensure equal heights after render
-setTimeout(function() {
-    const container = document.getElementById('nav-buttons-container');
-    if (container) {
-        const buttons = container.querySelectorAll('button');
-        let maxHeight = 0;
-        
-        // Find the tallest button
-        buttons.forEach(button => {
-            const height = button.offsetHeight;
-            if (height > maxHeight) maxHeight = height;
-        });
-        
-        // Set all buttons to the max height
-        buttons.forEach(button => {
-            button.style.height = maxHeight + 'px';
-        });
-    }
-}, 100);
-</script>
-""", unsafe_allow_html=True)
+    
+    st.markdown('<div style="margin: 15px 0; border-top: 1px solid #e0e0e0;"></div>', unsafe_allow_html=True)
+    
+    if st.button("Help & Documentation", key="sidebar_nav_help", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Help' else "secondary"):
+        st.session_state.current_page = 'Help'
+        st.rerun()
+    
+    # Footer with version
+    st.markdown("""
+    <div style="text-align: center; padding: 20px 10px; margin-top: 30px; border-top: 1px solid #e0e0e0; font-size: 10px; color: #999;">
+        <div>Version 2.4</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Display current page indicator
 current_page_info = {
@@ -847,7 +890,8 @@ current_page_info = {
     'Executive_Deep_Dive': {'icon': '📊', 'title': 'Executive Dive'},
     'Comparison_Tool': {'icon': '🔄', 'title': 'Comparison Tool'},
     'Marketing_Analysis': {'icon': '📢', 'title': 'Marketing Analysis'},
-    'Database': {'icon': '🗄️', 'title': 'Data Explorer'}
+    'Database': {'icon': '🗄️', 'title': 'Data Explorer'},
+    'Help': {'icon': '📖', 'title': 'Help & Documentation'}
 }
 
 current_info = current_page_info[st.session_state.current_page]
@@ -870,16 +914,6 @@ if st.session_state.current_page == 'Home':
         st.session_state.home_funnel_log_scale = False
     
     # Section header for filters
-    st.markdown("""
-    <div style="text-align: center;
-                padding: 15px;
-                background: #e9ecef;
-                border-radius: 8px;
-                margin: 20px 0;">
-        <h3 style="color: #500000; margin: 0; font-size: 20px;">🎓 Select Cohort and Program for Analysis</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    
     # Two-column filter layout
     col_cohort, col_program = st.columns(2)
     
@@ -905,23 +939,6 @@ if st.session_state.current_page == 'Home':
             key=f"program_select_home_{st.session_state.home_reset_count}"
         )
     
-    # Info box centered
-    st.markdown(f"""
-    <div style="background: #f0f8ff;
-                padding: 15px;
-                border-radius: 8px;
-                margin: 15px 0;
-                text-align: center;">
-        <strong style="color: #500000; font-size: 16px;">📊 Analyzing Class of {selected_cohort}{' - ' + selected_program if selected_program != 'All Programs' else ''}</strong><br>
-        <span style="color: #495057; font-size: 14px;">
-            All metrics below are specific to this cohort{' and program' if selected_program != 'All Programs' else ''}.<br>
-            Use the Executive Deep Dive for detailed year-over-year comparisons.
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
     # Load data for selected cohort
     conn = get_connection()
     query = 'SELECT * FROM admissions_metrics WHERE cohort_year = ? ORDER BY report_date, program'
@@ -1505,16 +1522,6 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
     # EXECUTIVE DEEP DIVE CONTENT
     
     # Section header for filters
-    st.markdown("""
-    <div style="text-align: center;
-                padding: 15px;
-                background: #e9ecef;
-                border-radius: 8px;
-                margin: 20px 0;">
-        <h3 style="color: #500000; margin: 0; font-size: 20px;">🎓 Select Cohort and Program for Analysis</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    
     # Two-column filter layout
     col_cohort, col_program = st.columns(2)
 
@@ -2550,7 +2557,7 @@ elif st.session_state.current_page == 'Comparison_Tool':
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("**Primary Cohort**")
+        st.markdown("**🎓 Primary Cohort**")
         cohort_options = [2028, 2027, 2026]
         primary_cohort = st.selectbox(
             "Primary Cohort",
@@ -2561,7 +2568,7 @@ elif st.session_state.current_page == 'Comparison_Tool':
         )
     
     with col2:
-        st.markdown("**Comparison Cohort**")
+        st.markdown("**🔄 Comparison Cohort**")
         comparison_cohorts = [c for c in cohort_options if c != primary_cohort]
         if comparison_cohorts:
             comparison_cohort = st.selectbox(
@@ -2575,7 +2582,7 @@ elif st.session_state.current_page == 'Comparison_Tool':
             comparison_cohort = None
     
     with col3:
-        st.markdown("**Program Filter**")
+        st.markdown("**📚 Program Filter**")
         programs_df = load_programs()
         program_options = ['All Programs'] + sorted(programs_df['program_code'].tolist())
         program_filter_comp = st.selectbox(
@@ -3293,8 +3300,6 @@ elif st.session_state.current_page == 'Marketing_Analysis':
         }
         </style>
         """, unsafe_allow_html=True)
-        
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         
         # Initialize independent reset counters for each filter
         if 'fy_reset_count' not in st.session_state:
@@ -4871,11 +4876,11 @@ elif st.session_state.current_page == 'Database':
         st.error(f"Database connection error: {str(e)}")
         st.info("Please check if the database file exists and is accessible.")
 
-# Footer with Print Button
-# Add print-specific CSS - simplified approach with proper margins
-st.markdown("""
-<style>
-@media print {
+    # Footer with Print Button
+    # Add print-specific CSS - simplified approach with proper margins
+    st.markdown("""
+    <style>
+    @media print {
     /* Hide Streamlit UI */
     header[data-testid="stHeader"],
     div[data-testid="stToolbar"],
@@ -5014,6 +5019,531 @@ st.markdown("""
         margin: 1.5cm 1cm;
         size: A4 portrait;
     }
-}
-</style>
-""", unsafe_allow_html=True)
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+elif st.session_state.current_page == 'Help':
+    # HELP & DOCUMENTATION PAGE
+    
+    # Center-aligned welcome section
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); 
+                padding: 30px; 
+                border-radius: 10px; 
+                margin-bottom: 30px;
+                text-align: center;">
+        <h2 style="color: #500000; margin: 0 0 15px 0;">Welcome to the Analytics Platform</h2>
+        <p style="color: #495057; font-size: 16px; line-height: 1.6; margin: 0;">
+            Your comprehensive analytics platform for Mays Business School's Flex Online Programs. 
+            This guide will help you understand how to use each feature to make data-driven decisions 
+            about admissions, marketing, and program performance.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Key Questions This Platform Answers - centered header
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Key Questions This Platform Answers</h3>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 100%;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Enrollment Questions</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <li>Are we on track to meet our cohort size goals?</li>
+                <li>Which programs are over/under-performing?</li>
+                <li>How do conversion rates compare to last year?</li>
+                <li>Where are we losing applicants in the funnel?</li>
+                <li>What's our inquiry-to-enrollment conversion rate?</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 100%;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Marketing Questions</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <li>What's our cost per inquiry and application?</li>
+                <li>Which marketing channels deliver the best ROI?</li>
+                <li>How should we allocate next year's budget?</li>
+                <li>Are we spending efficiently across programs?</li>
+                <li>What's the trend in our marketing effectiveness?</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Custom Chrome-style tab styling
+    st.markdown("""
+    <style>
+    /* Chrome-style tabs for Help page */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: transparent;
+        justify-content: center;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        gap: 1px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 15px;
+        padding-right: 15px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        border-bottom: none;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: white;
+        color: #500000;
+        font-weight: 600;
+        border-top: 3px solid #500000;
+        border-left: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid white;
+    }
+    
+    .stTabs [data-baseweb="tab-panel"] {
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0 0 8px 8px;
+        padding: 25px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Page-by-Page Guide with Marketing Analysis style tabs - shorter labels
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Page-by-Page Guide</h3>", unsafe_allow_html=True)
+    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Home", 
+        "Executive", 
+        "Compare", 
+        "Marketing", 
+        "Database"
+    ])
+    
+    with tab1:
+        st.markdown("""
+        **Purpose**: Get a quick snapshot of current cohort performance
+        
+        **Best For**:
+        - Daily check-ins on enrollment progress
+        - Quick program comparisons
+        - Sharing high-level updates with stakeholders
+        
+        **How to Use**:
+        1. **Select Cohort**: Choose the class year you want to analyze (2026, 2027, or 2028)
+        2. **Filter by Program**: View all programs or focus on a specific one
+        3. **Review Key Metrics**: See total enrolled, applications, inquiries, and conversion rates
+        4. **Check the Funnel**: Visual flow from inquiries → applications → enrollment
+        5. **Compare Programs**: Side-by-side bar charts show which programs are performing best
+        
+        **Key Metrics Explained**:
+        - **Enrolled**: Students who have accepted admission and enrolled
+        - **Applications**: Complete applications received
+        - **Inquiries**: Initial interest expressed (top of funnel)
+        - **Conversion Rate**: % of inquiries that become enrolled students
+        
+        **Pro Tip**: Use this page for weekly leadership meetings - it's designed for quick updates!
+        """)
+    
+    with tab2:
+        st.markdown("""
+        **Purpose**: Comprehensive analysis of cohort performance with interactive visualizations
+        
+        **Best For**:
+        - Monthly performance reviews
+        - Identifying trends and patterns
+        - Program-specific deep dives
+        - Preparing board presentations
+        
+        **Four Analysis Tabs**:
+        
+        **1. Performance Analysis**
+        - Key performance indicators with year-over-year comparisons
+        - Admissions funnel visualization
+        - Program comparison charts
+        - Growth metrics and trend indicators
+        
+        **2. Trend Analysis**
+        - Time-series charts showing how metrics evolve
+        - Application and inquiry trends over time
+        - Conversion rate tracking
+        - Toggle buttons to show/hide specific metrics
+        
+        **3. Program Deep Dive**
+        - 11 Application metrics (inquiries, applications in progress, complete, etc.)
+        - 9 Admissions metrics (offered, accepted, denied, enrolled, etc.)
+        - Switch between Line and Bar charts
+        - Log scale option for wide-ranging values
+        - Data labels on all points
+        
+        **4. Data Tables**
+        - Complete metric breakdowns
+        - Program-level details
+        - CSV export for further analysis
+        - Sortable columns
+        
+        **Pro Tip**: Use the Program Deep Dive tab to understand exactly where applicants are in the pipeline!
+        """)
+    
+    with tab3:
+        st.markdown("""
+        **Purpose**: Compare two cohorts side-by-side with statistical analysis
+        
+        **Best For**:
+        - Annual planning and goal setting
+        - Understanding year-over-year growth
+        - Identifying successful strategies to replicate
+        - Budget justification with data
+        
+        **How to Use**:
+        1. **Select Primary Cohort**: Choose your main cohort (e.g., Class of 2028)
+        2. **Select Comparison Cohort**: Choose the cohort to compare against (e.g., Class of 2027)
+        3. **Filter by Program**: Focus on specific program or view all
+        4. **Review Comparison Table**: See all metrics side-by-side with % change
+        5. **Explore Time Series**: Click metric selectors to see trends over time
+        6. **Export Data**: Download comparison tables for presentations
+        
+        **Understanding the Statistics**:
+        - **Absolute Change**: Simple difference between cohorts (Primary - Comparison)
+        - **% Change**: Percentage growth or decline
+        - **Variance**: Measure of spread between the two values
+        - **Standard Deviation**: How much the values differ from their average
+        - **Coefficient of Variation**: Relative variability (useful for comparing different metrics)
+        - **Performance Indicator**: Growth, Decline, or Stable
+        
+        **Smart Features**:
+        - Automatically excludes metrics where both cohorts have zero values
+        - Shows "N/A" for % change when comparison cohort has no data
+        - Descriptive messages for edge cases (e.g., "New Metric - Strong Growth")
+        
+        **Pro Tip**: Use this for annual reviews to show leadership how programs are trending!
+        """)
+    
+    with tab4:
+        st.markdown("""
+        **Purpose**: Analyze marketing spend effectiveness and channel performance
+        
+        **Best For**:
+        - Budget planning and allocation
+        - ROI analysis and optimization
+        - Channel performance comparison
+        - Marketing strategy decisions
+        
+        **Global Filters** (Apply to All Tabs):
+        - **Fiscal Year**: Filter by FY25, FY26, etc.
+        - **Program**: Focus on specific program or view all
+        - **Channel**: Filter by Search, Display, LinkedIn, Meta, YouTube, etc.
+        
+        **Four Analysis Tabs**:
+        
+        **1. Overview Tab**
+        - Total spend and key ROI metrics
+        - Cost per Inquiry (CPI) and Cost per Application (CPA)
+        - Spend by program (bar chart with log scale)
+        - Spend by channel (pie and bar charts)
+        - Quick snapshot of marketing performance
+        
+        **2. Advanced Analytics Tab**
+        - Detailed ROI metrics: CPI, CPA, Cost per Admission, Conversion Rate
+        - Spend vs Outcomes Trend: Correlate spend with inquiries, applications, admissions
+        - Program-by-program ROI comparison table
+        - Deep-dive analysis connecting spend to outcomes
+        
+        **3. Channel Analytics Tab**
+        - Channel-focused performance analysis
+        - Spend distribution across channels
+        - Monthly trend lines for each channel
+        - Performance summary table
+        
+        **4. Incremental Notes Tab**
+        - Document campaign changes and special events
+        - Track performance anomalies
+        - Searchable notes database
+        - Historical context for data analysis
+        
+        **Key Metrics Explained**:
+        - **CPI (Cost per Inquiry)**: Marketing spend ÷ Number of inquiries
+        - **CPA (Cost per Application)**: Marketing spend ÷ Number of applications
+        - **CPAd (Cost per Admission)**: Marketing spend ÷ Number of admissions
+        - **Conversion Rate**: (Applications ÷ Inquiries) × 100
+        
+        **Pro Tip**: Use the Advanced Analytics tab to justify marketing budget increases with ROI data!
+        """)
+    
+    with tab5:
+        st.markdown("""
+        **Purpose**: Access and export raw data for custom analysis
+        
+        **Best For**:
+        - Creating custom reports
+        - Exporting data to Excel/PowerPoint
+        - Detailed data validation
+        - Ad-hoc analysis
+        
+        **Seven Database Tables**:
+        1. **Admissions Matrix**: All admissions metrics by cohort, program, and date
+        2. **Inquiry Sources**: Where inquiries come from (future use)
+        3. **Marketing Campaigns**: Campaign-level tracking (future use)
+        4. **Marketing Spend**: Monthly spend by program and channel
+        5. **Marketing Spend Totals**: Aggregated spend metrics
+        6. **Metadata Programs**: Program codes and names
+        7. **SQLite Sequence**: System table
+        
+        **Advanced Features**:
+        - **Column Selection**: Choose which columns to display
+        - **Row Limits**: View 10, 25, 50, 100, 500, or all rows
+        - **Sort**: Click column headers to sort ascending/descending
+        - **Search**: Filter across all columns with text search
+        - **Statistics**: Quick stats for numeric columns
+        - **Export**: Download filtered data as CSV
+        
+        **Pro Tip**: Export data to Excel for custom pivot tables and charts!
+        """)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Common Workflows - centered
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Common Workflows</h3>", unsafe_allow_html=True)
+    
+    workflow_col1, workflow_col2 = st.columns(2)
+    
+    with workflow_col1:
+        st.markdown("""
+        <div style="background: #f0f8ff; padding: 20px; border-radius: 8px;">
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Weekly Check-In</h4>
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <li>Open <strong>Home Dashboard</strong></li>
+                <li>Select current cohort (e.g., Class of 2028)</li>
+                <li>Review key metrics vs. goals</li>
+                <li>Check program comparison chart</li>
+                <li>Note any programs needing attention</li>
+                <li>Share screenshot with team</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: #fff8f0; padding: 20px; border-radius: 8px;">
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Budget Planning</h4>
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <li>Open <strong>Marketing Analysis</strong></li>
+                <li>Go to <strong>Advanced Analytics</strong> tab</li>
+                <li>Review CPI, CPA, and ROI metrics</li>
+                <li>Check <strong>Channel Analytics</strong> tab</li>
+                <li>Identify best-performing channels</li>
+                <li>Export data for budget proposal</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with workflow_col2:
+        st.markdown("""
+        <div style="background: #f0fff0; padding: 20px; border-radius: 8px;">
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Monthly Review</h4>
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <li>Open <strong>Executive Dive</strong></li>
+                <li>Select cohort and program</li>
+                <li>Review <strong>Performance Analysis</strong> tab</li>
+                <li>Check <strong>Trend Analysis</strong> for patterns</li>
+                <li>Use <strong>Program Deep Dive</strong> for details</li>
+                <li>Export data tables for records</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: #fff0f8; padding: 20px; border-radius: 8px;">
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Annual Planning</h4>
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <li>Open <strong>Comparison Tool</strong></li>
+                <li>Compare current vs. previous year</li>
+                <li>Review % change for all metrics</li>
+                <li>Identify growth opportunities</li>
+                <li>Set goals based on trends</li>
+                <li>Export comparison table</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Tips & Best Practices - centered
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Tips & Best Practices</h3>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 2px solid #C5A572;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4 style="color: #500000; margin: 0 0 10px 0;">Do's</h4>
+                <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+                    <li>Check data regularly (weekly minimum)</li>
+                    <li>Compare year-over-year trends</li>
+                    <li>Export data for presentations</li>
+                    <li>Use filters to focus analysis</li>
+                    <li>Hover over charts for exact values</li>
+                    <li>Share insights with your team</li>
+                    <li>Track marketing ROI monthly</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #500000; margin: 0 0 10px 0;">Don'ts</h4>
+                <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+                    <li>Don't ignore declining trends</li>
+                    <li>Don't compare incomplete data</li>
+                    <li>Don't make decisions on single data points</li>
+                    <li>Don't forget to check "Last Updated" date</li>
+                    <li>Don't overlook small programs</li>
+                    <li>Don't skip the "How to Use" guides</li>
+                    <li>Don't hesitate to export and explore</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Data Understanding - using separate divs with consistent styling
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Understanding Your Data</h3>", unsafe_allow_html=True)
+    
+    # Data Coverage
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); 
+                padding: 25px; 
+                border-radius: 8px 8px 0 0; 
+                border: 1px solid #e0e0e0;
+                border-bottom: none;">
+        <h4 style="color: #500000; margin: 0 0 15px 0;">Data Coverage</h4>
+        <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0;">
+            <li><strong>Admissions Data</strong>: January 2024 - December 2025 (2,037 records)</li>
+            <li><strong>Marketing Data</strong>: September 2024 - June 2025 (FY25 Year 1)</li>
+            <li><strong>Programs</strong>: MBA, MS ACCT, MS ENLD, MS HRM, MS MISY, MS MKTG, MS SPBA</li>
+            <li><strong>Cohorts</strong>: Class of 2026, 2027, 2028</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Important Notes
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); 
+                padding: 25px; 
+                border-left: 1px solid #e0e0e0;
+                border-right: 1px solid #e0e0e0;">
+        <h4 style="color: #500000; margin: 0 0 15px 0;">Important Notes</h4>
+        <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0;">
+            <li><strong>Cumulative Data</strong>: All metrics are cumulative within a cohort year</li>
+            <li><strong>Monthly Reports</strong>: Dates represent the last day of the reporting month</li>
+            <li><strong>Missing Data</strong>: Blank values indicate data not yet available (not zero)</li>
+            <li><strong>Campaign Matrix</strong>: "- NA -" means campaign was not active for that program/month</li>
+            <li><strong>Marketing Spend</strong>: "No Ad Spend" entries are treated as NULL (not zero)</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Key Metrics Definitions
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); 
+                padding: 25px; 
+                border-radius: 0 0 8px 8px; 
+                border: 1px solid #e0e0e0;
+                border-top: none;">
+        <h4 style="color: #500000; margin: 0 0 15px 0;">Key Metrics Definitions</h4>
+        <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0;">
+            <li><strong>Inquiries</strong>: Initial interest expressed (top of funnel)</li>
+            <li><strong>Applications</strong>: Complete applications received</li>
+            <li><strong>Admissions Offered</strong>: Offers extended to applicants</li>
+            <li><strong>Admissions Accepted</strong>: Offers accepted by applicants</li>
+            <li><strong>Enrolled</strong>: Students who have enrolled in the program</li>
+            <li><strong>Anticipated Cohort Size</strong>: Expected final enrollment (most important metric!)</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Troubleshooting - with proper boxes
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Troubleshooting</h3>", unsafe_allow_html=True)
+    
+    trouble_col1, trouble_col2 = st.columns(2)
+    
+    with trouble_col1:
+        st.markdown("""
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; min-height: 300px;">
+            <h4 style="color: #500000; margin: 0 0 20px 0; text-align: center;">Common Issues</h4>
+            <div style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <p style="margin-bottom: 15px;">
+                    <strong>Q: Why is my data not showing?</strong><br>
+                    <span style="color: #666;">A: Check the 'Last Updated' date in the sidebar. Data may need to be refreshed.</span>
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>Q: Why do some metrics show 'N/A'?</strong><br>
+                    <span style="color: #666;">A: This means there is no comparison data available.</span>
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>Q: Why are some programs missing?</strong><br>
+                    <span style="color: #666;">A: Programs may not have data for the selected time period or cohort.</span>
+                </p>
+                <p style="margin-bottom: 0;">
+                    <strong>Q: Charts not loading?</strong><br>
+                    <span style="color: #666;">A: Try refreshing the page or clearing your browser cache.</span>
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with trouble_col2:
+        st.markdown("""
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; min-height: 300px;">
+            <h4 style="color: #500000; margin: 0 0 20px 0; text-align: center;">Need Help?</h4>
+            <div style="font-size: 14px; line-height: 1.8; color: #495057;">
+                <p style="margin-bottom: 20px;">
+                    <strong>Contact:</strong><br>
+                    Tirth Shah<br>
+                    tirth.shah@tamu.edu
+                </p>
+                <p style="margin-bottom: 0;">
+                    <strong>Platform Version:</strong> 2.4<br>
+                    <strong>Last Updated:</strong> January 23, 2026
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Footer
+    st.markdown("""
+    <div style="text-align: center; 
+                padding: 30px; 
+                background: linear-gradient(135deg, #500000 0%, #700000 100%); 
+                border-radius: 10px; 
+                color: white;
+                margin-top: 30px;">
+        <h3 style="color: white; margin: 0 0 15px 0;">Mays Flex Online Programs</h3>
+        <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+            Analytics Platform for Data-Driven Decisions
+        </p>
+        <p style="margin: 15px 0 0 0; font-size: 12px; opacity: 0.7;">
+            © 2026 Texas A&M Mays Business School | Version 2.4
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
