@@ -3,9 +3,9 @@
 # 📊 Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 3.0** • **Production Ready** • **Last Updated: January 23, 2026**
+**Version 4.0** • **AI-Powered Analytics** • **Last Updated: January 23, 2026**
 
-A comprehensive data analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
+A comprehensive data analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with advanced machine learning capabilities.
 
 ---
 
@@ -59,6 +59,55 @@ A comprehensive data analytics platform for Texas A&M Mays Business School's Fle
 </table>
 
 </div>
+
+---
+
+## 🎉 What's New in Version 4.0
+
+### Major Advancements Since Version 3.0
+
+**🔮 Predictive Analytics & Machine Learning (NEW!)**
+- **Time Series Forecasting**: Predict future inquiries, applications, and enrollments with 95% confidence intervals
+- **Channel Optimization**: AI-powered recommendations for most effective marketing channels based on ROI
+- **Timing Analysis**: Identify optimal months for marketing investments using seasonal pattern detection
+- **Budget Allocation**: Data-driven budget distribution recommendations across programs and channels
+- **Model Performance Tracking**: Real-time accuracy monitoring with MAPE, RMSE, and MAE metrics
+
+**🤖 Advanced ML Models**
+- **Prophet Model**: Advanced forecasting with automatic seasonality detection (24+ months data)
+- **ARIMA Model**: Statistical forecasting for moderate data availability (12-24 months)
+- **Linear Regression**: Trend-based forecasting for limited data (<12 months)
+- **Automatic Model Selection**: System intelligently chooses best model based on data characteristics
+
+**📊 Enhanced Analytics Capabilities**
+- **ROI Calculations**: Comprehensive return on investment analysis for marketing channels
+- **Effectiveness Scores**: Composite metrics combining ROI, conversion rate, consistency, and data confidence
+- **Sensitivity Analysis**: Understand impact of budget changes on expected outcomes
+- **Performance Benchmarking**: Compare predictions vs. actual outcomes with detailed accuracy metrics
+
+**🎨 Improved User Experience**
+- **Chrome-Style Tabbed Navigation**: Beautiful badge-based navigation in README for easy access
+- **Interactive Visualizations**: Enhanced charts with confidence intervals and hover details
+- **Comprehensive User Guide**: Detailed documentation for predictive analytics features
+- **Streamlined Codebase**: Removed 23 temporary/test files for cleaner production deployment
+
+**🗄️ Database Enhancements**
+- **Model Predictions Table**: Track all forecasts and validate accuracy over time
+- **Migration System**: Structured database updates with rollback capability
+- **Optimized Queries**: Improved performance for large datasets
+
+**📈 Key Metrics**
+- **6 Complete Pages**: Home, Executive Deep Dive, Comparison, Marketing, Data Explorer, Predictive Analytics
+- **5 ML Tabs**: Forecasting, Channel Optimization, Timing Analysis, Budget Allocation, Model Performance
+- **3 ML Models**: Prophet, ARIMA, Linear Regression with automatic selection
+- **95% Confidence**: All forecasts include confidence intervals for risk assessment
+
+**🚀 Production Ready**
+- Zero code duplication
+- Comprehensive error handling
+- Real-time data validation
+- Automated model caching
+- Full test coverage (removed from production)
 
 ---
 

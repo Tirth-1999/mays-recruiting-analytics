@@ -4,7 +4,7 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "3.0"
+VERSION = "4.0"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
@@ -14,5 +14,5 @@ VERSION_SHORT = f"v{VERSION}"
 LAST_UPDATED = "January 23, 2026"
 
 # Version metadata
-VERSION_NAME = "Major Architecture Overhaul"
-VERSION_STATUS = "Production Ready - Fully Modular Architecture"
+VERSION_NAME = "Predictive Analytics & ML Integration"
+VERSION_STATUS = "Production Ready - AI-Powered Analytics Platform"
