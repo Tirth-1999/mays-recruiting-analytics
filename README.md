@@ -7,56 +7,12 @@
 
 A comprehensive data analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with advanced machine learning capabilities.
 
----
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-4.0-blue.svg)](CHANGELOG.md)
+[![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io/)
 
-### 🗂️ Navigate by Tab
-
-<table>
-<tr>
-<td align="center" width="14.28%">
-<a href="#-quick-start">
-<img src="https://img.shields.io/badge/🚀_Quick_Start-500000?style=for-the-badge" alt="Quick Start"/>
-</a>
-</td>
-<td align="center" width="14.28%">
-<a href="#-home-dashboard">
-<img src="https://img.shields.io/badge/🏠_Home-500000?style=for-the-badge" alt="Home Dashboard"/>
-</a>
-</td>
-<td align="center" width="14.28%">
-<a href="#-executive-deep-dive">
-<img src="https://img.shields.io/badge/📊_Executive-500000?style=for-the-badge" alt="Executive Deep Dive"/>
-</a>
-</td>
-<td align="center" width="14.28%">
-<a href="#-comparison-tool">
-<img src="https://img.shields.io/badge/🔄_Compare-500000?style=for-the-badge" alt="Comparison Tool"/>
-</a>
-</td>
-</tr>
-<tr>
-<td align="center" width="14.28%">
-<a href="#-marketing-analysis">
-<img src="https://img.shields.io/badge/📢_Marketing-500000?style=for-the-badge" alt="Marketing Analysis"/>
-</a>
-</td>
-<td align="center" width="14.28%">
-<a href="#️-data-explorer">
-<img src="https://img.shields.io/badge/🗄️_Data-500000?style=for-the-badge" alt="Data Explorer"/>
-</a>
-</td>
-<td align="center" width="14.28%">
-<a href="#-predictive-analytics">
-<img src="https://img.shields.io/badge/🔮_Predictive-500000?style=for-the-badge" alt="Predictive Analytics"/>
-</a>
-</td>
-<td align="center" width="14.28%">
-<a href="#️-configuration">
-<img src="https://img.shields.io/badge/⚙️_Config-500000?style=for-the-badge" alt="Configuration"/>
-</a>
-</td>
-</tr>
-</table>
+[Quick Start](docs/QUICK_START.md) • [Changelog](CHANGELOG.md) • [Security](SECURITY.md) • [Contributing](CODE_OF_CONDUCT.md)
 
 </div>
 
