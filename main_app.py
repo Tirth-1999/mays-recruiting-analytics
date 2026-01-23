@@ -157,7 +157,7 @@ st.markdown("""
             Admissions Analytics & Strategic Insights
         </p>
         <p style='color: white; margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;'>
-            MBA • MS ACCT • MS HRM • MS MISY • MS MKTG • MS ENLD • MS SPBA
+            MBA • ACCT • HRM • MISY • MKTG • ENLD • SPBA
         </p>
     </div>
 """, unsafe_allow_html=True)
