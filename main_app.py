@@ -1545,42 +1545,29 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     
-    # How to Use This Section
-    st.markdown("""
-    <div style="text-align: center;
-                padding: 15px;
-                background: #e9ecef;
-                border-radius: 8px;
-                margin: 20px 0;">
-        <h3 style="color: #500000; margin: 0 0 15px 0; font-size: 20px;">
-            💡 How to Use This Section
-        </h3>
-        <div style="background: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin-top: 15px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057; text-align: left;">
-                <div>
-                    <strong style="color: #500000;">📊 Navigation & Filters:</strong>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li><strong>Primary Cohort:</strong> Select the class year you want to analyze</li>
-                        <li><strong>Program Focus:</strong> Filter by specific program or view all programs</li>
-                        <li><strong>Four Tabs:</strong> Navigate between Performance, Trends, Programs, and Data Tables</li>
-                    </ul>
-                </div>
-                <div>
-                    <strong style="color: #500000;">🎯 Interactive Features:</strong>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li><strong>Toggle Buttons:</strong> Show/hide specific metrics on charts</li>
-                        <li><strong>Log Scale:</strong> Switch between linear and logarithmic scales for better visualization</li>
-                        <li><strong>Hover Details:</strong> Move mouse over charts for exact values and insights</li>
-                        <li><strong>Export Data:</strong> Download tables and charts for further analysis</li>
-                    </ul>
-                </div>
+    # How to Use This Section - Collapsible
+    with st.expander("💡 How to Use This Section", expanded=False):
+        st.markdown("""
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057;">
+            <div>
+                <strong style="color: #500000;">📊 Navigation & Filters:</strong>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li><strong>Primary Cohort:</strong> Select the class year you want to analyze</li>
+                    <li><strong>Program Focus:</strong> Filter by specific program or view all programs</li>
+                    <li><strong>Four Tabs:</strong> Navigate between Performance, Trends, Programs, and Data Tables</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color: #500000;">🎯 Interactive Features:</strong>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li><strong>Toggle Buttons:</strong> Show/hide specific metrics on charts</li>
+                    <li><strong>Log Scale:</strong> Switch between linear and logarithmic scales for better visualization</li>
+                    <li><strong>Hover Details:</strong> Move mouse over charts for exact values and insights</li>
+                    <li><strong>Export Data:</strong> Download tables and charts for further analysis</li>
+                </ul>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -1840,91 +1827,96 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
         tab1, tab2, tab3, tab4 = st.tabs(["📊 Performance Analysis", "📈 Trend Analysis", "🎓 Program Deep Dive", "📋 Data Tables"])
         
         with tab1:
-            col1, col2 = st.columns(2)
+            # Complete conversion funnel with log scale toggle - FULL WIDTH
+            st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Complete Conversion Funnel</h4>", unsafe_allow_html=True)
             
-            with col1:
-                # Complete conversion funnel
-                st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Complete Conversion Funnel</h4>", unsafe_allow_html=True)
-                
-                # Initialize log scale state for full deep dive funnel
-                if 'exec_full_funnel_log' not in st.session_state:
-                    st.session_state.exec_full_funnel_log = False
-                
-                # Log scale toggle
-                col_spacer1, col_toggle, col_spacer2 = st.columns([2, 1, 2])
-                with col_toggle:
-                    if st.button(
-                        f"📊 {'Log' if st.session_state.exec_full_funnel_log else 'Linear'} Scale",
-                        key="toggle_log_full_funnel",
-                        use_container_width=True,
-                        type="secondary"
-                    ):
-                        st.session_state.exec_full_funnel_log = not st.session_state.exec_full_funnel_log
-                        st.rerun()
-                
-                funnel_data = [inquiries, applications, complete, offers, accepted, enrolled]
-                funnel_labels = ['Inquiries', 'Applications', 'Complete Apps', 'Offers', 'Accepted', 'Enrolled']
-                
-                if st.session_state.exec_full_funnel_log:
-                    # Use bar chart with log scale
-                    fig = go.Figure(go.Bar(
-                        x=funnel_labels,
-                        y=funnel_data,
-                        marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]},
-                        text=funnel_data,
-                        texttemplate='%{text:,.0f}',
-                        textposition='outside',
-                        hovertemplate='<b>%{x}</b><br>Count: %{y:,.0f}<extra></extra>'
-                    ))
-                    fig.update_layout(
-                        height=500,
-                        showlegend=False,
-                        yaxis_type='log',
-                        yaxis_title='Count (Log Scale)',
-                        xaxis_title='Stage',
-                        margin=dict(t=80, b=50, l=50, r=50)
-                    )
-                else:
-                    # Use funnel chart
-                    fig = go.Figure(go.Funnel(
-                        y=funnel_labels,
-                        x=funnel_data,
-                        textinfo="value+percent initial",
-                        marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]}
-                    ))
-                    fig.update_layout(height=500)
-                st.plotly_chart(fig, use_container_width=True)
+            # Initialize log scale state for full deep dive funnel
+            if 'exec_full_funnel_log' not in st.session_state:
+                st.session_state.exec_full_funnel_log = False
             
-            with col2:
-                # Performance metrics radar chart
-                st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Performance Radar</h4>", unsafe_allow_html=True)
-                
-                metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
-                values = [
-                    conversion_1,
-                    (complete / applications * 100) if applications > 0 else 0,
-                    conversion_2,
-                    yield_rate,
-                    overall_conversion
-                ]
-                
-                fig = go.Figure()
-                fig.add_trace(go.Scatterpolar(
-                    r=values,
-                    theta=metrics,
-                    fill='toself',
-                    name='Performance',
-                    line_color='#500000'
+            # Log scale toggle button - centered
+            col_spacer1, col_toggle, col_spacer2 = st.columns([2, 1, 2])
+            with col_toggle:
+                toggle_label = "📊 Linear Scale" if st.session_state.exec_full_funnel_log else "📊 Log Scale"
+                if st.button(
+                    toggle_label,
+                    key="toggle_log_full_funnel",
+                    use_container_width=True,
+                    type="primary" if st.session_state.exec_full_funnel_log else "secondary"
+                ):
+                    st.session_state.exec_full_funnel_log = not st.session_state.exec_full_funnel_log
+                    st.rerun()
+            
+            funnel_data = [inquiries, applications, complete, offers, accepted, enrolled]
+            funnel_labels = ['Inquiries', 'Applications', 'Complete Apps', 'Offers', 'Accepted', 'Enrolled']
+            
+            if st.session_state.exec_full_funnel_log:
+                # Use bar chart with log scale
+                fig = go.Figure(go.Bar(
+                    x=funnel_labels,
+                    y=funnel_data,
+                    marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]},
+                    text=funnel_data,
+                    texttemplate='%{text:,.0f}',
+                    textposition='outside',
+                    hovertemplate='<b>%{x}</b><br>Count: %{y:,.0f}<extra></extra>'
                 ))
                 fig.update_layout(
-                    polar=dict(
-                        radialaxis=dict(
-                            visible=True,
-                            range=[0, 100]
-                        )),
-                    height=500
+                    height=500,
+                    showlegend=False,
+                    yaxis_type='log',
+                    yaxis_title='Count (Log Scale)',
+                    xaxis_title='Stage',
+                    margin=dict(t=80, b=50, l=80, r=80)
                 )
-                st.plotly_chart(fig, use_container_width=True)
+            else:
+                # Use funnel chart
+                fig = go.Figure(go.Funnel(
+                    y=funnel_labels,
+                    x=funnel_data,
+                    textinfo="value+percent initial",
+                    marker={"color": ["#500000", "#600000", "#700000", "#800000", "#900000", "#B00000"]}
+                ))
+                fig.update_layout(
+                    height=500,
+                    margin=dict(t=50, b=50, l=80, r=80)
+                )
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Divider between charts
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            
+            # Performance metrics radar chart - FULL WIDTH
+            st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Performance Radar</h4>", unsafe_allow_html=True)
+            
+            metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
+            values = [
+                conversion_1,
+                (complete / applications * 100) if applications > 0 else 0,
+                conversion_2,
+                yield_rate,
+                overall_conversion
+            ]
+            
+            fig = go.Figure()
+            fig.add_trace(go.Scatterpolar(
+                r=values,
+                theta=metrics,
+                fill='toself',
+                name='Performance',
+                line_color='#500000',
+                fillcolor='rgba(80, 0, 0, 0.3)'
+            ))
+            fig.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100]
+                    )),
+                height=500,
+                margin=dict(t=50, b=50, l=80, r=80)
+            )
+            st.plotly_chart(fig, use_container_width=True)
             
             # Add Correlation Matrix and Performance Benchmarks to Performance Analysis
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -1959,8 +1951,38 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
             
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
-            # Performance benchmarks - centered
+            # Performance benchmarks - full width stretched layout with center alignment
             st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Performance Benchmarks</h4>", unsafe_allow_html=True)
+            
+            # Add CSS to center-align metrics while preserving styling
+            st.markdown("""
+            <style>
+            [data-testid="stMetric"] {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            [data-testid="stMetricLabel"] {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+            [data-testid="stMetricLabel"] > div {
+                text-align: center;
+            }
+            [data-testid="stMetricValue"] {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+            [data-testid="stMetricDelta"] {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+            </style>
+            """, unsafe_allow_html=True)
             
             benchmarks = {
                 'Inquiry Conversion': {'value': conversion_1, 'benchmark': 30, 'unit': '%'},
@@ -1968,7 +1990,8 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
                 'Application Completion': {'value': (complete / applications * 100) if applications > 0 else 0, 'benchmark': 80, 'unit': '%'}
             }
             
-            col1, col2, col3 = st.columns(3)
+            # Use columns with no gap and custom spacing
+            col1, col2, col3 = st.columns([1, 1, 1])
             for idx, (metric, data) in enumerate(benchmarks.items()):
                 with [col1, col2, col3][idx]:
                     performance = "🟢 Above" if data['value'] > data['benchmark'] else "🟡 At" if abs(data['value'] - data['benchmark']) < 5 else "🔴 Below"
@@ -2276,21 +2299,23 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
                     
                     fig_app.update_layout(
                         title='Applications Metrics Over Time',
-                        height=550,
+                        height=600,
                         xaxis_title='Date',
                         yaxis_title='Count',
                         yaxis_type='log' if st.session_state.exec_app_log else 'linear',
                         legend=dict(
                             orientation='h',
-                            yanchor='top',
-                            y=-0.25,
+                            yanchor='bottom',
+                            y=-0.35,
                             xanchor='center',
                             x=0.5,
                             bgcolor='rgba(255,255,255,0.9)',
                             bordercolor='rgba(0,0,0,0.3)',
-                            borderwidth=1
+                            borderwidth=1,
+                            font=dict(size=11),
+                            itemwidth=30
                         ),
-                        margin=dict(b=140, t=50)
+                        margin=dict(b=180, t=50, l=40, r=40)
                     )
                     st.plotly_chart(fig_app, use_container_width=True)
                 else:
@@ -2442,21 +2467,23 @@ elif st.session_state.current_page == 'Executive_Deep_Dive':
                     
                     fig_adm.update_layout(
                         title='Admissions Metrics Over Time',
-                        height=550,
+                        height=600,
                         xaxis_title='Date',
                         yaxis_title='Count',
                         yaxis_type='log' if st.session_state.exec_adm_log else 'linear',
                         legend=dict(
                             orientation='h',
-                            yanchor='top',
-                            y=-0.25,
+                            yanchor='bottom',
+                            y=-0.35,
                             xanchor='center',
                             x=0.5,
                             bgcolor='rgba(255,255,255,0.9)',
                             bordercolor='rgba(0,0,0,0.3)',
-                            borderwidth=1
+                            borderwidth=1,
+                            font=dict(size=11),
+                            itemwidth=30
                         ),
-                        margin=dict(b=140, t=50)
+                        margin=dict(b=180, t=50, l=40, r=40)
                     )
                     st.plotly_chart(fig_adm, use_container_width=True)
                 else:
@@ -2594,43 +2621,30 @@ elif st.session_state.current_page == 'Comparison_Tool':
     
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     
-    # How to Use This Comparison Tool
-    st.markdown("""
-    <div style="text-align: center;
-                padding: 15px;
-                background: #e9ecef;
-                border-radius: 8px;
-                margin: 20px 0;">
-        <h3 style="color: #500000; margin: 0 0 15px 0; font-size: 20px;">
-            💡 How to Use This Comparison Tool
-        </h3>
-        <div style="background: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin-top: 15px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057; text-align: left;">
-                <div>
-                    <strong style="color: #500000;">📊 Step-by-Step Guide:</strong>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li><strong>Select Cohorts:</strong> Choose primary and comparison cohorts using filters above</li>
-                        <li><strong>Filter by Program:</strong> Select specific program or view all programs combined</li>
-                        <li><strong>Explore Time Series:</strong> Click metric selector to visualize trends over time</li>
-                        <li><strong>View Data Tables:</strong> Click "Show Data Table" for detailed program breakdowns</li>
-                    </ul>
-                </div>
-                <div>
-                    <strong style="color: #500000;">🎯 Key Features:</strong>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li><strong>Percentage Changes:</strong> Full-width bar chart showing growth/decline metrics</li>
-                        <li><strong>Comprehensive Table:</strong> Detailed comparison with variance metrics</li>
-                        <li><strong>Export Options:</strong> Download comparison tables or individual cohort data</li>
-                        <li><strong>Visual Indicators:</strong> Green = growth, Red = decline, hover for exact values</li>
-                    </ul>
-                </div>
+    # How to Use This Comparison Tool - Collapsible
+    with st.expander("💡 How to Use This Comparison Tool", expanded=False):
+        st.markdown("""
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057;">
+            <div>
+                <strong style="color: #500000;">📊 Step-by-Step Guide:</strong>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li><strong>Select Cohorts:</strong> Choose primary and comparison cohorts using filters above</li>
+                    <li><strong>Filter by Program:</strong> Select specific program or view all programs combined</li>
+                    <li><strong>Explore Time Series:</strong> Click metric selector to visualize trends over time</li>
+                    <li><strong>View Data Tables:</strong> Click "Show Data Table" for detailed program breakdowns</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color: #500000;">🎯 Key Features:</strong>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li><strong>Percentage Changes:</strong> Full-width bar chart showing growth/decline metrics</li>
+                    <li><strong>Comprehensive Table:</strong> Detailed comparison with variance metrics</li>
+                    <li><strong>Export Options:</strong> Download comparison tables or individual cohort data</li>
+                    <li><strong>Visual Indicators:</strong> Green = growth, Red = decline, hover for exact values</li>
+                </ul>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     
@@ -3537,43 +3551,30 @@ elif st.session_state.current_page == 'Marketing_Analysis':
         
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         
-        # How to Use This Analysis
-        st.markdown("""
-        <div style="text-align: center;
-                    padding: 15px;
-                    background: #e9ecef;
-                    border-radius: 8px;
-                    margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0 0 15px 0; font-size: 20px;">
-                💡 How to Use This Analysis
-            </h3>
-            <div style="background: white;
-                        padding: 20px;
-                        border-radius: 8px;
-                        margin-top: 15px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057; text-align: left;">
-                    <div>
-                        <strong style="color: #500000;">� What You Can Discover:</strong>
-                        <ul style="margin: 8px 0; padding-left: 20px;">
-                            <li><strong>Spend Analysis:</strong> Track marketing investments by channel and program</li>
-                            <li><strong>Channel Performance:</strong> Compare effectiveness across different marketing channels</li>
-                            <li><strong>Trend Tracking:</strong> Monitor spending patterns over time and fiscal years</li>
-                            <li><strong>ROI Insights:</strong> Understand cost per inquiry and conversion metrics</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <strong style="color: #500000;">🎯 Interactive Features:</strong>
-                        <ul style="margin: 8px 0; padding-left: 20px;">
-                            <li><strong>Multi-Select Filters:</strong> Choose fiscal years, programs, and channels</li>
-                            <li><strong>Dynamic Charts:</strong> Click legend items to toggle data series on/off</li>
-                            <li><strong>Hover Details:</strong> Move mouse over charts for exact values and breakdowns</li>
-                            <li><strong>Data Export:</strong> Download filtered data for further analysis</li>
-                        </ul>
-                    </div>
+        # How to Use This Analysis - Collapsible
+        with st.expander("💡 How to Use This Analysis", expanded=False):
+            st.markdown("""
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057;">
+                <div>
+                    <strong style="color: #500000;">📊 What You Can Discover:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li><strong>Spend Analysis:</strong> Track marketing investments by channel and program</li>
+                        <li><strong>Channel Performance:</strong> Compare effectiveness across different marketing channels</li>
+                        <li><strong>Trend Tracking:</strong> Monitor spending patterns over time and fiscal years</li>
+                        <li><strong>ROI Insights:</strong> Understand cost per inquiry and conversion metrics</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong style="color: #500000;">🎯 Interactive Features:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li><strong>Multi-Select Filters:</strong> Choose fiscal years, programs, and channels</li>
+                        <li><strong>Dynamic Charts:</strong> Click legend items to toggle data series on/off</li>
+                        <li><strong>Hover Details:</strong> Move mouse over charts for exact values and breakdowns</li>
+                        <li><strong>Data Export:</strong> Download filtered data for further analysis</li>
+                    </ul>
                 </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
         
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         

@@ -13,6 +13,16 @@ A comprehensive data analytics platform for Texas A&M Mays Business School's Fle
 ### ✅ Latest Updates (v2.4 - January 23, 2026)
 
 **UI/UX Refinements - Cleaner Interface:**
+- **Collapsible "How to Use" Sections**: All instructional sections now use dismissible expanders
+  - Executive Deep Dive: "How to Use This Section"
+  - Comparison Tool: "How to Use This Comparison Tool"
+  - Marketing Analysis: "How to Use This Analysis"
+  - Collapsed by default to reduce clutter
+  - Users can expand/collapse as needed
+- **Performance Benchmarks Enhancement**: Center-aligned metrics with full-width distribution
+  - Inquiry Conversion, Yield Rate, and Application Completion now centered
+  - Metrics stretch across full width with proper spacing
+  - Improved visual balance and professional appearance
 - **Sidebar Optimization**: Reduced padding and spacing for more compact navigation
   - Logo size reduced from 50px to 40px
   - Brand section padding reduced from 20px to 10px
