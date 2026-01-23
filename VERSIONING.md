@@ -52,7 +52,7 @@ Complete version-controlled history of the Mays Analytics Platform, documenting 
 
 #### Code Restructuring (7-Phase Migration)
 - **Phase 1**: Extracted utilities to `utils/` folder
-- **Phase 2-7**: Extracted all pages to `pages/` folder
+- **Phase 2-7**: Extracted all page modules to `modules/` folder
 - **Result**: Single source of truth for all functions
 
 #### New Structure
@@ -62,12 +62,12 @@ Complete version-controlled history of the Mays Analytics Platform, documenting 
 - `utils/table_display.py` - Table display (273 lines)
 
 **Pages Modularized:**
-- `pages/help.py` (539 lines)
-- `pages/home_dashboard.py` (630 lines)
-- `pages/database.py` (421 lines)
-- `pages/comparison_tool.py` (665 lines)
-- `pages/executive_deep_dive.py` (1,077 lines)
-- `pages/marketing_analysis.py` (1,402 lines)
+- `modules/help.py` (539 lines)
+- `modules/home_dashboard.py` (630 lines)
+- `modules/database.py` (421 lines)
+- `modules/comparison_tool.py` (665 lines)
+- `modules/executive_deep_dive.py` (1,077 lines)
+- `modules/marketing_analysis.py` (1,402 lines)
 
 #### Centralized Version Management
 - Created `version.py` for single source of truth

@@ -378,35 +378,35 @@ st.markdown(f"""
 # Page Content Based on Navigation
 if st.session_state.current_page == 'Home':
     # HOME PAGE CONTENT
-    from pages import home_dashboard
+    from modules import home_dashboard
     home_dashboard.render()
 
 elif st.session_state.current_page == 'Executive_Deep_Dive':
     # EXECUTIVE DEEP DIVE PAGE
-    from pages import executive_deep_dive
+    from modules import executive_deep_dive
     executive_deep_dive.render()
 
 elif st.session_state.current_page == 'Comparison_Tool':
     # COMPARISON TOOL PAGE
-    from pages import comparison_tool
+    from modules import comparison_tool
     comparison_tool.render()
 
 elif st.session_state.current_page == 'Marketing_Analysis':
     # MARKETING ANALYSIS PAGE
-    from pages import marketing_analysis
+    from modules import marketing_analysis
     marketing_analysis.render()
 
 elif st.session_state.current_page == 'Database':
     # DATA EXPLORER PAGE
-    from pages import database
+    from modules import database
     database.render()
 
 elif st.session_state.current_page == 'Predictive_Analytics':
     # PREDICTIVE ANALYTICS PAGE
-    from pages import predictive_analytics
+    from modules import predictive_analytics
     predictive_analytics.render()
 
 elif st.session_state.current_page == 'Help':
     # HELP & DOCUMENTATION PAGE
-    from pages import help as help_page
+    from modules import help as help_page
     help_page.render()

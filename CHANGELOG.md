@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - **Modular Architecture** (7-Phase Migration):
   - Extracted utility modules to `utils/` folder
-  - Extracted all pages to `pages/` folder
+  - Extracted all page modules to `modules/` folder
   - Created single source of truth for all functions
 
 - **New Utility Modules**:
@@ -72,12 +72,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `utils/table_display.py` - Table filtering and display (273 lines)
 
 - **Modular Page Structure**:
-  - `pages/help.py` - Help & Documentation (539 lines)
-  - `pages/home_dashboard.py` - Home Dashboard (630 lines)
-  - `pages/database.py` - Data Explorer (421 lines)
-  - `pages/comparison_tool.py` - Comparison Tool (665 lines)
-  - `pages/executive_deep_dive.py` - Executive Deep Dive (1,077 lines)
-  - `pages/marketing_analysis.py` - Marketing Analysis (1,402 lines)
+  - `modules/help.py` - Help & Documentation (539 lines)
+  - `modules/home_dashboard.py` - Home Dashboard (630 lines)
+  - `modules/database.py` - Data Explorer (421 lines)
+  - `modules/comparison_tool.py` - Comparison Tool (665 lines)
+  - `modules/executive_deep_dive.py` - Executive Deep Dive (1,077 lines)
+  - `modules/marketing_analysis.py` - Marketing Analysis (1,402 lines)
 
 - **Centralized Version Management**:
   - Created `version.py` - Single source of truth for version numbers

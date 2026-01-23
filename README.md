@@ -102,7 +102,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 ├── requirements.txt            # Dependencies
 ├── edulytix.db                # SQLite database
 │
-├── pages/                     # Page modules
+├── modules/                   # Page modules
 │   ├── home_dashboard.py
 │   ├── executive_deep_dive.py
 │   ├── comparison_tool.py
