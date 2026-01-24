@@ -12,3 +12,4 @@ statsmodels==0.14.6
 hypothesis==6.150.3
 joblib==1.5.3
 numpy==2.3.5
+resend==2.4.0

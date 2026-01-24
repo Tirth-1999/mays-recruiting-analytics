@@ -788,6 +788,113 @@ def render():
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
+    # Contact & Feedback Form
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Contact & Feedback</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #495057; margin-bottom: 30px;'>Have a question, found a bug, or want to suggest an improvement? We'd love to hear from you!</p>", unsafe_allow_html=True)
+    
+    # Create the form
+    with st.form("contact_form", clear_on_submit=True):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            name = st.text_input("Name *", placeholder="Your full name")
+            email = st.text_input("Email *", placeholder="your.email@example.com")
+        
+        with col2:
+            phone = st.text_input("Phone Number", placeholder="(123) 456-7890")
+            feedback_type = st.selectbox(
+                "Type *",
+                ["Report a Bug", "Suggest Improvement", "Ask a Question", "General Feedback", "Other"]
+            )
+        
+        # Multi-select for pages
+        pages_affected = st.multiselect(
+            "Pages Affected (optional)",
+            ["Home Dashboard", "Executive Deep Dive", "Comparison Tool", "Marketing Analysis", 
+             "Data Explorer", "Predictive Analytics", "Documentation", "All Pages", "Other"],
+            help="Select the page(s) related to your feedback"
+        )
+        
+        subject = st.text_input("Subject *", placeholder="Brief description of your feedback")
+        message = st.text_area("Message *", placeholder="Please provide details...", height=150)
+        
+        submitted = st.form_submit_button("Send Feedback", use_container_width=True)
+        
+        if submitted:
+            # Validate required fields
+            if not name or not email or not subject or not message:
+                st.error("Please fill in all required fields (marked with *)")
+            elif "@" not in email:
+                st.error("Please enter a valid email address")
+            else:
+                # Send email using Resend API
+                try:
+                    import resend
+                    from config_secrets import RESEND_API_KEY, CONTACT_EMAIL, FROM_EMAIL
+                    
+                    resend.api_key = RESEND_API_KEY
+                    
+                    # Format pages list
+                    pages_list = ", ".join(pages_affected) if pages_affected else "Not specified"
+                    
+                    # Create email content
+                    email_html = f"""
+                    <html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                            <h2 style="color: #500000; border-bottom: 2px solid #C5A572; padding-bottom: 10px;">
+                                New Feedback: {feedback_type}
+                            </h2>
+                            
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                <p style="margin: 5px 0;"><strong>From:</strong> {name}</p>
+                                <p style="margin: 5px 0;"><strong>Email:</strong> {email}</p>
+                                <p style="margin: 5px 0;"><strong>Phone:</strong> {phone if phone else "Not provided"}</p>
+                                <p style="margin: 5px 0;"><strong>Type:</strong> {feedback_type}</p>
+                                <p style="margin: 5px 0;"><strong>Pages:</strong> {pages_list}</p>
+                            </div>
+                            
+                            <div style="margin: 20px 0;">
+                                <h3 style="color: #500000; margin-bottom: 10px;">Subject:</h3>
+                                <p style="background: #fff; padding: 10px; border-left: 3px solid #500000;">{subject}</p>
+                            </div>
+                            
+                            <div style="margin: 20px 0;">
+                                <h3 style="color: #500000; margin-bottom: 10px;">Message:</h3>
+                                <p style="background: #fff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 5px; white-space: pre-wrap;">{message}</p>
+                            </div>
+                            
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #666;">
+                                <p>Sent from Mays Analytics Platform v{VERSION}</p>
+                                <p>Timestamp: {LAST_UPDATED}</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    # Send email
+                    params = {
+                        "from": FROM_EMAIL,
+                        "to": [CONTACT_EMAIL],
+                        "subject": f"[Mays Analytics] {feedback_type}: {subject}",
+                        "html": email_html,
+                        "reply_to": email
+                    }
+                    
+                    response = resend.Emails.send(params)
+                    
+                    st.success("✅ Thank you! Your feedback has been sent successfully. We'll get back to you soon!")
+                    
+                except ImportError:
+                    st.error("Email service is not configured. Please contact tirth.shah@tamu.edu directly.")
+                except Exception as e:
+                    st.error(f"Failed to send feedback. Please email tirth.shah@tamu.edu directly.")
+                    # Log error for debugging (don't show to user)
+                    print(f"Email error: {str(e)}")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Footer
     st.markdown(f"""
     <div style="text-align: center;

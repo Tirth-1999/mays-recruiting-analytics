@@ -51,6 +51,12 @@ Thumbs.db
 .env
 .env.local
 
+# Secrets and API keys
+secrets.py
+config_secrets.py
+config/secrets.py
+.secrets/
+
 # Logs
 *.log
 

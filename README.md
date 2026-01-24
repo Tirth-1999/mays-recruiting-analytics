@@ -193,14 +193,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
+- **Email**: [tirth.shah@tamu.edu](mailto:tirth.shah@tamu.edu)
 - **GitHub**: [@Tirth-1999](https://github.com/Tirth-1999)
 - **Repository**: [mays-recruiting-analytics](https://github.com/Tirth-1999/mays-recruiting-analytics)
-- **Issues**: [Report a bug](https://github.com/Tirth-1999/mays-recruiting-analytics/issues)
+- **Feedback Form**: Use the Contact & Feedback form in the Documentation page to report bugs, suggest improvements, or ask questions
 
 ---
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 4.0 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 4.1 • Built for Texas A&M Mays Business School
 
 </div>
