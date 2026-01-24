@@ -830,7 +830,16 @@ def render():
                 # Send email using Resend API
                 try:
                     import resend
-                    from config_secrets import RESEND_API_KEY, CONTACT_EMAIL, FROM_EMAIL
+                    
+                    # Try to get secrets from Streamlit Cloud first, then fall back to local config
+                    try:
+                        # Streamlit Cloud secrets
+                        RESEND_API_KEY = st.secrets["RESEND_API_KEY"]
+                        CONTACT_EMAIL = st.secrets["CONTACT_EMAIL"]
+                        FROM_EMAIL = st.secrets.get("FROM_EMAIL", "onboarding@resend.dev")
+                    except (KeyError, FileNotFoundError):
+                        # Local development - use config_secrets.py
+                        from config_secrets import RESEND_API_KEY, CONTACT_EMAIL, FROM_EMAIL
                     
                     resend.api_key = RESEND_API_KEY
                     

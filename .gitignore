@@ -47,6 +47,9 @@ Thumbs.db
 # Streamlit (commented out to include config for deployment)
 # .streamlit/
 
+# Streamlit secrets (DO NOT commit)
+.streamlit/secrets.toml
+
 # Environment variables
 .env
 .env.local

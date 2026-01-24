@@ -4,6 +4,65 @@ Complete version-controlled history of the Mays Analytics Platform, documenting 
 
 ---
 
+## Version 4.2 - Contact & Feedback Integration
+**Release Date**: January 24, 2026  
+**Status**: Current Release  
+**Type**: Minor Release
+
+### 📧 Communication Features
+
+#### Contact & Feedback Form
+- **Comprehensive Form**: Name, Email, Phone, Type, Pages Affected, Subject, Message
+- **Feedback Types**: Report Bug, Suggest Improvement, Ask Question, General Feedback, Other
+- **Multi-Select Pages**: Users can tag which pages their feedback relates to
+- **Validation**: Required field validation and email format checking
+- **User Experience**: Form clears automatically after successful submission
+
+#### Email Integration
+- **Resend API**: Reliable email delivery service
+- **Professional Formatting**: HTML emails with maroon/gold theme matching platform
+- **Smart Routing**: All feedback sent to tirth.shah@tamu.edu
+- **Reply-To**: Set to user's email for easy responses
+- **Metadata**: Includes platform version and timestamp
+
+#### Deployment Support
+- **Streamlit Cloud Secrets**: Secure API key storage in production
+- **Local Development**: Fallback to config_secrets.py for local testing
+- **Automatic Detection**: Code detects environment and uses appropriate secrets
+- **Documentation**: Complete DEPLOYMENT.md guide for setup
+
+### 🔧 Technical Implementation
+- Smart secret loading with fallback mechanism
+- Import conflict resolution (secrets.py → config_secrets.py)
+- Graceful error handling for missing configuration
+- Email validation and sanitization
+- Professional HTML email templates
+
+### 📊 Files Modified
+- `modules/help.py` - Added contact form with dual secret loading
+- `.gitignore` - Added .streamlit/secrets.toml exclusion
+- `requirements.txt` - Added resend==2.4.0
+- `version.py` - Updated to 4.2
+- `README.md` - Updated contact section
+
+### 📈 Files Added
+- `DEPLOYMENT.md` - Complete deployment guide for Streamlit Cloud
+- `.streamlit/secrets.toml.template` - Secret configuration template
+
+### 🔒 Security
+- API keys stored in Streamlit secrets (production)
+- Local config_secrets.py for development (not committed)
+- Secrets properly excluded from version control
+- Email validation and error handling
+
+### 📈 Impact Metrics
+- **Communication**: Direct in-app feedback channel
+- **User Experience**: No need to leave platform to contact support
+- **Deployment**: Works seamlessly in both dev and production
+- **Security**: API keys properly protected
+
+---
+
 ## Version 4.1 - UI/UX Refinements & Responsive Design
 **Release Date**: January 24, 2026  
 **Status**: Current Release  
@@ -295,6 +354,7 @@ Jan 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **4.2** | Minor | Contact & Feedback Integration | 8 | +250 |
 | **4.1** | Minor | UI/UX & Responsive Design | 7 | +450 |
 | **4.0** | Major | Predictive Analytics & ML | 11 | +6,701 |
 | **3.0** | Major | Modular Architecture | 15 | +4,734 |
@@ -357,4 +417,4 @@ Jan 2026  ███████████████████████�
 
 ---
 
-**Version History** • Last Updated: January 24, 2026 • Current Version: 4.1
+**Version History** • Last Updated: January 24, 2026 • Current Version: 4.2

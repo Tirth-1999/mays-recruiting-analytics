@@ -4,6 +4,24 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 4.2
+
+**Contact & Feedback Integration** - Released January 24, 2026
+
+Version 4.2 adds direct communication capabilities to the platform:
+
+- 📧 **Contact & Feedback Form**: Comprehensive form in Documentation page for reporting bugs, suggesting improvements, or asking questions
+- 📨 **Email Integration**: Powered by Resend API - all feedback sent to tirth.shah@tamu.edu with professional HTML formatting
+- 🎯 **Feedback Types**: Bug Report, Suggest Improvement, Ask Question, General Feedback, Other
+- 📊 **Page Tagging**: Multi-select dropdown to specify which pages feedback relates to
+- 🔒 **Secure Deployment**: Streamlit Cloud secrets integration for production environments
+- 📖 **Deployment Guide**: Complete DEPLOYMENT.md with Streamlit Cloud setup instructions
+- ✅ **Validation**: Required field validation and email format checking
+
+[View complete changelog →](../CHANGELOG.md) | [Deployment Guide →](../DEPLOYMENT.md)
+
+---
+
 ## What's New in Version 4.1
 
 **UI/UX Refinements & Responsive Design** - Released January 24, 2026
@@ -73,7 +91,7 @@ MIT License information.
 
 ## Platform Overview
 
-**Current Version:** 4.1  
+**Current Version:** 4.2  
 **Last Updated:** January 24, 2026
 
 ### Analytics Pages
@@ -93,7 +111,13 @@ Class of 2026, 2027, 2028
 ### ML Models
 Prophet, ARIMA, Linear Regression
 
-### Design Features (New in v4.1)
+### Communication Features (New in v4.2)
+- In-app contact & feedback form
+- Email integration with Resend API
+- Multi-select page tagging
+- Professional HTML email formatting
+
+### Design Features (v4.1)
 - Responsive grid system (1000px breakpoint)
 - Chrome-style tabs with horizontal scrolling
 - Consistent metric box styling

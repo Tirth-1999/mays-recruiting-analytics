@@ -3,17 +3,31 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 4.1** | **Last Updated: January 24, 2026**
+**Version 4.2** | **Last Updated: January 24, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-4.1-blue.svg)](VERSIONING.md)
+[![Version](https://img.shields.io/badge/version-4.2-blue.svg)](VERSIONING.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
-[Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](CHANGELOG.md)
+[Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Deployment](DEPLOYMENT.md) • [Changelog](CHANGELOG.md)
 
 </div>
+
+---
+
+## What's New in Version 4.2
+
+**Contact & Feedback Integration** - Released January 24, 2026
+
+- 📧 **In-App Feedback Form**: Report bugs, suggest improvements, or ask questions directly in the Documentation page
+- 📨 **Email Integration**: Powered by Resend API for reliable delivery to tirth.shah@tamu.edu
+- 🎨 **Professional Formatting**: HTML emails with maroon/gold theme matching the platform
+- 🔒 **Secure Deployment**: Streamlit Cloud secrets integration for production
+- 📖 **Deployment Guide**: Complete setup instructions for Streamlit Cloud
+
+[View complete changelog →](CHANGELOG.md)
 
 ---
 

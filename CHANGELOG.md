@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.2.0] - 2026-01-24
+
+### 🎉 Minor Release - Contact & Feedback Integration
+
+#### Added
+- **Contact & Feedback Form** on Documentation page:
+  - Name, Email, Phone Number fields
+  - Feedback type selector (Bug Report, Improvement, Question, General, Other)
+  - Multi-select for affected pages
+  - Subject and detailed message fields
+  - Form validation for required fields
+  - Email format validation
+
+- **Email Integration**:
+  - Resend API integration for reliable email delivery
+  - Professional HTML email formatting with maroon/gold theme
+  - Reply-to set to user's email for easy responses
+  - Includes platform version and timestamp
+  - All feedback sent to tirth.shah@tamu.edu
+
+- **Deployment Support**:
+  - Streamlit Cloud secrets integration
+  - Automatic fallback to local config for development
+  - DEPLOYMENT.md guide for Streamlit Cloud setup
+  - secrets.toml.template for easy configuration
+
+#### Changed
+- **README.md**:
+  - Updated contact section with feedback form reference
+  - Removed GitHub Issues link (replaced with form)
+  - Updated version badge to 4.2
+
+- **Code Architecture**:
+  - Smart secret loading (Streamlit Cloud → local config)
+  - Graceful error handling for missing secrets
+  - Import conflict resolution (renamed secrets.py to config_secrets.py)
+
+#### Security
+- API keys stored securely in Streamlit secrets (production)
+- Local config_secrets.py for development (not committed)
+- Added .streamlit/secrets.toml to .gitignore
+- Email validation and sanitization
+
+#### Files Modified
+- modules/help.py: Added contact form with dual secret loading
+- .gitignore: Added secrets.toml exclusion
+- requirements.txt: Added resend==2.4.0
+- version.py: Updated to 4.2
+
+#### Files Added
+- DEPLOYMENT.md: Complete deployment guide
+- .streamlit/secrets.toml.template: Secret configuration template
+
+#### Impact
+- Users can now report bugs and provide feedback directly in the app
+- No need to leave the platform to contact support
+- Streamlined communication channel
+- Works in both development and production environments
+
+---
+
 ## [4.1.0] - 2026-01-24
 
 ### 🎨 Minor Release - UI/UX Refinements & Responsive Design
