@@ -107,11 +107,11 @@ def render():
             st.markdown(f"""
             <div style="text-align: center;
                         padding: 15px;
-                        background: #f8f9fa;
+                        background: #e9ecef;
                         border-radius: 8px;
                         margin: 20px 0;">
                 <h3 style="color: #500000; margin: 0; font-size: 20px;">
-                    📊 Comparing: Class of {primary_cohort} vs Class of {comparison_cohort}{program_scope}
+                    Comparing: Class of {primary_cohort} vs Class of {comparison_cohort}{program_scope}
                 </h3>
                 <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
                     Primary: {primary_latest_date.strftime('%B %d, %Y')} | Comparison: {secondary_latest_date.strftime('%B %d, %Y')}
@@ -485,10 +485,10 @@ def render():
             st.markdown("""
             <div style="text-align: center;
                         padding: 15px;
-                        background: #f8f9fa;
+                        background: #e9ecef;
                         border-radius: 8px;
                         margin: 20px 0;">
-                <h3 style="color: #500000; margin: 0; font-size: 20px;">📈 Percentage Change Analysis</h3>
+                <h3 style="color: #500000; margin: 0; font-size: 20px;">Percentage Change Analysis</h3>
                 <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
                     Compare performance changes across all metrics
                 </p>
@@ -546,10 +546,10 @@ def render():
             st.markdown("""
             <div style="text-align: center;
                         padding: 15px;
-                        background: #f8f9fa;
+                        background: #e9ecef;
                         border-radius: 8px;
                         margin: 20px 0;">
-                <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Comprehensive Comparison Table with Variance Metrics</h3>
+                <h3 style="color: #500000; margin: 0; font-size: 20px;">Comprehensive Comparison Table with Variance Metrics</h3>
                 <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
                     Detailed comparison with statistical variance analysis
                 </p>

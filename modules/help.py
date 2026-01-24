@@ -12,6 +12,127 @@ def render():
     
     # Center-aligned welcome section
     st.markdown("""
+    <style>
+    /* Responsive grid for Key Questions - stack when tabs need scrollbar */
+    .key-questions-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    @media screen and (max-width: 1000px) {
+        .key-questions-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+        .key-questions-grid > div {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .key-questions-grid ul {
+            text-align: left;
+            display: inline-block;
+        }
+    }
+    
+    /* Responsive grid for Workflows - stack when tabs need scrollbar */
+    .workflows-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    @media screen and (max-width: 1000px) {
+        .workflows-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+        .workflows-grid > div {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .workflows-grid ol {
+            text-align: left;
+            display: inline-block;
+        }
+    }
+    
+    /* Responsive grid for Tips - stack when tabs need scrollbar */
+    .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    @media screen and (max-width: 1000px) {
+        .tips-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+        .tips-grid > div {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .tips-grid ul {
+            text-align: left;
+            display: inline-block;
+        }
+    }
+    
+    /* Responsive grid for Data Understanding - stack when tabs need scrollbar */
+    .data-understanding-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    @media screen and (max-width: 1000px) {
+        .data-understanding-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+        .data-understanding-grid > div {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .data-understanding-grid ul {
+            text-align: left;
+            display: inline-block;
+        }
+    }
+    
+    /* Responsive grid for Troubleshooting - stack when tabs need scrollbar */
+    .troubleshooting-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    @media screen and (max-width: 1000px) {
+        .troubleshooting-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+        .troubleshooting-grid > div {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .troubleshooting-grid p {
+            text-align: center;
+        }
+    }
+    </style>
+    
     <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
                 padding: 30px;
                 border-radius: 10px;
@@ -26,16 +147,14 @@ def render():
     </div>
     """, unsafe_allow_html=True)
     
-    # Key Questions This Platform Answers - centered header
+    # Key Questions This Platform Answers - centered header with responsive grid
     st.markdown("<h3 style='text-align: center; color: #500000;'>Key Questions This Platform Answers</h3>", unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 100%;">
+    st.markdown("""
+    <div class="key-questions-grid">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Enrollment Questions</h4>
-            <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Are we on track to meet our cohort size goals?</li>
                 <li>Which programs are over/under-performing?</li>
                 <li>How do conversion rates compare to last year?</li>
@@ -43,13 +162,9 @@ def render():
                 <li>What's our inquiry-to-enrollment conversion rate?</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 100%;">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Marketing Questions</h4>
-            <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>What's our cost per inquiry and application?</li>
                 <li>Which marketing channels deliver the best ROI?</li>
                 <li>How should we allocate next year's budget?</li>
@@ -57,13 +172,9 @@ def render():
                 <li>What's the trend in our marketing effectiveness?</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 100%;">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Forecasting Questions</h4>
-            <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>What will our enrollment numbers be next year?</li>
                 <li>Which marketing channels should we invest in?</li>
                 <li>When is the best time to run campaigns?</li>
@@ -71,18 +182,45 @@ def render():
                 <li>Are our predictions accurate and reliable?</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Custom Chrome-style tab styling
+    # Custom Chrome-style tab styling with horizontal scroll
     st.markdown("""
     <style>
-    /* Chrome-style tabs for Help page */
+    /* Chrome-style tabs for Help page with horizontal scroll */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: transparent;
         justify-content: center;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: #500000 #f0f0f0 !important;
+    }
+    
+    /* Show scrollbar on mobile/tablet */
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+        height: 8px !important;
+        display: block !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+        background: #f0f0f0 !important;
+        border-radius: 4px !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+        background: #500000 !important;
+        border-radius: 4px !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
+        background: #700000 !important;
     }
     
     .stTabs [data-baseweb="tab"] {
@@ -100,6 +238,8 @@ def render():
         color: #495057;
         border: 1px solid #dee2e6;
         border-bottom: none;
+        flex-shrink: 0 !important;
+        min-width: fit-content !important;
     }
     
     .stTabs [aria-selected="true"] {
@@ -117,6 +257,13 @@ def render():
         border: 1px solid #dee2e6;
         border-radius: 0 0 8px 8px;
         padding: 30px;
+    }
+    
+    /* Mobile/Tablet: left-align tabs and ensure scroll works */
+    @media screen and (max-width: 1200px) {
+        .stTabs [data-baseweb="tab-list"] {
+            justify-content: flex-start !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -414,16 +561,14 @@ def render():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Common Workflows - centered
+    # Common Workflows - centered with responsive grid
     st.markdown("<h3 style='text-align: center; color: #500000;'>Common Workflows</h3>", unsafe_allow_html=True)
     
-    workflow_col1, workflow_col2, workflow_col3 = st.columns(3)
-    
-    with workflow_col1:
-        st.markdown("""
-        <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; height: 100%;">
+    st.markdown("""
+    <div class="workflows-grid">
+        <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Weekly Check-In</h4>
-            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Open <strong>Home Dashboard</strong></li>
                 <li>Select current cohort</li>
                 <li>Review key metrics vs. goals</li>
@@ -432,29 +577,9 @@ def render():
                 <li>Share screenshot with team</li>
             </ol>
         </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div style="background: #f0fff0; padding: 20px; border-radius: 8px; height: 100%;">
-            <h4 style="color: #500000; margin: 0 0 15px 0;">Monthly Review</h4>
-            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
-                <li>Open <strong>Executive Dive</strong></li>
-                <li>Select cohort and program</li>
-                <li>Review Performance Analysis</li>
-                <li>Check Trend Analysis</li>
-                <li>Use Program Deep Dive</li>
-                <li>Export data tables</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with workflow_col2:
-        st.markdown("""
-        <div style="background: #fff8f0; padding: 20px; border-radius: 8px; height: 100%;">
+        <div style="background: #fff8f0; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Budget Planning</h4>
-            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Open <strong>Marketing Analysis</strong></li>
                 <li>Go to Advanced Analytics</li>
                 <li>Review CPI, CPA, ROI metrics</li>
@@ -463,29 +588,9 @@ def render():
                 <li>Export for budget proposal</li>
             </ol>
         </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div style="background: #fff0f8; padding: 20px; border-radius: 8px; height: 100%;">
-            <h4 style="color: #500000; margin: 0 0 15px 0;">Annual Planning</h4>
-            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
-                <li>Open <strong>Comparison Tool</strong></li>
-                <li>Compare current vs. previous year</li>
-                <li>Review % change for metrics</li>
-                <li>Identify growth opportunities</li>
-                <li>Set goals based on trends</li>
-                <li>Export comparison table</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with workflow_col3:
-        st.markdown("""
-        <div style="background: #f8f0ff; padding: 20px; border-radius: 8px; height: 100%;">
+        <div style="background: #f8f0ff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Enrollment Forecasting</h4>
-            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Open <strong>Forecasting</strong></li>
                 <li>Select program and metric</li>
                 <li>Choose forecast horizon</li>
@@ -494,14 +599,31 @@ def render():
                 <li>Export forecast data</li>
             </ol>
         </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div style="background: #fffaf0; padding: 20px; border-radius: 8px; height: 100%;">
+        <div style="background: #f0fff0; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Monthly Review</h4>
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
+                <li>Open <strong>Executive Dive</strong></li>
+                <li>Select cohort and program</li>
+                <li>Review Performance Analysis</li>
+                <li>Check Trend Analysis</li>
+                <li>Use Program Deep Dive</li>
+                <li>Export data tables</li>
+            </ol>
+        </div>
+        <div style="background: #fff0f8; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Annual Planning</h4>
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
+                <li>Open <strong>Comparison Tool</strong></li>
+                <li>Compare current vs. previous year</li>
+                <li>Review % change for metrics</li>
+                <li>Identify growth opportunities</li>
+                <li>Set goals based on trends</li>
+                <li>Export comparison table</li>
+            </ol>
+        </div>
+        <div style="background: #fffaf0; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Marketing Optimization</h4>
-            <ol style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Open <strong>Forecasting</strong></li>
                 <li>Go to Channel Optimization</li>
                 <li>Review effectiveness scores</li>
@@ -510,114 +632,109 @@ def render():
                 <li>Implement recommendations</li>
             </ol>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Tips & Best Practices - centered
+    # Tips & Best Practices - centered with responsive grid
     st.markdown("<h3 style='text-align: center; color: #500000;'>Tips & Best Practices</h3>", unsafe_allow_html=True)
     
     st.markdown("""
-    <div style="background: white; padding: 25px; border-radius: 8px; border: 2px solid #C5A572;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-                <h4 style="color: #500000; margin: 0 0 10px 0;">Do's</h4>
-                <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
-                    <li>Check data regularly (weekly minimum)</li>
-                    <li>Compare year-over-year trends</li>
-                    <li>Export data for presentations</li>
-                    <li>Use filters to focus analysis</li>
-                    <li>Hover over charts for exact values</li>
-                    <li>Share insights with your team</li>
-                    <li>Track marketing ROI monthly</li>
-                </ul>
-            </div>
-            <div>
-                <h4 style="color: #500000; margin: 0 0 10px 0;">Don'ts</h4>
-                <ul style="font-size: 14px; line-height: 1.8; color: #495057;">
-                    <li>Don't ignore declining trends</li>
-                    <li>Don't compare incomplete data</li>
-                    <li>Don't make decisions on single data points</li>
-                    <li>Don't forget to check "Last Updated" date</li>
-                    <li>Don't overlook small programs</li>
-                    <li>Don't skip the "How to Use" guides</li>
-                    <li>Don't hesitate to export and explore</li>
-                </ul>
-            </div>
+    <div class="tips-grid">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Do's</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
+                <li>Check data regularly (weekly minimum)</li>
+                <li>Compare year-over-year trends</li>
+                <li>Export data for presentations</li>
+                <li>Use filters to focus analysis</li>
+                <li>Hover over charts for exact values</li>
+                <li>Share insights with your team</li>
+                <li>Track marketing ROI monthly</li>
+            </ul>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Don'ts</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
+                <li>Don't ignore declining trends</li>
+                <li>Don't compare incomplete data</li>
+                <li>Don't make decisions on single data points</li>
+                <li>Don't forget to check "Last Updated" date</li>
+                <li>Don't overlook small programs</li>
+                <li>Don't skip the "How to Use" guides</li>
+                <li>Don't hesitate to export and explore</li>
+            </ul>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Data Understanding - using separate divs with consistent styling
+    # Data Understanding - using CSS Grid with simple responsive breakpoints
     st.markdown("<h3 style='text-align: center; color: #500000;'>Understanding Your Data</h3>", unsafe_allow_html=True)
     
-    # Data Coverage
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-                padding: 25px;
-                border-radius: 8px 8px 0 0;
-                border: 1px solid #e0e0e0;
-                border-bottom: none;">
-        <h4 style="color: #500000; margin: 0 0 15px 0;">Data Coverage</h4>
-        <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0;">
-            <li><strong>Admissions Data</strong>: January 2024 - December 2025 (2,037 records)</li>
-            <li><strong>Marketing Data</strong>: September 2024 - June 2025 (FY25 Year 1)</li>
-            <li><strong>Programs</strong>: MBA, MS ACCT, MS ENLD, MS HRM, MS MISY, MS MKTG, MS SPBA</li>
-            <li><strong>Cohorts</strong>: Class of 2026, 2027, 2028</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
+    <style>
+    .data-understanding-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
     
-    # Important Notes
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-                padding: 25px;
-                border-left: 1px solid #e0e0e0;
-                border-right: 1px solid #e0e0e0;">
-        <h4 style="color: #500000; margin: 0 0 15px 0;">Important Notes</h4>
-        <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0;">
-            <li><strong>Cumulative Data</strong>: All metrics are cumulative within a cohort year</li>
-            <li><strong>Monthly Reports</strong>: Dates represent the last day of the reporting month</li>
-            <li><strong>Missing Data</strong>: Blank values indicate data not yet available (not zero)</li>
-            <li><strong>Campaign Matrix</strong>: "- NA -" means campaign was not active for that program/month</li>
-            <li><strong>Marketing Spend</strong>: "No Ad Spend" entries are treated as NULL (not zero)</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
+    /* Mobile/Tablet: Stack vertically (one below another) */
+    @media screen and (max-width: 1200px) {
+        .data-understanding-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
     
-    # Key Metrics Definitions
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-                padding: 25px;
-                border-radius: 0 0 8px 8px;
-                border: 1px solid #e0e0e0;
-                border-top: none;">
-        <h4 style="color: #500000; margin: 0 0 15px 0;">Key Metrics Definitions</h4>
-        <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0;">
-            <li><strong>Inquiries</strong>: Initial interest expressed (top of funnel)</li>
-            <li><strong>Applications</strong>: Complete applications received</li>
-            <li><strong>Admissions Offered</strong>: Offers extended to applicants</li>
-            <li><strong>Admissions Accepted</strong>: Offers accepted by applicants</li>
-            <li><strong>Enrolled</strong>: Students who have enrolled in the program</li>
-            <li><strong>Anticipated Cohort Size</strong>: Expected final enrollment (most important metric!)</li>
-        </ul>
+    <div class="data-understanding-grid">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Data Coverage</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0; flex: 1;">
+                <li><strong>Admissions Data</strong>: January 2024 - December 2025 (2,037 records)</li>
+                <li><strong>Marketing Data</strong>: September 2024 - June 2025 (FY25 Year 1)</li>
+                <li><strong>Programs</strong>: MBA, MS ACCT, MS ENLD, MS HRM, MS MISY, MS MKTG, MS SPBA</li>
+                <li><strong>Cohorts</strong>: Class of 2026, 2027, 2028</li>
+            </ul>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Important Notes</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0; flex: 1;">
+                <li><strong>Cumulative Data</strong>: All metrics are cumulative within a cohort year</li>
+                <li><strong>Monthly Reports</strong>: Dates represent the last day of the reporting month</li>
+                <li><strong>Missing Data</strong>: Blank values indicate data not yet available (not zero)</li>
+                <li><strong>Campaign Matrix</strong>: "- NA -" means campaign was not active for that program/month</li>
+                <li><strong>Marketing Spend</strong>: "No Ad Spend" entries are treated as NULL (not zero)</li>
+            </ul>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 15px 0; text-align: center;">Key Metrics Definitions</h4>
+            <ul style="font-size: 14px; line-height: 1.8; color: #495057; margin-bottom: 0; flex: 1;">
+                <li><strong>Inquiries</strong>: Initial interest expressed (top of funnel)</li>
+                <li><strong>Applications</strong>: Complete applications received</li>
+                <li><strong>Admissions Offered</strong>: Offers extended to applicants</li>
+                <li><strong>Admissions Accepted</strong>: Offers accepted by applicants</li>
+                <li><strong>Enrolled</strong>: Students who have enrolled in the program</li>
+                <li><strong>Anticipated Cohort Size</strong>: Expected final enrollment (most important metric!)</li>
+            </ul>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Troubleshooting - with proper boxes
+    # Troubleshooting - with responsive grid
     st.markdown("<h3 style='text-align: center; color: #500000;'>Troubleshooting</h3>", unsafe_allow_html=True)
     
-    trouble_col1, trouble_col2 = st.columns(2)
-    
-    with trouble_col1:
-        st.markdown("""
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; min-height: 300px;">
+    st.markdown(f"""
+    <div class="troubleshooting-grid">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 400px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 20px 0; text-align: center;">Common Issues</h4>
-            <div style="font-size: 14px; line-height: 1.8; color: #495057;">
+            <div style="font-size: 14px; line-height: 1.8; color: #495057; overflow-y: auto; flex: 1; padding-right: 10px;">
                 <p style="margin-bottom: 15px;">
                     <strong>Q: Why is my data not showing?</strong><br>
                     <span style="color: #666;">A: Check the 'Last Updated' date in the sidebar. Data may need to be refreshed.</span>
@@ -630,31 +747,44 @@ def render():
                     <strong>Q: Why are some programs missing?</strong><br>
                     <span style="color: #666;">A: Programs may not have data for the selected time period or cohort.</span>
                 </p>
-                <p style="margin-bottom: 0;">
+                <p style="margin-bottom: 15px;">
                     <strong>Q: Charts not loading?</strong><br>
                     <span style="color: #666;">A: Try refreshing the page or clearing your browser cache.</span>
                 </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with trouble_col2:
-        st.markdown(f"""
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; min-height: 300px;">
-            <h4 style="color: #500000; margin: 0 0 20px 0; text-align: center;">Need Help?</h4>
-            <div style="font-size: 14px; line-height: 1.8; color: #495057;">
-                <p style="margin-bottom: 20px;">
-                    <strong>Contact:</strong><br>
-                    Tirth Shah<br>
-                    tirth.shah@tamu.edu
+                <p style="margin-bottom: 15px;">
+                    <strong>Q: How do I export data?</strong><br>
+                    <span style="color: #666;">A: Look for the "Download CSV" button below each data table.</span>
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>Q: Can I compare more than two cohorts?</strong><br>
+                    <span style="color: #666;">A: Currently, the Comparison Tool supports two cohorts at a time.</span>
                 </p>
                 <p style="margin-bottom: 0;">
-                    <strong>Platform Version:</strong> {VERSION}<br>
-                    <strong>Last Updated:</strong> {LAST_UPDATED}
+                    <strong>Q: Why are forecasts showing errors?</strong><br>
+                    <span style="color: #666;">A: Ensure you have at least 12 months of historical data for reliable predictions.</span>
                 </p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: 400px; display: flex; flex-direction: column;">
+            <h4 style="color: #500000; margin: 0 0 20px 0; text-align: center;">Need Help?</h4>
+            <div style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <p style="margin-bottom: 25px; text-align: center;">
+                    <strong style="font-size: 16px;">Contact:</strong><br>
+                    <span style="font-size: 15px;">Tirth Shah</span><br>
+                    <a href="mailto:tirth.shah@tamu.edu" style="color: #500000; text-decoration: none;">tirth.shah@tamu.edu</a>
+                </p>
+                <p style="margin-bottom: 25px; text-align: center;">
+                    <strong style="font-size: 16px;">Platform Version:</strong><br>
+                    <span style="font-size: 15px;">{VERSION}</span>
+                </p>
+                <p style="margin-bottom: 0; text-align: center;">
+                    <strong style="font-size: 16px;">Last Updated:</strong><br>
+                    <span style="font-size: 15px;">{LAST_UPDATED}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     

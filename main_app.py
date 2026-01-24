@@ -188,15 +188,44 @@ with st.sidebar:
         background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
     }
     
+    /* Sidebar overlay behavior on ALL screen sizes - never shrink content */
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        position: fixed !important;
+        z-index: 999999 !important;
+        left: 0 !important;
+        top: 0 !important;
+        height: 100vh !important;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3) !important;
+    }
+    
+    /* Hide sidebar when collapsed - no space taken */
+    [data-testid="stSidebar"][aria-expanded="false"] {
+        display: none !important;
+    }
+    
+    /* Main content always stays full width - no shifting */
+    .main .block-container {
+        max-width: 100% !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        transition: none !important;
+    }
+    
+    /* Prevent any margin/padding changes on main content */
+    .main {
+        margin-left: 0 !important;
+        transition: none !important;
+    }
+    
     /* Reduce top padding of sidebar */
     [data-testid="stSidebar"] > div:first-child {
-        padding-top: 1rem;
+        padding-top: 10px;
     }
     
     /* Elegant logo/brand section - more compact */
     .sidebar-brand {
         text-align: center;
-        padding: 10px 10px 15px 10px;
+        padding: 5px 10px 10px 10px;
         margin-bottom: 15px;
         border-bottom: 2px solid #C5A572;
     }
@@ -345,7 +374,7 @@ with st.sidebar:
     
     st.markdown('<div style="margin: 15px 0; border-top: 1px solid #e0e0e0;"></div>', unsafe_allow_html=True)
     
-    if st.button("Help & Documentation", key="sidebar_nav_help", use_container_width=True,
+    if st.button("Documentation", key="sidebar_nav_help", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Help' else "secondary"):
         st.session_state.current_page = 'Help'
         st.rerun()
@@ -365,7 +394,7 @@ current_page_info = {
     'Marketing_Analysis': {'icon': '📢', 'title': 'Marketing Analysis'},
     'Database': {'icon': '🗄️', 'title': 'Data Explorer'},
     'Predictive_Analytics': {'icon': '🔮', 'title': 'Predictive Analytics'},
-    'Help': {'icon': '📖', 'title': 'Help & Documentation'}
+    'Help': {'icon': '📖', 'title': 'Documentation'}
 }
 
 current_info = current_page_info[st.session_state.current_page]

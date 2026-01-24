@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.1.0] - 2026-01-24
+
+### 🎨 Minor Release - UI/UX Refinements & Responsive Design
+
+#### Changed
+- **Metric Box Styling** (All Pages):
+  - Reduced metric box padding from 1.5rem to 1rem
+  - Reduced metric number font-size from 2.5rem to 1.8rem
+  - Removed emojis from metric boxes for professional appearance
+  - Added 20px left padding for centered numbers
+  - Kept emojis in filter labels for usability
+
+- **Header Standardization**:
+  - Applied consistent header background (#e9ecef) across all pages
+  - Removed emojis from section headers and tab names
+  - Centered all headers for professional appearance
+  - Standardized styling: Home, Executive, Comparison, Marketing, Data Explorer
+
+- **Data Explorer Enhancements**:
+  - Simplified tab names (removed emojis, shortened multi-word names)
+  - Created individual white boxes for each question (4 per table)
+  - Equal-sized question boxes using flexbox
+  - Consistent header styling for "Filter & Explore Data" and "Data Table"
+
+- **Documentation Page Overhaul**:
+  - Changed sidebar name from "Help & Documentation" to "Documentation"
+  - Implemented Chrome-style tabs with horizontal scrolling
+  - Custom scrollbar styling with maroon theme
+  - Responsive grid system for all sections (breakpoint at 1000px)
+  - Centered content in mobile/tablet mode
+  - Card-style boxes with equal heights
+  - Scrollable Common Issues section (400px height)
+
+#### Fixed
+- **Sidebar Behavior**:
+  - Sidebar now overlays content on ALL screen sizes (never shrinks content)
+  - Eliminated content shifting animation when sidebar opens/closes
+  - Hidden collapsed sidebar completely (display: none)
+  - Disabled all transitions for smooth, static experience
+
+- **Responsive Design**:
+  - All multi-column layouts stack to single column at 1000px width
+  - Centered boxes and text content in mobile/tablet mode
+  - Lists remain left-aligned but centered as blocks for readability
+  - Touch-friendly scrolling with visible scrollbars
+
+#### Impact
+- 7 files modified (home_dashboard.py, executive_deep_dive.py, comparison_tool.py, marketing_analysis.py, database.py, help.py, main_app.py)
+- 100% UI consistency across all pages
+- Significantly improved mobile experience
+- Professional emoji-free appearance
+
+---
+
 ## [4.0.0] - 2026-01-23
 
 ### 🎉 Major Release - Predictive Analytics & ML Integration

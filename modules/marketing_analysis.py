@@ -486,7 +486,7 @@ def render():
         """, unsafe_allow_html=True)
         
         # TABS - Now using globally filtered data
-        overview_tab, advanced_tab, channel_tab, notes_tab = st.tabs(["📊 Overview", "🔬 Advanced Analytics", "📢 Channel Analytics", "📝 Incremental Notes"])
+        overview_tab, advanced_tab, channel_tab, notes_tab = st.tabs(["Overview", "Advanced Analytics", "Channel Analytics", "Incremental Notes"])
         
         with overview_tab:
             # Use globally filtered data
@@ -559,24 +559,95 @@ def render():
                 # KEY METRICS SECTION
                 st.markdown("""
                 <div class="section-header">
-                    <h3>💰 Marketing Performance Overview</h3>
+                    <h3>Marketing Performance Overview</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
                 if has_roi_data:
-                    col1, col2, col3, col4 = st.columns(4)
+                    # Add metric card styling
+                    st.markdown("""
+                    <style>
+                    .metrics-container-marketing {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 1rem;
+                        margin: 20px 0;
+                    }
+                    .metric-box-marketing {
+                        background: white;
+                        padding: 1.5rem 1rem;
+                        border-radius: 12px;
+                        border: 1px solid #e0e0e0;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        text-align: center !important;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .metric-box-marketing * {
+                        text-align: center !important;
+                    }
+                    .metric-number-marketing {
+                        color: #500000;
+                        margin: 0 auto !important;
+                        padding: 0 0 0 20px !important;
+                        font-size: 1.8rem;
+                        font-weight: bold;
+                        line-height: 1.2;
+                        text-align: center !important;
+                        width: 100%;
+                        display: block;
+                    }
+                    .metric-label-marketing {
+                        margin: 10px auto 5px auto !important;
+                        padding: 0 !important;
+                        color: #495057;
+                        font-weight: 600;
+                        font-size: 1rem;
+                        line-height: 1.3;
+                        text-align: center !important;
+                        width: 100%;
+                        display: block;
+                    }
+                    @media (max-width: 1200px) {
+                        .metrics-container-marketing {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                    }
+                    @media (max-width: 768px) {
+                        .metrics-container-marketing {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
                     
-                    with col1:
-                        st.metric("Total Spend", f"${filtered_spend['spend_amount'].sum():,.2f}")
-                    with col2:
-                        avg_cpi = roi_df[roi_df['CPI'] > 0]['CPI'].mean()
-                        st.metric("Avg Cost per Inquiry", f"${avg_cpi:,.2f}" if pd.notna(avg_cpi) and avg_cpi > 0 else "N/A")
-                    with col3:
-                        avg_cpa = roi_df[roi_df['CPA'] > 0]['CPA'].mean()
-                        st.metric("Avg Cost per Application", f"${avg_cpa:,.2f}" if pd.notna(avg_cpa) and avg_cpa > 0 else "N/A")
-                    with col4:
-                        avg_conv = roi_df[roi_df['Conversion_Rate'] > 0]['Conversion_Rate'].mean()
-                        st.metric("Avg Conversion Rate", f"{avg_conv:.1f}%" if pd.notna(avg_conv) and avg_conv > 0 else "N/A")
+                    total_spend = filtered_spend['spend_amount'].sum()
+                    avg_cpi = roi_df[roi_df['CPI'] > 0]['CPI'].mean()
+                    avg_cpa = roi_df[roi_df['CPA'] > 0]['CPA'].mean()
+                    avg_conv = roi_df[roi_df['Conversion_Rate'] > 0]['Conversion_Rate'].mean()
+                    
+                    st.markdown(f"""
+                    <div class="metrics-container-marketing">
+                        <div class="metric-box-marketing">
+                            <h2 class="metric-number-marketing">${total_spend:,.2f}</h2>
+                            <p class="metric-label-marketing">Total Spend</p>
+                        </div>
+                        <div class="metric-box-marketing">
+                            <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpi) if pd.notna(avg_cpi) and avg_cpi > 0 else "N/A"}</h2>
+                            <p class="metric-label-marketing">Avg Cost per Inquiry</p>
+                        </div>
+                        <div class="metric-box-marketing">
+                            <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpa) if pd.notna(avg_cpa) and avg_cpa > 0 else "N/A"}</h2>
+                            <p class="metric-label-marketing">Avg Cost per Application</p>
+                        </div>
+                        <div class="metric-box-marketing">
+                            <h2 class="metric-number-marketing">{"{:.1f}%".format(avg_conv) if pd.notna(avg_conv) and avg_conv > 0 else "N/A"}</h2>
+                            <p class="metric-label-marketing">Avg Conversion Rate</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 else:
                     # Fallback to basic metrics if no ROI data
                     col1, col2, col3, col4 = st.columns(4)
@@ -596,7 +667,7 @@ def render():
                 # SPEND BY PROGRAM SECTION
                 st.markdown("""
                 <div class="section-header">
-                    <h3>📊 Spend by Program</h3>
+                    <h3>Spend by Program</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -677,7 +748,7 @@ def render():
                 # SPEND BY CHANNEL SECTION
                 st.markdown("""
                 <div class="section-header">
-                    <h3>📢 Spend by Channel</h3>
+                    <h3>Spend by Channel</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -813,30 +884,42 @@ def render():
                         # ROI SUMMARY SECTION
                         st.markdown("""
                         <div class="section-header">
-                            <h3>💰 ROI Summary</h3>
+                            <h3>ROI Summary</h3>
                         </div>
                         """, unsafe_allow_html=True)
-                        col1, col2, col3, col4 = st.columns(4)
                         
-                        with col1:
-                            avg_cpi = roi_df[roi_df['CPI'] > 0]['CPI'].mean()
-                            st.metric("Avg Cost per Inquiry", f"${avg_cpi:,.2f}" if avg_cpi > 0 else "N/A")
-                        with col2:
-                            avg_cpa = roi_df[roi_df['CPA'] > 0]['CPA'].mean()
-                            st.metric("Avg Cost per Application", f"${avg_cpa:,.2f}" if avg_cpa > 0 else "N/A")
-                        with col3:
-                            avg_cpad = roi_df[roi_df['CPAd'] > 0]['CPAd'].mean()
-                            st.metric("Avg Cost per Admission", f"${avg_cpad:,.2f}" if avg_cpad > 0 else "N/A")
-                        with col4:
-                            avg_conv = roi_df[roi_df['Conversion_Rate'] > 0]['Conversion_Rate'].mean()
-                            st.metric("Avg Conversion Rate", f"{avg_conv:.1f}%" if avg_conv > 0 else "N/A")
+                        avg_cpi = roi_df[roi_df['CPI'] > 0]['CPI'].mean()
+                        avg_cpa = roi_df[roi_df['CPA'] > 0]['CPA'].mean()
+                        avg_cpad = roi_df[roi_df['CPAd'] > 0]['CPAd'].mean()
+                        avg_conv = roi_df[roi_df['Conversion_Rate'] > 0]['Conversion_Rate'].mean()
+                        
+                        st.markdown(f"""
+                        <div class="metrics-container-marketing">
+                            <div class="metric-box-marketing">
+                                <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpi) if avg_cpi > 0 else "N/A"}</h2>
+                                <p class="metric-label-marketing">Avg Cost per Inquiry</p>
+                            </div>
+                            <div class="metric-box-marketing">
+                                <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpa) if avg_cpa > 0 else "N/A"}</h2>
+                                <p class="metric-label-marketing">Avg Cost per Application</p>
+                            </div>
+                            <div class="metric-box-marketing">
+                                <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpad) if avg_cpad > 0 else "N/A"}</h2>
+                                <p class="metric-label-marketing">Avg Cost per Admission</p>
+                            </div>
+                            <div class="metric-box-marketing">
+                                <h2 class="metric-number-marketing">{"{:.1f}%".format(avg_conv) if avg_conv > 0 else "N/A"}</h2>
+                                <p class="metric-label-marketing">Avg Conversion Rate</p>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                         
                         st.divider()
                         
                         # PROGRAM SPEND BY CHANNEL SECTION
                         st.markdown("""
                         <div class="section-header">
-                            <h3>📊 Program Spend by Channel</h3>
+                            <h3>Program Spend by Channel</h3>
                         </div>
                         """, unsafe_allow_html=True)
                         st.markdown("*See which channels each program invests in*")
@@ -902,7 +985,7 @@ def render():
                         # CHANNEL PERFORMANCE BY PROGRAM SECTION
                         st.markdown("""
                         <div class="section-header">
-                            <h3>🔗 Channel Performance by Program</h3>
+                            <h3>Channel Performance by Program</h3>
                         </div>
                         """, unsafe_allow_html=True)
                         st.markdown("*Discover which channels drive the most admissions for each program*")
@@ -979,7 +1062,7 @@ def render():
                         # SPEND VS OUTCOMES TREND SECTION
                         st.markdown("""
                         <div class="section-header">
-                            <h3>📈 Spend vs Outcomes Trend</h3>
+                            <h3>Spend vs Outcomes Trend</h3>
                         </div>
                         """, unsafe_allow_html=True)
                         monthly_trends = roi_df.groupby('month_date').agg({
@@ -1046,7 +1129,7 @@ def render():
                         # DETAILED ROI METRICS SECTION
                         st.markdown("""
                         <div class="section-header">
-                            <h3>📋 Detailed ROI Metrics by Program</h3>
+                            <h3>Detailed ROI Metrics by Program</h3>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1097,28 +1180,42 @@ def render():
                 # KEY METRICS SECTION
                 st.markdown("""
                 <div class="section-header">
-                    <h3>💰 Key Metrics</h3>
+                    <h3>Key Metrics</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                col1, col2, col3, col4 = st.columns(4)
+                total_spend_chan = filtered_spend_chan['spend_amount'].sum()
+                num_channels = filtered_spend_chan['channel'].nunique()
+                num_programs = filtered_spend_chan['program'].nunique()
+                avg_spend = filtered_spend_chan.groupby('channel')['spend_amount'].sum().mean()
                 
-                with col1:
-                    st.metric("Total Spend", f"${filtered_spend_chan['spend_amount'].sum():,.2f}")
-                with col2:
-                    st.metric("Channels", filtered_spend_chan['channel'].nunique())
-                with col3:
-                    st.metric("Programs", filtered_spend_chan['program'].nunique())
-                with col4:
-                    avg_spend = filtered_spend_chan.groupby('channel')['spend_amount'].sum().mean()
-                    st.metric("Avg per Channel", f"${avg_spend:,.2f}")
+                st.markdown(f"""
+                <div class="metrics-container-marketing">
+                    <div class="metric-box-marketing">
+                        <h2 class="metric-number-marketing">${total_spend_chan:,.2f}</h2>
+                        <p class="metric-label-marketing">Total Spend</p>
+                    </div>
+                    <div class="metric-box-marketing">
+                        <h2 class="metric-number-marketing">{num_channels}</h2>
+                        <p class="metric-label-marketing">Channels</p>
+                    </div>
+                    <div class="metric-box-marketing">
+                        <h2 class="metric-number-marketing">{num_programs}</h2>
+                        <p class="metric-label-marketing">Programs</p>
+                    </div>
+                    <div class="metric-box-marketing">
+                        <h2 class="metric-number-marketing">${avg_spend:,.2f}</h2>
+                        <p class="metric-label-marketing">Avg per Channel</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
                 st.divider()
                 
                 # CHART 1 - Spend Distribution
                 st.markdown("""
                 <div class="section-header">
-                    <h3>📊 Spend Distribution by Channel</h3>
+                    <h3>Spend Distribution by Channel</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -1209,7 +1306,7 @@ def render():
                 # CHART 2 - Trend Chart
                 st.markdown("""
                 <div class="section-header">
-                    <h3>📈 Channel Spend Trends</h3>
+                    <h3>Channel Spend Trends</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -1291,7 +1388,7 @@ def render():
                 # CHART 3: Summary Table (NO FILTERS)
                 st.markdown("""
                 <div class="section-header">
-                    <h3>📋 Channel Performance Summary</h3>
+                    <h3>Channel Performance Summary</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 

@@ -23,19 +23,127 @@ logger = logging.getLogger(__name__)
 def render():
     """Render the Predictive Analytics page"""
     
-    # Page title and description
+    # Chrome-style tab CSS - matching Data Explorer exactly
     st.markdown("""
-    <div style="text-align: center;
-                padding: 20px;
-                background: linear-gradient(135deg, #500000 0%, #700000 100%);
-                border-radius: 12px;
-                margin-bottom: 30px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h1 style="color: white; margin: 0; font-size: 32px;">🔮 Predictive Analytics & Machine Learning</h1>
-        <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 16px;">
-            Data-driven forecasting, optimization, and recommendations for enrollment planning
-        </p>
-    </div>
+    <style>
+    /* Chrome-style tabs for Predictive Analytics */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px !important;
+        justify-content: center !important;
+        background-color: transparent !important;
+        padding: 0px 20px !important;
+        border-bottom: none !important;
+        margin-bottom: 30px !important;
+        margin-top: 20px !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scroll-behavior: smooth !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: #500000 #f0f0f0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Always show scrollbar when content overflows */
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+        height: 10px !important;
+        display: block !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+        background: #f0f0f0 !important;
+        border-radius: 5px !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+        background: #500000 !important;
+        border-radius: 5px !important;
+        min-width: 50px !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
+        background: #700000 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 45px !important;
+        padding: 0px 32px !important;
+        background-color: #f5f5f5 !important;
+        border-radius: 8px 8px 0px 0px !important;
+        font-weight: 500 !important;
+        font-size: 15px !important;
+        border: none !important;
+        border-bottom: 3px solid transparent !important;
+        color: #666 !important;
+        margin-bottom: -2px !important;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        min-width: fit-content !important;
+        box-sizing: border-box !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: white !important;
+        color: #500000 !important;
+        border-bottom: 3px solid #500000 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e8e8e8 !important;
+        color: #500000 !important;
+    }
+    
+    .stTabs [aria-selected="true"]:hover {
+        background-color: white !important;
+    }
+    
+    /* Tablet adjustments - switch to left-aligned */
+    @media screen and (max-width: 1024px) {
+        .stTabs [data-baseweb="tab-list"] {
+            justify-content: flex-start !important;
+            padding: 0px 15px !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            padding: 0px 24px !important;
+            font-size: 14px !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            height: 12px !important;
+        }
+    }
+    
+    /* Mobile adjustments - left-aligned */
+    @media screen and (max-width: 768px) {
+        .stTabs [data-baseweb="tab-list"] {
+            justify-content: flex-start !important;
+            padding: 0px 10px !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            padding: 0px 20px !important;
+            font-size: 13px !important;
+            height: 42px !important;
+        }
+    }
+    
+    /* Small mobile adjustments - left-aligned */
+    @media screen and (max-width: 480px) {
+        .stTabs [data-baseweb="tab-list"] {
+            justify-content: flex-start !important;
+            padding: 0px 10px !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            padding: 0px 16px !important;
+            font-size: 12px !important;
+            height: 40px !important;
+        }
+    }
+    </style>
     """, unsafe_allow_html=True)
     
     # Initialize database connection and preprocessor
@@ -67,7 +175,7 @@ def render():
     with st.expander("💡 How to Use This Page", expanded=False):
         st.markdown("""
         <div style="font-size: 14px; color: #495057;">
-            <strong style="color: #500000;">🔮 What You Can Do:</strong>
+            <strong style="color: #500000;">What You Can Do:</strong>
             <ul style="margin: 8px 0; padding-left: 20px;">
                 <li><strong>Forecasting:</strong> Predict future inquiries, applications, and enrollments with confidence intervals</li>
                 <li><strong>Channel Optimization:</strong> Identify the most effective marketing channels for each program</li>
@@ -76,7 +184,7 @@ def render():
                 <li><strong>Model Performance:</strong> Track prediction accuracy and model health over time</li>
             </ul>
             
-            <strong style="color: #500000;">📊 Key Features:</strong>
+            <strong style="color: #500000;">Key Features:</strong>
             <ul style="margin: 8px 0; padding-left: 20px;">
                 <li><strong>Confidence Intervals:</strong> All forecasts include 95% confidence ranges</li>
                 <li><strong>ROI Analysis:</strong> Understand return on investment for each marketing channel</li>
@@ -88,13 +196,13 @@ def render():
     
     st.markdown("---")
     
-    # Create tabs for main sections
+    # Create tabs for main sections - NO EMOJIS
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📈 Forecasting",
-        "📢 Channel Optimization",
-        "📅 Timing Analysis",
-        "💰 Budget Allocation",
-        "🎯 Model Performance"
+        "Forecasting",
+        "Channels",
+        "Timing",
+        "Budget",
+        "Performance"
     ])
     
     # Tab 1: Forecasting Section
@@ -121,7 +229,7 @@ def render():
     st.divider()
     st.markdown(f"""
     <div style="text-align: center; color: #6b7280; font-size: 14px;">
-        <p>📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        <p>Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
         <p style="font-size: 12px; color: #9ca3af;">
             Predictions are based on historical data and should be used as guidance, not guarantees.
         </p>
@@ -131,14 +239,16 @@ def render():
 
 def render_forecasting_section(preprocessor: DataPreprocessor, conn):
     """Render the forecasting section UI"""
-    st.markdown("### 📈 Time Series Forecasting")
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Time Series Forecasting</h3>", unsafe_allow_html=True)
     st.markdown("""
+    <p style='text-align: center; color: #666; margin-bottom: 30px;'>
     Generate predictions for future inquiries, applications, and enrollments with confidence intervals.
     The system automatically selects the best forecasting model based on your data characteristics.
-    """)
+    </p>
+    """, unsafe_allow_html=True)
     
     # Explanatory text about methodology
-    with st.expander("ℹ️ About Forecasting Methodology", expanded=False):
+    with st.expander("About Forecasting Methodology", expanded=False):
         st.markdown("""
         **How It Works:**
         - **Prophet Model** (24+ months of data): Advanced time series model with automatic seasonality detection
@@ -191,7 +301,7 @@ def render_forecasting_section(preprocessor: DataPreprocessor, conn):
             'anticipated_cohort_size': 'Anticipated Cohort Size'
         }
         selected_metric = st.selectbox(
-            "📊 Metric",
+            "Metric",
             options=list(metric_options.keys()),
             format_func=lambda x: metric_options[x],
             help="Select the metric to forecast"
@@ -290,7 +400,7 @@ def render_forecasting_section(preprocessor: DataPreprocessor, conn):
                 st.plotly_chart(fig, use_container_width=True)
                 
                 # Display predictions table
-                st.markdown("#### 📋 Forecast Details")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Forecast Details</h4>", unsafe_allow_html=True)
                 
                 # Format predictions for display
                 display_df = predictions.copy()
@@ -423,14 +533,16 @@ def create_forecast_chart(
 
 def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
     """Render the channel optimization section UI"""
-    st.markdown("### 📢 Marketing Channel Optimization")
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Marketing Channel Optimization</h3>", unsafe_allow_html=True)
     st.markdown("""
+    <p style='text-align: center; color: #666; margin-bottom: 30px;'>
     Identify the most effective marketing channels for each program based on ROI and performance metrics.
     Recommendations consider spend efficiency, conversion rates, and consistency over time.
-    """)
+    </p>
+    """, unsafe_allow_html=True)
     
     # Explanatory text about methodology
-    with st.expander("ℹ️ About Channel Optimization", expanded=False):
+    with st.expander("About Channel Optimization", expanded=False):
         st.markdown("""
         **Effectiveness Score Components:**
         - **ROI (40%)**: Return on investment based on admissions value vs. marketing spend
@@ -440,13 +552,13 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
         
         **ROI Calculation:**
         - ROI = (Admissions Value - Marketing Spend) / Marketing Spend
-        - Admissions Value = Number of Accepted Students × Program Tuition Estimate
+        - Admissions Value = Number of Accepted Students * Program Tuition Estimate
         - Marketing spend is lagged by 2 months to account for conversion time
         
         **Color Indicators:**
-        - 🟢 Green: High ROI (> 2.0)
-        - 🟡 Yellow: Medium ROI (1.0 - 2.0)
-        - 🔴 Red: Low ROI (< 1.0)
+        - Green: High ROI (> 2.0)
+        - Yellow: Medium ROI (1.0 - 2.0)
+        - Red: Low ROI (< 1.0)
         """)
     
     st.markdown("---")
@@ -468,7 +580,7 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
     with col2:
         # Number of top channels to show
         top_n = st.selectbox(
-            "📊 Top Channels",
+            "Top Channels",
             options=[3, 5, 10],
             index=0,
             help="Number of top channels to display"
@@ -506,7 +618,7 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
                 st.markdown("---")
                 
                 # Create visualization
-                st.markdown("#### 📊 Top Channel Recommendations")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Top Channel Recommendations</h4>", unsafe_allow_html=True)
                 
                 # Prepare data for visualization
                 channels = [rec[0] for rec in recommendations]
@@ -567,7 +679,7 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
                 st.plotly_chart(fig, use_container_width=True)
                 
                 # Display detailed metrics table
-                st.markdown("#### 📋 Channel Performance Details")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Channel Performance Details</h4>", unsafe_allow_html=True)
                 
                 # Get detailed ROI data for all recommended channels
                 roi_data = optimizer.calculate_roi(selected_program)
@@ -588,9 +700,9 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
                 
                 # Add ROI indicator
                 display_df['roi_indicator'] = display_df['roi'].apply(lambda x: 
-                    '🟢 High' if float(x) > 2.0 else 
-                    '🟡 Medium' if float(x) >= 1.0 else 
-                    '🔴 Low'
+                    'High' if float(x) > 2.0 else 
+                    'Medium' if float(x) >= 1.0 else 
+                    'Low'
                 )
                 
                 # Rename columns
@@ -615,7 +727,7 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
                 # Show performance history for top channel
                 if len(recommendations) > 0:
                     st.markdown("---")
-                    st.markdown(f"#### 📈 Performance History - {recommendations[0][0]}")
+                    st.markdown(f"<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Performance History - {recommendations[0][0]}</h4>", unsafe_allow_html=True)
                     
                     top_channel = recommendations[0][0]
                     history = optimizer.get_channel_performance_history(selected_program, top_channel)
@@ -686,17 +798,19 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
 
 def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
     """Render the timing analysis section UI"""
-    st.markdown("### 📅 Marketing Timing Analysis")
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Marketing Timing Analysis</h3>", unsafe_allow_html=True)
     st.markdown("""
+    <p style='text-align: center; color: #666; margin-bottom: 30px;'>
     Discover optimal months for marketing investments based on seasonal patterns and conversion rates.
     Identify when your target audience is most responsive to marketing efforts.
-    """)
+    </p>
+    """, unsafe_allow_html=True)
     
     # Explanatory text about methodology
-    with st.expander("ℹ️ About Timing Analysis", expanded=False):
+    with st.expander("About Timing Analysis", expanded=False):
         st.markdown("""
         **How It Works:**
-        - Analyzes historical conversion rates (inquiries → applications) by month
+        - Analyzes historical conversion rates (inquiries to applications) by month
         - Identifies seasonal patterns using autocorrelation analysis
         - Ranks months by effectiveness score combining conversion rate and consistency
         
@@ -728,7 +842,7 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
     with col2:
         # Number of top months to show
         top_n = st.selectbox(
-            "📊 Top Months",
+            "Top Months",
             options=[3, 6, 12],
             index=0,
             help="Number of top months to display"
@@ -761,7 +875,7 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
                 st.markdown("---")
                 
                 # Display seasonal heatmap
-                st.markdown("#### 🌡️ Seasonal Conversion Rate Heatmap")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Seasonal Conversion Rate Heatmap</h4>", unsafe_allow_html=True)
                 
                 heatmap_fig = optimizer.visualize_seasonal_heatmap(selected_program)
                 st.plotly_chart(heatmap_fig, use_container_width=True)
@@ -769,41 +883,34 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
                 st.markdown("---")
                 
                 # Display ranked list of recommended months
-                st.markdown("#### 📋 Recommended Months (Ranked by Effectiveness)")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Recommended Months (Ranked by Effectiveness)</h4>", unsafe_allow_html=True)
                 
                 # Create a nice display for recommendations
                 for i, (month, effectiveness, conversion_rate) in enumerate(recommendations, 1):
                     # Determine badge color based on rank
                     if i == 1:
                         badge_color = "#28a745"  # Green
-                        badge_text = "🥇 Best"
+                        badge_text = "Best"
                     elif i == 2:
                         badge_color = "#ffc107"  # Yellow
-                        badge_text = "🥈 2nd"
+                        badge_text = "2nd"
                     elif i == 3:
                         badge_color = "#fd7e14"  # Orange
-                        badge_text = "🥉 3rd"
+                        badge_text = "3rd"
                     else:
                         badge_color = "#6c757d"  # Gray
                         badge_text = f"#{i}"
                     
+                    # Format conversion rate as percentage
+                    conv_rate_pct = f"{conversion_rate * 100:.1f}%"
+                    effectiveness_str = f"{effectiveness:.1f}"
+                    
                     # Create card for each month
-                    st.markdown(f"""
-                    <div style="background: white;
-                                border: 2px solid {badge_color};
-                                border-radius: 12px;
-                                padding: 15px;
-                                margin: 10px 0;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    card_html = f"""
+                    <div style="background: white; border: 2px solid {badge_color}; border-radius: 12px; padding: 15px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <span style="background: {badge_color};
-                                           color: white;
-                                           padding: 4px 12px;
-                                           border-radius: 20px;
-                                           font-size: 12px;
-                                           font-weight: bold;
-                                           margin-right: 10px;">
+                                <span style="background: {badge_color}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 10px;">
                                     {badge_text}
                                 </span>
                                 <span style="font-size: 20px; font-weight: bold; color: #500000;">
@@ -812,7 +919,7 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
                             </div>
                             <div style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: {badge_color};">
-                                    {effectiveness:.1f}
+                                    {effectiveness_str}
                                 </div>
                                 <div style="font-size: 12px; color: #6c757d;">
                                     Effectiveness Score
@@ -821,15 +928,16 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
                         </div>
                         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
                             <span style="color: #6c757d; font-size: 14px;">
-                                Avg Conversion Rate: <strong style="color: #500000;">{conversion_rate:.1%}</strong>
+                                Avg Conversion Rate: <strong style="color: #500000;">{conv_rate_pct}</strong>
                             </span>
                         </div>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """
+                    st.markdown(card_html, unsafe_allow_html=True)
                 
                 # Display seasonal pattern analysis
                 st.markdown("---")
-                st.markdown("#### 📊 Seasonal Pattern Analysis")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Seasonal Pattern Analysis</h4>", unsafe_allow_html=True)
                 
                 # Get full seasonal data
                 seasonal_data = optimizer.analyze_seasonal_patterns(selected_program)
@@ -855,7 +963,7 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
                         marker=dict(size=10),
                         fill='tozeroy',
                         fillcolor='rgba(80, 0, 0, 0.1)',
-                        hovertemplate='<b>%{x}</b><br>Conversion Rate: %{y:.1%}<extra></extra>'
+                        hovertemplate='<b>%{x}</b><br>Conversion Rate: %{y:.1f}%<extra></extra>'
                     ))
                     
                     fig_seasonal.update_layout(
@@ -886,7 +994,7 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
                     # Display data table
                     display_df = seasonal_data.copy()
                     display_df['month_name'] = display_df['month'].map(month_names)
-                    display_df['avg_conversion_rate'] = display_df['avg_conversion_rate'].apply(lambda x: f"{x:.1%}")
+                    display_df['avg_conversion_rate'] = display_df['avg_conversion_rate'].apply(lambda x: f"{x * 100:.1f}%")
                     display_df['consistency_score'] = display_df['consistency_score'].apply(lambda x: f"{x:.2f}")
                     
                     display_df = display_df.rename(columns={
@@ -910,14 +1018,16 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
 
 def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
     """Render the budget allocation section UI"""
-    st.markdown("### 💰 Budget Allocation Recommendations")
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Budget Allocation Recommendations</h3>", unsafe_allow_html=True)
     st.markdown("""
+    <p style='text-align: center; color: #666; margin-bottom: 30px;'>
     Get data-driven recommendations for distributing your marketing budget across programs and channels.
     Maximize ROI by allocating resources to the most effective combinations.
-    """)
+    </p>
+    """, unsafe_allow_html=True)
     
     # Explanatory text about methodology
-    with st.expander("ℹ️ About Budget Allocation", expanded=False):
+    with st.expander("About Budget Allocation", expanded=False):
         st.markdown("""
         **How It Works:**
         - Ranks program-channel combinations by effectiveness score and ROI
@@ -932,7 +1042,7 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
         - **ROI**: Expected return on investment
         
         **Sensitivity Analysis:**
-        - Shows how outcomes change with ±20% budget adjustments
+        - Shows how outcomes change with +/-20% budget adjustments
         - Helps understand the impact of budget changes on expected results
         """)
     
@@ -965,7 +1075,7 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
         )
     
     # Interactive slider for budget adjustment
-    st.markdown("#### 🎚️ Budget Adjustment Slider")
+    st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Budget Adjustment Slider</h4>", unsafe_allow_html=True)
     budget_multiplier = st.slider(
         "Adjust budget to see impact on allocations",
         min_value=0.5,
@@ -1083,7 +1193,7 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
                 st.markdown("---")
                 
                 # Display summary metrics
-                st.markdown("#### 📊 Allocation Summary")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Allocation Summary</h4>", unsafe_allow_html=True)
                 
                 col1, col2, col3, col4 = st.columns(4)
                 
@@ -1118,7 +1228,7 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
                 st.markdown("---")
                 
                 # Display allocation chart
-                st.markdown("#### 💰 Budget Allocation by Program and Channel")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Budget Allocation by Program and Channel</h4>", unsafe_allow_html=True)
                 
                 # Create stacked bar chart by program
                 fig_allocation = go.Figure()
@@ -1158,7 +1268,7 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
                 st.plotly_chart(fig_allocation, use_container_width=True)
                 
                 # Display detailed allocation table
-                st.markdown("#### 📋 Detailed Allocation Breakdown")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Detailed Allocation Breakdown</h4>", unsafe_allow_html=True)
                 
                 display_df = all_allocations.copy()
                 display_df['allocated_budget'] = display_df['allocated_budget'].apply(lambda x: f"${x:,.2f}")
@@ -1192,18 +1302,18 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
                 
                 # Sensitivity analysis
                 st.markdown("---")
-                st.markdown("#### 📈 Sensitivity Analysis")
+                st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Sensitivity Analysis</h4>", unsafe_allow_html=True)
                 
-                st.info("""
+                low_budget = f"${adjusted_budget * 0.8:,.2f}"
+                base_budget = f"${adjusted_budget:,.2f}"
+                high_budget = f"${adjusted_budget * 1.2:,.2f}"
+                
+                st.info(f"""
                 **Budget Scenarios:**
-                - **Low (-20%)**: ${:,.2f}
-                - **Base (100%)**: ${:,.2f}
-                - **High (+20%)**: ${:,.2f}
-                """.format(
-                    adjusted_budget * 0.8,
-                    adjusted_budget,
-                    adjusted_budget * 1.2
-                ))
+                - **Low (-20%)**: {low_budget}
+                - **Base (100%)**: {base_budget}
+                - **High (+20%)**: {high_budget}
+                """)
                 
                 # Create comparison chart
                 scenarios = ['Low (-20%)', 'Base (100%)', 'High (+20%)']
@@ -1260,14 +1370,17 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
 
 def render_model_performance_section(conn):
     """Render the model performance dashboard section UI"""
-    st.markdown("### 🎯 Model Performance Dashboard")
+    st.markdown("<h3 style='text-align: center; color: #500000;'>Model Performance Dashboard</h3>", unsafe_allow_html=True)
     st.markdown("""
+    <p style='text-align: center; color: #666; margin-bottom: 30px;'>
     Track prediction accuracy and model health over time. Monitor how well forecasting models
-    perform against actual outcomes to ensure reliable recommendations.
-    """)
+    are performing and identify when retraining may be needed. Evaluate how models perform against 
+    actual outcomes to ensure reliable recommendations.
+    </p>
+    """, unsafe_allow_html=True)
     
     # Explanatory text
-    with st.expander("ℹ️ About Model Performance Tracking", expanded=False):
+    with st.expander("About Model Performance Tracking", expanded=False):
         st.markdown("""
         **Performance Metrics:**
         - **MAPE** (Mean Absolute Percentage Error): Average percentage error, lower is better
@@ -1275,9 +1388,9 @@ def render_model_performance_section(conn):
         - **MAE** (Mean Absolute Error): Average absolute error, lower is better
         
         **Model Health Status:**
-        - 🟢 **Healthy**: MAPE < 15% - Model is performing well
-        - 🟡 **Warning**: MAPE 15-25% - Model performance is acceptable but could be improved
-        - 🔴 **Needs Retraining**: MAPE > 25% - Model should be retrained with recent data
+        - **Healthy**: MAPE < 15% - Model is performing well
+        - **Warning**: MAPE 15-25% - Model performance is acceptable but could be improved
+        - **Needs Retraining**: MAPE > 25% - Model should be retrained with recent data
         
         **Why Track Performance:**
         - Ensures predictions remain accurate as conditions change
@@ -1295,7 +1408,7 @@ def render_model_performance_section(conn):
         
         if not has_predictions_table:
             st.info("""
-            📊 **Model Performance Tracking**
+            **Model Performance Tracking**
             
             The model performance dashboard will display accuracy metrics once predictions are generated and validated.
             
@@ -1304,7 +1417,7 @@ def render_model_performance_section(conn):
             2. Wait for actual outcomes to become available
             3. Return here to see how accurate the predictions were
             
-            **What you'll see:**
+            **What you will see:**
             - Accuracy trends over time
             - Current MAPE values for all models
             - Warnings if model performance degrades
@@ -1331,7 +1444,7 @@ def render_model_performance_section(conn):
         
         if predictions_df.empty:
             st.info("""
-            📊 **No Predictions Yet**
+            **No Predictions Yet**
             
             Start generating forecasts in the Forecasting tab to see performance metrics here.
             
@@ -1344,7 +1457,7 @@ def render_model_performance_section(conn):
             return
         
         # Display current model status
-        st.markdown("#### 🎯 Current Model Status")
+        st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Current Model Status</h4>", unsafe_allow_html=True)
         
         # Calculate MAPE for each model type
         model_performance = []
@@ -1376,13 +1489,13 @@ def render_model_performance_section(conn):
                 
                 # Determine status
                 if mape < 15:
-                    status = "🟢 Healthy"
+                    status = "Healthy"
                     status_color = "#28a745"
                 elif mape < 25:
-                    status = "🟡 Warning"
+                    status = "Warning"
                     status_color = "#ffc107"
                 else:
-                    status = "🔴 Needs Retraining"
+                    status = "Needs Retraining"
                     status_color = "#dc3545"
                 
                 model_performance.append({
@@ -1401,13 +1514,12 @@ def render_model_performance_section(conn):
             
             for i, model in enumerate(model_performance):
                 with cols[i % 3]:
+                    mape_str = f"{model['mape']:.2f}%"
+                    rmse_str = f"{model['rmse']:.2f}"
+                    mae_str = f"{model['mae']:.2f}"
+                    
                     st.markdown(f"""
-                    <div style="background: white;
-                                border: 2px solid {model['status_color']};
-                                border-radius: 12px;
-                                padding: 15px;
-                                margin: 10px 0;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="background: white; border: 2px solid {model['status_color']}; border-radius: 12px; padding: 15px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <div style="font-size: 18px; font-weight: bold; color: #500000; margin-bottom: 10px;">
                             {model['model_type']} Model
                         </div>
@@ -1415,13 +1527,13 @@ def render_model_performance_section(conn):
                             <strong>Status:</strong> {model['status']}
                         </div>
                         <div style="font-size: 14px; margin-bottom: 5px;">
-                            <strong>MAPE:</strong> {model['mape']:.2f}%
+                            <strong>MAPE:</strong> {mape_str}
                         </div>
                         <div style="font-size: 14px; margin-bottom: 5px;">
-                            <strong>RMSE:</strong> {model['rmse']:.2f}
+                            <strong>RMSE:</strong> {rmse_str}
                         </div>
                         <div style="font-size: 14px; margin-bottom: 5px;">
-                            <strong>MAE:</strong> {model['mae']:.2f}
+                            <strong>MAE:</strong> {mae_str}
                         </div>
                         <div style="font-size: 12px; color: #6c757d; margin-top: 10px;">
                             Based on {model['predictions_count']} validated predictions
@@ -1432,7 +1544,7 @@ def render_model_performance_section(conn):
             st.markdown("---")
             
             # Display accuracy trends over time
-            st.markdown("#### 📈 Accuracy Trends Over Time")
+            st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Accuracy Trends Over Time</h4>", unsafe_allow_html=True)
             
             # Calculate MAPE by prediction date
             predictions_with_actuals = predictions_df[predictions_df['actual_value'].notna()].copy()
@@ -1526,7 +1638,7 @@ def render_model_performance_section(conn):
             st.markdown("---")
             
             # Display prediction errors distribution
-            st.markdown("#### 📊 Prediction Error Distribution")
+            st.markdown("<h4 style='text-align: center; color: #500000; margin-top: 30px;'>Prediction Error Distribution</h4>", unsafe_allow_html=True)
             
             if not predictions_with_actuals.empty:
                 # Create histogram of errors
@@ -1558,7 +1670,7 @@ def render_model_performance_section(conn):
         
         else:
             st.info("""
-            📊 **Waiting for Validation Data**
+            **Waiting for Validation Data**
             
             Predictions have been generated, but actual outcomes are not yet available for validation.
             

@@ -257,10 +257,19 @@ def render():
             
             tab_labels = []
             for table in available_tables:
-                icon = table_icons.get(table, '📋')
-                # Format table name nicely
+                # Format table name nicely - remove emojis and simplify names
                 display_name = table.replace('_', ' ').title()
-                tab_labels.append(f"{icon} {display_name}")
+                # Simplify multi-word names to single words where possible
+                name_mapping = {
+                    'Admissions Metrics': 'Admissions',
+                    'Marketing Metrics': 'Marketing',
+                    'Marketing Campaigns': 'Campaigns',
+                    'Marketing Spend': 'Spend',
+                    'Inquiry Sources': 'Sources',
+                    'Sqlite Sequence': 'System'
+                }
+                display_name = name_mapping.get(display_name, display_name)
+                tab_labels.append(display_name)
             
             tabs = st.tabs(tab_labels)
             

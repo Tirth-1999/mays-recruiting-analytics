@@ -76,7 +76,7 @@ def render():
                     background: #e9ecef;
                     border-radius: 8px;
                     margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Current Stats - Class of {}</h3>
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Current Stats - Class of {}</h3>
             <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
                 All metrics below are specific to the {} cohort • Last updated: {}
             </p>
@@ -94,33 +94,49 @@ def render():
         }
         .metric-box {
             background: white;
-            padding: 1.5rem;
+            padding: 1.5rem 1rem;
             border-radius: 12px;
             border: 1px solid #e0e0e0;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
+            text-align: center !important;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
+        .metric-box * {
+            text-align: center !important;
+        }
         .metric-number {
             color: #500000;
-            margin: 0;
-            font-size: 2.5rem;
+            margin: 0 auto !important;
+            padding: 0 0 0 20px !important;
+            font-size: 1.8rem;
             font-weight: bold;
             line-height: 1.2;
+            text-align: center !important;
+            width: 100%;
+            display: block;
         }
         .metric-label {
-            margin: 10px 0 5px 0;
+            margin: 10px auto 5px auto !important;
+            padding: 0 !important;
             color: #495057;
             font-weight: 600;
             font-size: 1rem;
             line-height: 1.3;
+            text-align: center !important;
+            width: 100%;
+            display: block;
         }
         .metric-small {
             color: #6c757d;
             font-size: 0.875rem;
+            text-align: center !important;
+            width: 100%;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            display: block;
         }
         @media (max-width: 768px) {
             .metrics-container {
@@ -146,22 +162,22 @@ def render():
         st.markdown(f"""
         <div class="metrics-container">
             <div class="metric-box">
-                <h2 class="metric-number">🎯 {int(total_cohort) if pd.notna(total_cohort) else 0}</h2>
+                <h2 class="metric-number">{int(total_cohort) if pd.notna(total_cohort) else 0}</h2>
                 <p class="metric-label">Enrolled Students</p>
                 <small class="metric-small">as of {latest_date.strftime('%b %d')}</small>
             </div>
             <div class="metric-box">
-                <h2 class="metric-number">📝 {int(total_applications) if pd.notna(total_applications) else 0}</h2>
+                <h2 class="metric-number">{int(total_applications) if pd.notna(total_applications) else 0}</h2>
                 <p class="metric-label">Total Applications</p>
                 <small class="metric-small">submitted</small>
             </div>
             <div class="metric-box">
-                <h2 class="metric-number">👥 {int(total_inquiries) if pd.notna(total_inquiries) else 0}</h2>
+                <h2 class="metric-number">{int(total_inquiries) if pd.notna(total_inquiries) else 0}</h2>
                 <p class="metric-label">Total Inquiries</p>
                 <small class="metric-small">received</small>
             </div>
             <div class="metric-box">
-                <h2 class="metric-number" style="color: {conversion_color};">📈 {conversion_rate:.1f}%</h2>
+                <h2 class="metric-number" style="color: {conversion_color};">{conversion_rate:.1f}%</h2>
                 <p class="metric-label">Conversion Rate</p>
                 <small class="metric-small">Inquiry → Application</small>
             </div>
@@ -178,7 +194,7 @@ def render():
                     background: #e9ecef;
                     border-radius: 8px;
                     margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0; font-size: 20px;">🎯 Admissions Funnel - Class of {}</h3>
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Admissions Funnel - Class of {}</h3>
             <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
                 Single-cohort analysis showing the complete application journey
             </p>
@@ -189,7 +205,7 @@ def render():
         col_spacer1, col_toggle, col_spacer2 = st.columns([2, 1, 2])
         with col_toggle:
             if st.button(
-                f"📊 {'Log' if st.session_state.home_funnel_log_scale else 'Linear'} Scale",
+                f"{'Log' if st.session_state.home_funnel_log_scale else 'Linear'} Scale",
                 key="toggle_log_funnel_home",
                 use_container_width=True,
                 type="secondary"
@@ -247,7 +263,7 @@ def render():
                     background: #e9ecef;
                     border-radius: 8px;
                     margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Program Comparison</h3>
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Program Comparison</h3>
         </div>
         """, unsafe_allow_html=True)
         
@@ -315,7 +331,7 @@ def render():
         
         with filter_col5:
             if st.button(
-                f"📊 {'Log' if st.session_state.prog_home_log_scale else 'Linear'} Scale",
+                f"{'Log' if st.session_state.prog_home_log_scale else 'Linear'} Scale",
                 key="toggle_log_prog_home",
                 use_container_width=True,
                 type="secondary"
@@ -402,7 +418,7 @@ def render():
                     background: #e9ecef;
                     border-radius: 8px;
                     margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0; font-size: 20px;">📊 Trend Analysis</h3>
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Trend Analysis</h3>
         </div>
         """, unsafe_allow_html=True)
         
@@ -429,10 +445,10 @@ def render():
             col1, col2 = st.columns(2)
             
             with col1:
-                st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Application & Inquiry Trends</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='text-align: center; color: #500000;'>Application & Inquiry Trends</h4>", unsafe_allow_html=True)
                 
                 # Toggle buttons for line selection
-                st.markdown("**📊 Select Lines to Display:**")
+                st.markdown("**Select Lines to Display:**")
                 filter_col1, filter_col2 = st.columns(2)
                 
                 with filter_col1:
@@ -500,10 +516,10 @@ def render():
                 st.plotly_chart(fig_trend1, use_container_width=True)
             
             with col2:
-                st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Conversion Rates Over Time</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='text-align: center; color: #500000;'>Conversion Rates Over Time</h4>", unsafe_allow_html=True)
                 
                 # Toggle buttons for conversion rates
-                st.markdown("**📊 Select Conversion Metrics:**")
+                st.markdown("**Select Conversion Metrics:**")
                 conv_filter_col1, conv_filter_col2 = st.columns(2)
                 
                 with conv_filter_col1:
@@ -597,7 +613,7 @@ def render():
     with footer_col1:
         st.markdown(f"""
         <div class="footer-left footer-content" style="text-align: left;">
-            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
         </div>
         """, unsafe_allow_html=True)
     with footer_col2:

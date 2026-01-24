@@ -87,6 +87,20 @@ def process_table_display(conn, selected_table):
         if selected_table in table_descriptions:
             desc = table_descriptions[selected_table]
             
+            # Create individual question boxes
+            question_boxes = ''.join([
+                f'''<div style="background: white;
+                            padding: 15px 20px;
+                            border-radius: 6px;
+                            margin: 8px 0;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                            flex: 1;
+                            min-width: 0;">
+                    <p style="margin: 0; color: #495057; font-size: 14px; line-height: 1.5;">{q}</p>
+                </div>'''
+                for q in desc['questions']
+            ])
+            
             st.markdown(f"""
             <div style="text-align: center;
                         padding: 20px;
@@ -94,18 +108,17 @@ def process_table_display(conn, selected_table):
                         border-radius: 8px;
                         margin: 20px 0;">
                 <h4 style="color: #500000; margin-top: 0; margin-bottom: 15px; font-size: 18px;">
-                    {desc['icon']} {desc['title']}
+                    {desc['title']}
                 </h4>
                 <p style="margin: 0 0 15px 0; color: #495057; font-weight: 600; font-size: 15px;">
                     💡 What questions can this table help answer?
                 </p>
-                <div style="background: white;
-                            padding: 15px 20px;
-                            border-radius: 6px;
-                            max-width: 700px;
-                            margin: 0 auto;
-                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    {''.join([f'<p style="margin: 8px 0; color: #495057; font-size: 14px; line-height: 1.5;">{q}</p>' for q in desc['questions']])}
+                <div style="display: flex;
+                            flex-direction: column;
+                            gap: 8px;
+                            max-width: 800px;
+                            margin: 0 auto;">
+                    {question_boxes}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -142,8 +155,12 @@ def process_table_display(conn, selected_table):
         
         # FILTERS SECTION with header
         st.markdown("""
-        <div class="section-header">
-            <h3>🔍 Filter & Explore Data</h3>
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Filter & Explore Data</h3>
         </div>
         """, unsafe_allow_html=True)
         
@@ -233,8 +250,12 @@ def process_table_display(conn, selected_table):
             
             # DATA DISPLAY SECTION with header
             st.markdown("""
-            <div class="section-header">
-                <h3>📊 Data Table</h3>
+            <div style="text-align: center;
+                        padding: 15px;
+                        background: #e9ecef;
+                        border-radius: 8px;
+                        margin: 20px 0;">
+                <h3 style="color: #500000; margin: 0; font-size: 20px;">Data Table</h3>
             </div>
             """, unsafe_allow_html=True)
             

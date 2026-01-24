@@ -107,7 +107,7 @@ def render():
                     background: #e9ecef;
                     border-radius: 8px;
                     margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0; font-size: 20px;">🔍 Full Deep Dive - Class of {}</h3>
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Full Deep Dive - Class of {}</h3>
             <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
                 Complete analytics suite with advanced insights and predictive analysis
             </p>
@@ -156,32 +156,32 @@ def render():
         st.markdown(f"""
         <div class="full-metrics-container">
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">👥 {int(inquiries)}</h2>
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(inquiries)}</h2>
                 <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Inquiries</p>
                 <small style="color: #6c757d; font-size: 0.8rem;">Total received</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">📝 {int(applications)}</h2>
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(applications)}</h2>
                 <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Applications</p>
                 <small style="color: {'#28a745' if conversion_1 > 30 else '#ffc107' if conversion_1 > 20 else '#dc3545'}; font-size: 0.8rem;">{conversion_1:.1f}% conv.</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">⏳ {int(in_progress)}</h2>
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(in_progress)}</h2>
                 <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">In Progress</p>
                 <small style="color: #6c757d; font-size: 0.8rem;">Applications</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">✅ {int(complete)}</h2>
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(complete)}</h2>
                 <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Complete</p>
                 <small style="color: #6c757d; font-size: 0.8rem;">Applications</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">🎓 {int(offers)}</h2>
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(offers)}</h2>
                 <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Offers</p>
                 <small style="color: #6c757d; font-size: 0.8rem;">{conversion_2:.1f}% rate</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem;">🎯 {int(enrolled)}</h2>
+                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(enrolled)}</h2>
                 <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Enrolled</p>
                 <small style="color: {'#28a745' if yield_rate > 70 else '#ffc107' if yield_rate > 50 else '#dc3545'}; font-size: 0.8rem;">{yield_rate:.1f}% yield</small>
             </div>
@@ -322,11 +322,11 @@ def render():
         ).fillna(0).reset_index()
         
         # Tab content using native Streamlit tabs (Chrome-style)
-        tab1, tab2, tab3, tab4 = st.tabs(["📊 Performance Analysis", "📈 Trend Analysis", "🎓 Program Deep Dive", "📋 Data Tables"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Performance Analysis", "Trend Analysis", "Program Deep Dive", "Data Tables"])
         
         with tab1:
             # Complete conversion funnel with log scale toggle - FULL WIDTH
-            st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Complete Conversion Funnel</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; color: #500000;'>Complete Conversion Funnel</h4>", unsafe_allow_html=True)
             
             # Initialize log scale state for full deep dive funnel
             if 'exec_full_funnel_log' not in st.session_state:
@@ -385,7 +385,7 @@ def render():
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
             # Performance metrics radar chart - FULL WIDTH
-            st.markdown("<h4 style='text-align: center; color: #500000;'>📈 Performance Radar</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; color: #500000;'>Performance Radar</h4>", unsafe_allow_html=True)
             
             metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
             values = [
@@ -420,7 +420,7 @@ def render():
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
             # Correlation analysis - full width with better color scale
-            st.markdown("<h4 style='text-align: center; color: #500000;'>📊 Correlation Matrix</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; color: #500000;'>Correlation Matrix</h4>", unsafe_allow_html=True)
             
             if not complete_data.empty:
                 numeric_data = complete_data.select_dtypes(include=[np.number])
@@ -450,7 +450,7 @@ def render():
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
             # Performance benchmarks - full width stretched layout with center alignment
-            st.markdown("<h4 style='text-align: center; color: #500000;'>🎯 Performance Benchmarks</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; color: #500000;'>Performance Benchmarks</h4>", unsafe_allow_html=True)
             
             # Add CSS to center-align metrics while preserving styling
             st.markdown("""
