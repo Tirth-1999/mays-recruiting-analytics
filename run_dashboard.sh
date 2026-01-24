@@ -32,5 +32,6 @@ fi
 
 # Start Streamlit using venv's streamlit
 echo "📊 Launching dashboard at http://localhost:8501"
+echo "🌐 Live deployment available at: https://mays-recruiting-analytics.streamlit.app/"
 echo ""
 venv/bin/streamlit run main_app.py --server.port 8501

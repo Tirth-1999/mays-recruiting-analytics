@@ -65,6 +65,8 @@ chmod +x run_dashboard.sh
 
 The dashboard will open automatically at `http://localhost:8501`
 
+**Live Deployment:** You can also access the dashboard at https://mays-recruiting-analytics.streamlit.app/
+
 ## First Time Setup
 
 ### Verify Installation
@@ -90,7 +92,7 @@ The dashboard will open automatically at `http://localhost:8501`
 
 ### Test the Application
 
-1. Open browser to `http://localhost:8501`
+1. Open browser to `http://localhost:8501` (or visit https://mays-recruiting-analytics.streamlit.app/)
 2. Navigate through all 6 pages:
    - 🏠 Home Dashboard
    - 📊 Executive Deep Dive

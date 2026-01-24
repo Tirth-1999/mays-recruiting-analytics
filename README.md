@@ -108,7 +108,7 @@ python3 marketing_etl.py
 streamlit run main_app.py
 ```
 
-Dashboard opens at `http://localhost:8501`
+Dashboard opens at `http://localhost:8501` (or visit the live deployment at https://mays-recruiting-analytics.streamlit.app/)
 
 For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md).
 
