@@ -4,6 +4,93 @@ Complete version-controlled history of the Mays Analytics Platform, documenting 
 
 ---
 
+## Version 4.4 - Navigation & UX Enhancements (Final)
+**Release Date**: January 24, 2026  
+**Status**: Current Release  
+**Type**: Minor Release
+
+### 🎨 User Experience Improvements
+
+#### Back to Top Button - Chevron Style
+- **Design**: Circular button (56px) with triangle chevron icon (▲)
+- **Position**: Fixed bottom-right corner (30px from edges)
+- **Animation**: Smooth 2.5-second scroll with ease-in-out easing
+- **Styling**: Maroon gradient, white icon, semi-transparent border
+- **Hover Effects**: Lift 3px, scale to 1.03, enhanced shadow
+- **Mobile**: Responsive sizing (50px on mobile devices)
+
+#### Sidebar Behavior
+- **Initial State**: Changed to "collapsed" (starts closed)
+- **Overlay Mode**: Sidebar overlays content (no shifting)
+- **User Control**: Users open sidebar when needed
+
+#### Scroll Animation
+- **Duration**: 2.5 seconds for smooth, visible scrolling
+- **Easing**: Ease-in-out quad for natural movement
+- **Implementation**: Custom JavaScript with `requestAnimationFrame`
+
+### 🔧 Technical Implementation
+- Used `st.components.html` for proper JavaScript execution
+- Global function for cross-iframe communication
+- CSS smooth scroll behavior as fallback
+- Mobile breakpoint at 768px
+
+### 📊 Files Modified
+- `main_app.py` - Back-to-top button, scroll animation, sidebar config
+- `version.py` - Updated to 4.4
+
+---
+
+## Version 4.3 - Navigation & UX Enhancements (Initial)
+**Release Date**: January 24, 2026  
+**Type**: Minor Release
+
+### 🎨 User Experience Improvements
+
+#### Floating "Back to Top" Button
+- **Beautiful Design**: Rounded square (56x56px) with maroon gradient background
+- **White Arrow Icon**: Perfectly centered, 28px size (24px on mobile)
+- **Professional Styling**: 
+  - Deep shadows (8px blur, 24px spread)
+  - Glassmorphism with backdrop blur
+  - Subtle white semi-transparent border
+  - Smooth cubic-bezier animations
+- **Hover Effects**: Lifts 4px, scales to 105%, darker gradient
+- **Mobile Responsive**: Adapts to 48x48px on smaller screens
+- **Fixed Position**: Bottom-right corner (30px from edges)
+- **Functionality**: Scrolls to absolute top of page including headers
+
+#### Sidebar Behavior
+- **Collapsed by Default**: Sidebar starts collapsed for cleaner interface
+- **Overlay Mode**: Never shrinks content when opening/closing
+- **User Control**: Users open sidebar when needed for navigation
+- **No Content Shift**: Content stays in place at all times
+
+#### Scroll Improvements
+- **Smooth Scrolling**: Added smooth scroll behavior to HTML
+- **Proper Anchoring**: Page anchor at absolute top for accurate scroll-to-top
+- **Clean Implementation**: Removed problematic JavaScript, uses anchor links
+
+### 🔧 Technical Implementation
+- Simplified scroll-to-top using CSS anchor links
+- Removed non-working JavaScript scroll attempts
+- Improved button centering with flexbox
+- Enhanced z-index management (999999)
+- Mobile-first responsive design
+- Professional animation timing with cubic-bezier
+
+### 📊 Files Modified
+- `main_app.py` - Added back-to-top button, changed sidebar state, improved scroll
+- `version.py` - Updated to 4.3
+
+### 📈 Impact Metrics
+- **User Experience**: Significantly improved navigation
+- **Design Quality**: Professional, modern button design
+- **Mobile Friendly**: Fully responsive on all devices
+- **Performance**: No JavaScript overhead, pure CSS/HTML
+
+---
+
 ## Version 4.2 - Contact & Feedback Integration
 **Release Date**: January 24, 2026  
 **Status**: Current Release  
@@ -354,6 +441,8 @@ Jan 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **4.4** | Minor | Navigation & UX (Final) | 2 | +120 |
+| **4.3** | Minor | Navigation & UX (Initial) | 2 | +80 |
 | **4.2** | Minor | Contact & Feedback Integration | 8 | +250 |
 | **4.1** | Minor | UI/UX & Responsive Design | 7 | +450 |
 | **4.0** | Major | Predictive Analytics & ML | 11 | +6,701 |
@@ -417,4 +506,4 @@ Jan 2026  ███████████████████████�
 
 ---
 
-**Version History** • Last Updated: January 24, 2026 • Current Version: 4.2
+**Version History** • Last Updated: January 24, 2026 • Current Version: 4.4

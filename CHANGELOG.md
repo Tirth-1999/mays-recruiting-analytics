@@ -7,6 +7,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.4.0] - 2026-01-24
+
+### 🎨 Minor Release - Navigation & UX Enhancements (Final)
+
+#### Added
+- **Back to Top Button - Chevron Style**:
+  - Circular button (56px) with triangle chevron icon (▲)
+  - Maroon gradient background matching platform theme
+  - Smooth 2.5-second scroll animation with easing
+  - Positioned bottom-right (30px from edges)
+  - Hover effects: lift, scale, enhanced shadow
+  - Mobile responsive (50px on mobile)
+  - Always visible on all pages
+
+#### Changed
+- **Sidebar Behavior**:
+  - `initial_sidebar_state` changed to "collapsed"
+  - Sidebar starts closed by default
+  - Overlay mode prevents content shifting
+  - Users open sidebar when needed
+
+- **Scroll Animation**:
+  - Custom JavaScript with `requestAnimationFrame`
+  - 2.5-second duration for smooth, visible scrolling
+  - Ease-in-out quad easing function
+  - Users can see content while scrolling up
+  - Anchor at absolute top of page
+
+#### Design Details
+- Circular border (border-radius: 50%)
+- White triangle chevron (▲) icon
+- Semi-transparent border with glassmorphism
+- Professional shadow (6px blur, 18px spread)
+- 0.4s transition timing
+- Scale to 1.03 on hover
+
+#### Technical Implementation
+- Used `st.components.html` for JavaScript execution
+- Global function for cross-iframe communication
+- CSS smooth scroll as fallback
+- Mobile breakpoint at 768px
+- Z-index: 999999 for always-on-top
+
+#### Files Modified
+- main_app.py: Back-to-top button, scroll animation, sidebar config
+- version.py: Updated to 4.4
+
+#### Impact
+- Enhanced navigation UX
+- Professional floating button
+- Smooth, visible scroll animations
+- Reduced visual clutter
+- Better mobile experience
+
+---
+
+## [4.3.0] - 2026-01-24
+
+### 🎨 Minor Release - Navigation & UX Enhancements (Initial)
+
+#### Added
+- **Floating "Back to Top" Button**:
+  - Beautiful rounded square design (56x56px) with maroon gradient
+  - White upward arrow icon, perfectly centered
+  - Fixed position in bottom-right corner (30px from edges)
+  - Smooth hover animations with lift effect and scale
+  - Professional shadow effects and glassmorphism border
+  - Mobile responsive (48x48px on smaller screens)
+  - Scrolls to absolute top of page including headers
+
+#### Changed
+- **Sidebar Behavior**:
+  - Changed `initial_sidebar_state` from "expanded" to "collapsed"
+  - Sidebar now starts collapsed by default
+  - Users can open when needed for navigation
+  - Content never shifts when sidebar opens/closes (overlay mode)
+
+- **Scroll Behavior**:
+  - Added smooth scroll behavior to HTML
+  - Page anchor placed at absolute top for proper scroll-to-top
+  - Back to top button scrolls to very beginning of content
+
+#### Design Improvements
+- Modern rounded square button (16px border-radius) instead of circle
+- Larger, more clickable button size
+- Enhanced shadow effects (8px blur, 24px spread)
+- Subtle white semi-transparent border for depth
+- Backdrop blur effect for glassmorphism
+- Smooth cubic-bezier easing for professional animations
+- Hover effect: lifts 4px and scales to 105%
+- Active state with reduced lift for tactile feedback
+
+#### Technical
+- Removed non-working JavaScript scroll attempts
+- Simplified scroll-to-top implementation using anchor links
+- Added proper CSS for button centering and responsiveness
+- Improved z-index management (999999) for button visibility
+
+#### Impact
+- Better user experience with easy navigation back to top
+- Cleaner interface with collapsed sidebar by default
+- Professional, modern design matching platform aesthetics
+- Mobile-friendly responsive design
+
+---
+
 ## [4.2.0] - 2026-01-24
 
 ### 🎉 Minor Release - Contact & Feedback Integration

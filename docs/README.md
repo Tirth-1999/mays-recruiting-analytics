@@ -4,6 +4,43 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 4.4
+
+**Navigation & UX Enhancements (Final)** - Released January 24, 2026
+
+Version 4.4 completes the navigation improvements with enhanced scroll functionality:
+
+- 🔼 **Back to Top Button - Chevron Style**: Circular button (56px) with triangle chevron icon (▲)
+- ⏱️ **Smooth 2.5-Second Scroll**: Custom animation with ease-in-out easing for visible content scrolling
+- 📐 **Collapsed Sidebar**: Starts closed by default, overlay mode prevents content shifting
+- 🎨 **Professional Design**: Maroon gradient, white icon, semi-transparent border with glassmorphism
+- 💫 **Hover Effects**: Lift 3px, scale to 1.03, enhanced shadow on hover
+- 📱 **Mobile Responsive**: Adapts to 50px on mobile devices
+- 🔒 **Fixed Position**: Always visible in bottom-right corner (30px from edges)
+- ✨ **Smooth Animation**: Users can see content while scrolling to top
+
+[View complete changelog →](../CHANGELOG.md)
+
+---
+
+## What's New in Version 4.3
+
+**Navigation & UX Enhancements (Initial)** - Released January 24, 2026
+
+Version 4.3 brings significant navigation and user experience improvements:
+
+- 🎯 **Floating "Back to Top" Button**: Beautiful rounded square design with maroon gradient and white arrow icon
+- 📱 **Mobile Responsive**: Button adapts from 56x56px (desktop) to 48x48px (mobile)
+- 🎨 **Professional Styling**: Smooth animations, glassmorphism effects, perfect centering with flexbox
+- 📂 **Collapsed Sidebar**: Sidebar now starts collapsed by default for cleaner interface
+- ⬆️ **Smooth Scrolling**: Instant scroll to absolute top of page including headers
+- 💫 **Hover Effects**: Button lifts 4px and scales to 105% on hover with darker gradient
+- 🔒 **Fixed Position**: Always visible in bottom-right corner (30px from edges)
+
+[View complete changelog →](../CHANGELOG.md)
+
+---
+
 ## What's New in Version 4.2
 
 **Contact & Feedback Integration** - Released January 24, 2026
@@ -91,7 +128,7 @@ MIT License information.
 
 ## Platform Overview
 
-**Current Version:** 4.2  
+**Current Version:** 4.4  
 **Last Updated:** January 24, 2026
 
 ### Analytics Pages
@@ -111,7 +148,13 @@ Class of 2026, 2027, 2028
 ### ML Models
 Prophet, ARIMA, Linear Regression
 
-### Communication Features (New in v4.2)
+### Navigation Features (New in v4.3)
+- Floating "Back to Top" button with professional design
+- Collapsed sidebar by default
+- Smooth scroll behavior
+- Mobile-responsive button sizing
+
+### Communication Features (v4.2)
 - In-app contact & feedback form
 - Email integration with Resend API
 - Multi-select page tagging

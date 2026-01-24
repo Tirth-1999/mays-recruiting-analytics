@@ -3,17 +3,45 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 4.2** | **Last Updated: January 24, 2026**
+**Version 4.4** | **Last Updated: January 24, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-4.2-blue.svg)](VERSIONING.md)
+[![Version](https://img.shields.io/badge/version-4.4-blue.svg)](VERSIONING.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Deployment](DEPLOYMENT.md) • [Changelog](CHANGELOG.md)
 
 </div>
+
+---
+
+## What's New in Version 4.4
+
+**Navigation & UX Enhancements (Final)** - Released January 24, 2026
+
+- 🔼 **Back to Top Button - Chevron Style**: Circular button with triangle icon (▲) and 2.5-second smooth scroll
+- 📐 **Collapsed Sidebar**: Starts closed by default, overlay mode prevents content shifting
+- ✨ **Smooth Animations**: Ease-in-out scrolling with visible content during animation
+- 📱 **Mobile Responsive**: Button adapts to mobile screens (50px)
+- 🎨 **Professional Design**: Maroon gradient, white icon, glassmorphism effects
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
+## What's New in Version 4.3
+
+**Navigation & UX Enhancements (Initial)** - Released January 24, 2026
+
+- 🎯 **Floating "Back to Top" Button**: Beautiful rounded square button with maroon gradient and white arrow
+- 📱 **Mobile Responsive**: Adapts perfectly to all screen sizes
+- 🎨 **Professional Design**: Smooth animations, glassmorphism effects, perfect centering
+- 📂 **Collapsed Sidebar**: Sidebar starts collapsed for cleaner interface
+- ⬆️ **Smooth Scrolling**: Instant scroll to absolute top of page
+
+[View complete changelog →](CHANGELOG.md)
 
 ---
 
@@ -216,6 +244,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 4.1 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 4.3 • Built for Texas A&M Mays Business School
 
 </div>

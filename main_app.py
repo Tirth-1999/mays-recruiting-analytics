@@ -3,6 +3,7 @@ Mays Online Flex Recruiting Analytics Platform
 Single-Page Application with Navigation
 """
 import streamlit as st
+import streamlit.components.v1 as components
 from version import VERSION_FULL
 
 # Page config
@@ -10,7 +11,7 @@ st.set_page_config(
     page_title="Mays Online Flex Recruiting Analytics Platform",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Remove top padding and adjust layout for sidebar
@@ -32,6 +33,10 @@ st.markdown("""
     .stApp > header {
         display: none !important;
     }
+    /* Ensure smooth scroll behavior */
+    section.main {
+        scroll-behavior: auto !important;
+    }
     /* div[data-testid="stToolbar"] {
         display: none !important;
     } */
@@ -41,6 +46,9 @@ st.markdown("""
 # Initialize session state for navigation
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'Home'
+
+# Add anchor at the ABSOLUTE TOP of the page (before everything)
+st.markdown('<div id="page-top" style="position: absolute; top: 0;"></div>', unsafe_allow_html=True)
 
 # CSS for the entire application
 st.markdown("""
@@ -398,10 +406,149 @@ current_page_info = {
 }
 
 current_info = current_page_info[st.session_state.current_page]
+
 st.markdown(f"""
 <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
     <h2 style="margin: 0; color: #500000; font-size: 24px;">{current_info['title']}</h2>
 </div>
+""", unsafe_allow_html=True)
+
+# Add floating "Back to Top" button - Option 6: Chevron Style with Circular Border
+st.markdown("""
+<style>
+    /* Back to Top Button - Chevron Style with Circular Border */
+    .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #500000 0%, #700000 100%);
+        color: white !important;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(80, 0, 0, 0.22);
+        z-index: 999999;
+        transition: all 0.4s ease;
+        text-decoration: none;
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        font-size: 26px;
+        font-weight: bold;
+    }
+    
+    .back-to-top:hover {
+        background: linear-gradient(135deg, #700000 0%, #900000 100%);
+        box-shadow: 0 8px 24px rgba(80, 0, 0, 0.3);
+        transform: translateY(-3px) scale(1.03);
+        border-color: rgba(255, 255, 255, 0.25);
+        color: white !important;
+    }
+    
+    .back-to-top:active {
+        transform: translateY(-1px) scale(1.01);
+        box-shadow: 0 4px 12px rgba(80, 0, 0, 0.25);
+    }
+    
+    .back-to-top-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white !important;
+        line-height: 1;
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Smooth and slow scroll behavior */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    section.main {
+        scroll-behavior: smooth !important;
+    }
+    
+    /* Make scroll animation slower with CSS */
+    @media (prefers-reduced-motion: no-preference) {
+        * {
+            scroll-behavior: smooth;
+        }
+    }
+    
+    /* Slow down the scroll with transition */
+    section.main {
+        scroll-padding-top: 0;
+    }
+    
+    /* Mobile responsive */
+    @media screen and (max-width: 768px) {
+        .back-to-top {
+            width: 50px;
+            height: 50px;
+            bottom: 20px;
+            right: 20px;
+            font-size: 22px;
+        }
+    }
+</style>
+
+<a href="#page-top" class="back-to-top" onclick="smoothScrollToTop(event)" title="Back to Top">
+    <div class="back-to-top-icon">▲</div>
+</a>
+""", unsafe_allow_html=True)
+
+# Add smooth scroll JavaScript using components.html
+components.html("""
+<script>
+function smoothScrollToTop(e) {
+    if (e) e.preventDefault();
+    
+    const mainContent = window.parent.document.querySelector('section.main');
+    if (!mainContent) return;
+    
+    const startPosition = mainContent.scrollTop;
+    const duration = 2500; // 2.5 seconds
+    const startTime = performance.now();
+    
+    function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+    
+    function animateScroll(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = easeInOutQuad(progress);
+        
+        mainContent.scrollTop = startPosition * (1 - easeProgress);
+        
+        if (progress < 1) {
+            requestAnimationFrame(animateScroll);
+        }
+    }
+    
+    requestAnimationFrame(animateScroll);
+}
+
+// Make function globally available
+window.parent.smoothScrollToTop = smoothScrollToTop;
+</script>
+""", height=0)
+
+st.markdown("""
+<script>
+    // Scroll to top on page load
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var mainContent = window.parent.document.querySelector('section.main');
+            if (mainContent) {
+                mainContent.scrollTop = 0;
+            }
+        }, 50);
+    });
+</script>
 """, unsafe_allow_html=True)
 
 # Page Content Based on Navigation
