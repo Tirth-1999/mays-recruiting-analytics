@@ -4,6 +4,24 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 4.1
+
+**UI/UX Refinements & Responsive Design** - Released January 24, 2026
+
+Version 4.1 brings significant improvements to the user interface and responsive design:
+
+- ✨ **Standardized Design**: Consistent metric boxes and headers across all pages
+- 📱 **Responsive Layout**: Mobile-optimized with 1000px breakpoint - all layouts stack to single column
+- 🎨 **Professional Appearance**: Emoji-free headers, centered content, consistent styling
+- 📊 **Enhanced Data Explorer**: Individual question boxes with equal sizing using flexbox
+- 📖 **Documentation Overhaul**: Chrome-style tabs with horizontal scrolling and responsive grid system
+- 🔧 **Sidebar Fix**: Overlay behavior on all screen sizes - no content shifting when opening/closing
+- 📐 **Centered Mobile Content**: All text and boxes centered in mobile/tablet mode for better readability
+
+[View complete changelog →](../CHANGELOG.md)
+
+---
+
 ## Documentation Structure
 
 ### Getting Started
@@ -55,8 +73,8 @@ MIT License information.
 
 ## Platform Overview
 
-**Current Version:** 4.0  
-**Last Updated:** January 23, 2026
+**Current Version:** 4.1  
+**Last Updated:** January 24, 2026
 
 ### Analytics Pages
 - Home Dashboard
@@ -74,6 +92,13 @@ Class of 2026, 2027, 2028
 
 ### ML Models
 Prophet, ARIMA, Linear Regression
+
+### Design Features (New in v4.1)
+- Responsive grid system (1000px breakpoint)
+- Chrome-style tabs with horizontal scrolling
+- Consistent metric box styling
+- Mobile-optimized centered layouts
+- Professional emoji-free headers
 
 ---
 

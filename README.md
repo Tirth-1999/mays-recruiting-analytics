@@ -3,17 +3,32 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 4.0** | **Last Updated: January 23, 2026**
+**Version 4.1** | **Last Updated: January 24, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-4.0-blue.svg)](VERSIONING.md)
+[![Version](https://img.shields.io/badge/version-4.1-blue.svg)](VERSIONING.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](CHANGELOG.md)
 
 </div>
+
+---
+
+## What's New in Version 4.1
+
+**UI/UX Refinements & Responsive Design** - Released January 24, 2026
+
+- ✨ **Standardized Design**: Consistent metric boxes and headers across all pages
+- 📱 **Responsive Layout**: Mobile-optimized with 1000px breakpoint
+- 🎨 **Professional Appearance**: Emoji-free headers, centered content
+- 📊 **Enhanced Data Explorer**: Individual question boxes with equal sizing
+- 📖 **Documentation Overhaul**: Chrome-style tabs with responsive grid system
+- 🔧 **Sidebar Fix**: Overlay behavior on all screen sizes (no content shifting)
+
+[View complete changelog →](CHANGELOG.md)
 
 ---
 
@@ -26,6 +41,7 @@ Mays Analytics is an AI-powered platform designed for Texas A&M Mays Business Sc
 - Predictive forecasting with AI-powered predictions and 95% confidence intervals
 - Marketing ROI analysis with comprehensive spend tracking and channel optimization
 - Year-over-year comparisons for detailed cohort performance analysis
+- Responsive design optimized for desktop, tablet, and mobile devices
 - Full data export capabilities with CSV download options
 
 ---
