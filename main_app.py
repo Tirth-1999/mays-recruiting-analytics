@@ -337,8 +337,13 @@ with st.sidebar:
         """, unsafe_allow_html=True)
     else:
         if st.button("Sign in with Google", key="sidebar_signin", use_container_width=True, type="primary"):
-            auth_url = auth.get_authorization_url()
-            st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
+            try:
+                auth_url = auth.get_authorization_url()
+                # Debug: Show the auth URL being generated
+                st.info(f"Redirecting to Google... If nothing happens, the URL is: {auth_url[:100]}...")
+                st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"Error generating auth URL: {str(e)}")
     
     # Gold divider
     st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
