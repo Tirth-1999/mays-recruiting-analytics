@@ -355,10 +355,11 @@ with st.sidebar:
         try:
             auth_url = auth.get_authorization_url()
             
-            # Device detection and styled button with Google logo - matches navigation buttons exactly
-            st.markdown(f"""
+            # Use components.html for better rendering
+            import streamlit.components.v1 as components
+            
+            components.html(f"""
                 <style>
-                    /* OAuth button styling - exact match to navigation buttons */
                     .oauth-button {{
                         display: flex !important;
                         align-items: center !important;
@@ -370,7 +371,7 @@ with st.sidebar:
                         border: none !important;
                         border-radius: 6px !important;
                         padding: 6px 12px !important;
-                        margin: 0px 0 !important;
+                        margin: 0px !important;
                         font-size: 13px !important;
                         font-weight: 500 !important;
                         text-decoration: none !important;
@@ -383,64 +384,15 @@ with st.sidebar:
                         background: #f0f2f6 !important;
                         color: #500000 !important;
                         transform: translateX(3px) !important;
-                        text-decoration: none !important;
-                    }}
-                    .oauth-button:visited,
-                    .oauth-button:active,
-                    .oauth-button:link {{
-                        color: #495057 !important;
-                        text-decoration: none !important;
-                    }}
-                    .oauth-button:hover:visited,
-                    .oauth-button:hover:active,
-                    .oauth-button:hover:link {{
-                        color: #500000 !important;
                     }}
                     .google-logo {{
                         width: 16px !important;
                         height: 16px !important;
                         flex-shrink: 0 !important;
                     }}
-                    
-                    /* Responsive sizing - Desktop (>900px height) */
-                    @media (min-height: 900px) {{
-                        .oauth-button {{
-                            padding: 8px 15px !important;
-                            font-size: 14px !important;
-                        }}
-                        .google-logo {{
-                            width: 18px !important;
-                            height: 18px !important;
-                        }}
-                    }}
-                    
-                    /* Responsive sizing - Laptop (700-900px height) */
-                    @media (min-height: 700px) and (max-height: 899px) {{
-                        .oauth-button {{
-                            padding: 6px 12px !important;
-                            font-size: 13px !important;
-                        }}
-                        .google-logo {{
-                            width: 16px !important;
-                            height: 16px !important;
-                        }}
-                    }}
-                    
-                    /* Responsive sizing - Tablet (<700px height) */
-                    @media (max-height: 699px) {{
-                        .oauth-button {{
-                            padding: 5px 10px !important;
-                            font-size: 12px !important;
-                        }}
-                        .google-logo {{
-                            width: 14px !important;
-                            height: 14px !important;
-                        }}
-                    }}
                 </style>
                 
                 <div id="oauth-container">
-                    <!-- Desktop: same tab -->
                     <a href="{auth_url}" 
                        target="_self"
                        class="oauth-button" 
@@ -455,7 +407,6 @@ with st.sidebar:
                         <span>Sign in with Google</span>
                     </a>
                     
-                    <!-- Mobile: new tab -->
                     <a href="{auth_url}" 
                        target="_blank"
                        rel="noopener noreferrer"
@@ -473,17 +424,14 @@ with st.sidebar:
                 </div>
                 
                 <script>
-                    // Detect device and show appropriate button
-                    (function() {{
-                        const isMobile = window.innerWidth <= 768;
-                        if (isMobile) {{
-                            document.getElementById('oauth-mobile').style.display = 'flex';
-                        }} else {{
-                            document.getElementById('oauth-desktop').style.display = 'flex';
-                        }}
-                    }})();
+                    const isMobile = window.innerWidth <= 768;
+                    if (isMobile) {{
+                        document.getElementById('oauth-mobile').style.display = 'flex';
+                    }} else {{
+                        document.getElementById('oauth-desktop').style.display = 'flex';
+                    }}
                 </script>
-            """, unsafe_allow_html=True)
+            """, height=50)
             
         except Exception as e:
             st.error(f"❌ Error generating login URL: {str(e)}")
