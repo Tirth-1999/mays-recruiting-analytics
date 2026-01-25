@@ -336,7 +336,7 @@ with st.sidebar:
     # Gold divider
     st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
     
-    # Navigation - 7 main pages (reordered: Chat with AI before Data Explorer)
+    # Navigation - 6 main pages
     if st.button("Home Dashboard", key="nav_home", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Home' else "secondary"):
         st.session_state.current_page = 'Home'
@@ -361,10 +361,6 @@ with st.sidebar:
                 type="primary" if st.session_state.current_page == 'Predictive_Analytics' else "secondary"):
         st.session_state.current_page = 'Predictive_Analytics'
         st.rerun()
-    
-    # Chat with AI - BEFORE Data Explorer
-    if st.button("Chat with AI", key="nav_chat", use_container_width=True, type="secondary"):
-        st.info("AI Chatbot coming soon!")
     
     if st.button("Data Explorer", key="nav_database", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Database' else "secondary"):

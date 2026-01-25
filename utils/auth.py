@@ -11,16 +11,27 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import json
 
-# Allow HTTP for local development (IMPORTANT: Only for localhost!)
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-# Try to import from config_secrets, fallback to st.secrets
+# Try to import from config_secrets first, fallback to st.secrets
 try:
     from config_secrets import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
+    # Only allow HTTP for local development
+    if 'localhost' in GOOGLE_REDIRECT_URI:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 except ImportError:
-    GOOGLE_CLIENT_ID = st.secrets.get("google_oauth", {}).get("client_id", "")
-    GOOGLE_CLIENT_SECRET = st.secrets.get("google_oauth", {}).get("client_secret", "")
-    GOOGLE_REDIRECT_URI = st.secrets.get("google_oauth", {}).get("redirect_uri", "http://localhost:8501")
+    # Using Streamlit secrets (production)
+    try:
+        GOOGLE_CLIENT_ID = st.secrets["google_oauth"]["client_id"]
+        GOOGLE_CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
+        GOOGLE_REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
+        # Only allow HTTP for localhost in production secrets
+        if 'localhost' in GOOGLE_REDIRECT_URI:
+            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    except Exception:
+        # Secrets not configured - set defaults for development
+        GOOGLE_CLIENT_ID = ""
+        GOOGLE_CLIENT_SECRET = ""
+        GOOGLE_REDIRECT_URI = "http://localhost:8501"
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 
 # OAuth 2.0 scopes
