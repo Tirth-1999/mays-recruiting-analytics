@@ -71,6 +71,7 @@ config/secrets.py
 .cache/
 .pytest_cache/
 .hypothesis/
+.chromadb/
 
 # Dataset files (too large for GitHub)
 Dataset/*.xlsx

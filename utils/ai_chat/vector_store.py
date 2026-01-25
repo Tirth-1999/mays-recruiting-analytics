@@ -43,37 +43,50 @@ class VectorStore:
         # Initialize embedding model (lightweight and fast)
         self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
         
-        # Get or create collections (this ensures they exist)
+        # Get or create collections with corruption handling
         try:
             self.schema_collection = self.client.get_or_create_collection(
                 name="schema_collection",
                 metadata={"description": "Database schema embeddings"}
             )
-            
+        except KeyError as e:
+            # ChromaDB collection is corrupted, delete and recreate
+            print(f"⚠️ ChromaDB schema collection corrupted, recreating: {e}")
+            try:
+                self.client.delete_collection("schema_collection")
+            except Exception:
+                pass
+            self.schema_collection = self.client.create_collection(
+                name="schema_collection",
+                metadata={"description": "Database schema embeddings"}
+            )
+        
+        try:
             self.platform_collection = self.client.get_or_create_collection(
                 name="platform_collection",
                 metadata={"description": "Platform knowledge embeddings"}
             )
-            
-            # Auto-initialize if collections are empty
+        except KeyError as e:
+            # ChromaDB collection is corrupted, delete and recreate
+            print(f"⚠️ ChromaDB platform collection corrupted, recreating: {e}")
+            try:
+                self.client.delete_collection("platform_collection")
+            except Exception:
+                pass
+            self.platform_collection = self.client.create_collection(
+                name="platform_collection",
+                metadata={"description": "Platform knowledge embeddings"}
+            )
+        
+        # Auto-initialize if collections are empty
+        try:
             if self.schema_collection.count() == 0:
                 self.initialize_schema_embeddings()
             
             if self.platform_collection.count() == 0:
                 self.initialize_platform_embeddings()
-                
         except Exception as e:
-            print(f"Warning: Error initializing ChromaDB collections: {e}")
-            # Create collections if they don't exist
-            self.schema_collection = self.client.get_or_create_collection(
-                name="schema_collection",
-                metadata={"description": "Database schema embeddings"}
-            )
-            
-            self.platform_collection = self.client.get_or_create_collection(
-                name="platform_collection",
-                metadata={"description": "Platform knowledge embeddings"}
-            )
+            print(f"Warning: Error initializing embeddings: {e}")
     
     def add_schema_embedding(
         self,
