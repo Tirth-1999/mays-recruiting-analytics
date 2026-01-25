@@ -73,7 +73,12 @@ class ChatManager:
                 st.session_state.chat_processor = QueryProcessor()
             except Exception as e:
                 st.session_state.chat_processor = None
-                st.session_state.chat_error = str(e)
+                # Capture full error details
+                import traceback
+                error_str = str(e) if str(e) else repr(e)
+                error_type = type(e).__name__
+                error_trace = traceback.format_exc()
+                st.session_state.chat_error = f"{error_type}: {error_str}\n\nFull traceback:\n{error_trace}"
     
     def get_suggested_queries(self, query_type: str, limit: int = 3):
         """Get suggested follow-up queries based on query type."""
@@ -291,7 +296,17 @@ def render():
         return
     
     user = auth.get_current_user()
-    manager = ChatManager()
+    
+    # Initialize ChatManager with error handling
+    try:
+        manager = ChatManager()
+    except Exception as e:
+        import traceback
+        st.error("⚠️ Failed to Initialize AI Chat Assistant")
+        with st.expander("🔍 Initialization Error Details", expanded=True):
+            st.code(f"{type(e).__name__}: {str(e) if str(e) else repr(e)}\n\nTraceback:\n{traceback.format_exc()}", language="text")
+        st.info("This usually means there's a configuration issue. Please check the error details above.")
+        return
     
     # Custom CSS
     st.markdown("""
