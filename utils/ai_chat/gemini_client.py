@@ -66,9 +66,31 @@ class GeminiClient:
         
         # Load API key from Streamlit secrets
         try:
-            api_key = st.secrets.get("gemini", {}).get("api_key", "")
+            # Check if secrets exist
+            if not hasattr(st, 'secrets'):
+                raise ValueError("Streamlit secrets not available")
+            
+            # Try to access gemini section
+            if "gemini" not in st.secrets:
+                raise ValueError("Gemini configuration not found in secrets. Please add [gemini] section with api_key.")
+            
+            gemini_config = st.secrets["gemini"]
+            
+            # Handle both dict and AttrDict from Streamlit
+            if hasattr(gemini_config, 'get'):
+                api_key = gemini_config.get("api_key", "")
+            elif hasattr(gemini_config, 'api_key'):
+                api_key = gemini_config.api_key
+            else:
+                raise ValueError("Cannot access api_key from gemini configuration")
+            
             if not api_key or api_key == "YOUR_GEMINI_API_KEY":
-                raise ValueError("Gemini API key not configured in secrets")
+                raise ValueError("Gemini API key not configured. Please set a valid API key in Streamlit secrets.")
+                
+        except KeyError as e:
+            raise ValueError(f"Missing configuration in secrets: {e}")
+        except AttributeError as e:
+            raise ValueError(f"Invalid secrets structure: {e}")
         except Exception as e:
             raise ValueError(f"Failed to load Gemini API key: {e}")
         
@@ -87,8 +109,24 @@ class GeminiClient:
         )
         
         # Rate limiter (10 requests per minute for free tier safety)
-        rate_limit = st.secrets.get("chat", {}).get("rate_limit_requests", 10)
-        rate_window = st.secrets.get("chat", {}).get("rate_limit_window", 60)
+        try:
+            if "chat" in st.secrets:
+                chat_config = st.secrets["chat"]
+                if hasattr(chat_config, 'get'):
+                    rate_limit = chat_config.get("rate_limit_requests", 10)
+                    rate_window = chat_config.get("rate_limit_window", 60)
+                else:
+                    rate_limit = getattr(chat_config, 'rate_limit_requests', 10)
+                    rate_window = getattr(chat_config, 'rate_limit_window', 60)
+            else:
+                # Use defaults if chat config not present
+                rate_limit = 10
+                rate_window = 60
+        except Exception:
+            # Fallback to safe defaults
+            rate_limit = 10
+            rate_window = 60
+            
         self.rate_limiter = RateLimiter(rate_limit, rate_window)
         
         # Token tracking

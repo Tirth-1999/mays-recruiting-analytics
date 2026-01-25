@@ -234,8 +234,49 @@ def render():
     
     # Check for configuration errors
     if 'chat_error' in st.session_state:
-        st.error(f"Chat configuration error: {st.session_state.chat_error}")
-        st.info("Please ensure your Gemini API key is configured in Streamlit secrets.")
+        st.error("⚠️ AI Chat Assistant Configuration Error")
+        
+        error_msg = st.session_state.chat_error
+        
+        # Provide specific guidance based on error
+        if "api_key" in error_msg.lower() or "gemini" in error_msg.lower():
+            st.markdown("""
+            ### 🔑 Gemini API Key Not Configured
+            
+            The AI Chat Assistant requires a Google Gemini API key to function. 
+            
+            **For Streamlit Cloud (Production):**
+            1. Go to your app dashboard on Streamlit Cloud
+            2. Click on "⚙️ Settings" → "Secrets"
+            3. Add the following configuration:
+            
+            ```toml
+            [gemini]
+            api_key = "YOUR_ACTUAL_GEMINI_API_KEY"
+            
+            [chat]
+            rate_limit_requests = 10
+            rate_limit_window = 60
+            max_conversation_history = 5
+            token_limit_per_query = 1000
+            ```
+            
+            4. Get your free API key from: [Google AI Studio](https://makersuite.google.com/app/apikey)
+            5. Save the secrets and restart your app
+            
+            **For Local Development:**
+            1. Create/edit `.streamlit/secrets.toml` in your project
+            2. Add the same configuration as above
+            3. Restart your Streamlit app
+            
+            ---
+            
+            **Error Details:** `{error_msg}`
+            """)
+        else:
+            st.warning(f"**Error:** {error_msg}")
+            st.info("Please check your configuration and try again.")
+        
         return
     
     user = auth.get_current_user()

@@ -90,12 +90,46 @@ git push origin v5.3
    - Python version: 3.12
    - Branch: `main`
 
-4. **Add Secrets**:
-   - Go to App Settings → Secrets
-   - Paste contents of `.streamlit/secrets.toml`
-   - Save
+4. **Add Secrets** (CRITICAL STEP):
+   - Go to App Settings → Secrets (or click ⚙️ → Secrets)
+   - Add the following configuration:
+   
+   ```toml
+   [gemini]
+   api_key = "YOUR_ACTUAL_GEMINI_API_KEY"
+   
+   [chat]
+   rate_limit_requests = 10
+   rate_limit_window = 60
+   max_conversation_history = 5
+   token_limit_per_query = 1000
+   
+   [google_oauth]
+   client_id = "YOUR_GOOGLE_CLIENT_ID"
+   client_secret = "YOUR_GOOGLE_CLIENT_SECRET"
+   redirect_uri = "https://your-app.streamlit.app"
+   
+   [resend]
+   api_key = "YOUR_RESEND_API_KEY"
+   
+   [email]
+   contact_email = "your-email@example.com"
+   from_email = "onboarding@resend.dev"
+   ```
+   
+   - **Get Gemini API Key**: Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Click "Create API Key" (it's free!)
+   - Copy the key and paste it in the secrets
+   - **IMPORTANT**: Replace ALL placeholder values with actual keys
+   - Save the secrets
 
-5. **Deploy**: Click "Deploy"
+5. **Deploy**: Click "Deploy" or "Reboot" if already deployed
+
+6. **Verify Deployment**:
+   - Wait for app to rebuild (2-3 minutes)
+   - Check logs for any errors
+   - Test the AI Chat page
+   - Verify authentication works
 
 ### Step 3: Post-Deployment Verification
 
