@@ -81,7 +81,8 @@ def get_authorization_url():
     flow = create_oauth_flow()
     authorization_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true'
+        include_granted_scopes='true',
+        prompt='consent'  # Force consent screen to show permissions
     )
     
     # Store state in session for CSRF protection
