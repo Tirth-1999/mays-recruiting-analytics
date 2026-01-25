@@ -23,7 +23,14 @@ if 'code' in st.query_params and not st.session_state.get('auth_processed', Fals
     st.session_state.auth_processed = True
     code = st.query_params['code']
     state = st.query_params.get('state', '')
-    full_url = f"http://localhost:8501/?code={code}&state={state}"
+    
+    # Get the redirect URI from auth module (matches production or localhost)
+    try:
+        from utils.auth import GOOGLE_REDIRECT_URI
+        full_url = f"{GOOGLE_REDIRECT_URI}?code={code}&state={state}"
+    except:
+        # Fallback to localhost for development
+        full_url = f"http://localhost:8501/?code={code}&state={state}"
     
     try:
         user_info = auth.handle_oauth_callback(full_url)
