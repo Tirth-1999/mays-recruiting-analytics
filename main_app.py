@@ -354,7 +354,12 @@ with st.sidebar:
         if st.button("Sign in with Google", key="sidebar_signin", use_container_width=True, type="primary"):
             try:
                 auth_url = auth.get_authorization_url()
-                st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
+                # Use JavaScript redirect instead of meta refresh for better mobile compatibility
+                st.markdown(f"""
+                <script>
+                    window.location.href = "{auth_url}";
+                </script>
+                """, unsafe_allow_html=True)
             except Exception as e:
                 st.error(f"❌ Error generating login URL: {str(e)}")
     
