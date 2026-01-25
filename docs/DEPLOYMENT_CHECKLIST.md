@@ -57,14 +57,16 @@
 
 ### 3. Code Quality
 - [ ] Remove all temporary files (.md test files, debug files)
+- [ ] **DELETE any unnecessary .md files** - DO NOT move them to docs/
 - [ ] Check for any .md files in root directory:
-  - [ ] If temporary → Delete them
-  - [ ] If essential for production → Move to `docs/` folder
+  - [ ] If temporary → **DELETE them**
+  - [ ] If essential for production → Keep in root or docs/ as appropriate
   - [ ] Keep only GitHub-required files in root: README.md, LICENSE, CODE_OF_CONDUCT.md, SECURITY.md
 - [ ] Remove console.log or debug print statements
 - [ ] Check for TODO comments that should be addressed
 - [ ] Verify all imports are used
 - [ ] Run local tests if available
+- [ ] **IMPORTANT: Do NOT create new .md files unless explicitly instructed**
 
 ### 4. Production Compatibility
 - [ ] Test on localhost thoroughly
@@ -182,7 +184,7 @@ git push origin vX.X
 3. Forget to create and push git tag
 4. Skip updating docs/README.md
 5. Leave temporary test files in repo
-6. Leave .md files in root (except GitHub-required ones)
+6. **Create unnecessary .md files (summaries, temporary docs, etc.)**
 7. Use weak commit messages
 8. Forget to test on production
 9. Skip CSS production compatibility checks
@@ -197,7 +199,7 @@ git push origin vX.X
 4. Update ALL documentation files
 5. Remove old version from main README
 6. Keep root directory clean (only GitHub-required .md files)
-7. Move all documentation to `docs/` folder
+7. **DELETE unnecessary .md files - do not create summaries or temporary docs**
 8. Create descriptive git tags
 9. Verify on production after deployment
 10. Add aggressive CSS for production
@@ -263,8 +265,8 @@ git push origin vX.X
 
 **Before deployment:**
 - Check root for any .md files not in the list above
-- Move essential files to `docs/`
-- Delete temporary files
+- **DELETE temporary or unnecessary .md files**
+- Do NOT create new documentation files unless explicitly needed
 - Update all links to reflect new paths
 
 ---
