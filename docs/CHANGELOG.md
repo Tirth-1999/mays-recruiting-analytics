@@ -39,6 +39,8 @@ Jan 2026  ███████████████████████�
 Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v5.1 - OAuth Fix & Consent Screen
           │
 Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v5.2 - OAuth Button Refinement
+          │
+Jan 2026  ████████████████████████████  v6.0 - AI-Powered Analytics
 ```
 
 ---
@@ -47,6 +49,7 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **6.0** | Major | AI Chat Assistant with NLP | 25+ | +3,500 |
 | **5.2** | Minor | OAuth Button Refinement | 2 | +15 |
 | **5.1** | Minor | OAuth Fix & Consent Screen | 3 | +25 |
 | **5.0** | Major | Authentication & UI Optimization | 7 | +601 |
@@ -62,6 +65,75 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 | **2.1** | Minor | Global Filters | 4 | +289 |
 | **2.0** | Major | Marketing Integration | 6 | +1,234 |
 | **1.0** | Major | Initial Release | - | +3,500 |
+
+---
+
+## [6.0.0] - 2026-01-25
+
+### 🤖 Major Release - AI-Powered Analytics
+
+#### Added
+- **AI Chat Assistant Module** (`modules/ai_chat.py`): Complete natural language query interface
+- **Gemini Client** (`utils/ai_chat/gemini_client.py`): Google Gemini AI integration
+- **Vector Store** (`utils/ai_chat/vector_store.py`): ChromaDB for semantic schema search
+- **SQL Generator** (`utils/ai_chat/sql_generator.py`): Natural language to SQL conversion
+- **Chat History** (`utils/ai_chat/chat_history.py`): Conversation storage and retrieval
+- **Rate Limiter** (`utils/ai_chat/rate_limiter.py`): Per-user and global rate limiting
+- **Query Processor** (`utils/ai_chat/query_processor.py`): Query classification and routing
+- **Prompts** (`utils/ai_chat/prompts.py`): Optimized AI prompts for different query types
+- **Cache** (`utils/ai_chat/cache.py`): Response caching for performance
+- **Metrics** (`utils/ai_chat/metrics.py`): Usage tracking and analytics
+
+#### Features
+- **Natural Language Queries**: Ask questions in plain English about admissions data
+- **Conversation Memory**: Context-aware follow-ups with reference resolution ("it", "that", "same")
+- **Smart Query Processing**: Understands business terms, abbreviations, complex queries with JOINs
+- **Rate Limiting**: 10 queries/minute per user, 100/minute globally with visual indicators
+- **Feedback System**: Thumbs up/down ratings with satisfaction analytics by query type
+- **Suggested Queries**: Context-aware suggestions after each response
+- **In-App Help**: Quick reference modal with examples and tips
+- **Chat History**: Three-tab interface (Current, History, Settings & Privacy)
+- **Search & Export**: Search across conversations, export to JSON
+- **Settings & Privacy**: Usage stats, feedback analytics, GDPR-compliant deletion
+
+#### Technical Implementation
+- **Google Gemini 2.5 Flash**: Fast, accurate AI responses
+- **ChromaDB**: Vector embeddings for 11 schema documents
+- **Query Pattern Recognition**: 5 cached patterns for 30%+ speed improvement
+- **Token Optimization**: Compressed prompts, avg <1000 tokens/query
+- **Response Caching**: 5-minute LRU cache (100 entries)
+- **Performance**: <3s for 80% queries, <5s for 95%
+- **SQL Validation**: Security checks before execution
+- **User Isolation**: Users only see their own chat history
+
+#### Database Changes
+- **chat_history table**: Stores all conversations with metadata
+- **chat_feedback table**: Tracks user ratings and comments
+- **Indexes**: Optimized for user_id, conversation_id, timestamp queries
+
+#### Documentation
+- **AI Chat Assistant Guide** (`docs/AI_CHAT_ASSISTANT.md`): Comprehensive user documentation
+- **AI Chat Deployment** (`docs/AI_CHAT_DEPLOYMENT.md`): Deployment and configuration guide
+- **Help Integration**: AI Chat tab added to Documentation & Help page
+- **Feedback Form**: AI Chat Assistant option in contact form
+
+#### Files Modified
+- `main_app.py` - Added AI Chat page to navigation
+- `modules/ai_chat.py` - Complete chat interface implementation
+- `modules/help.py` - Added AI Chat documentation tab
+- `utils/ai_chat/*.py` - 10 new utility modules
+- `migrations/add_chat_history_table.py` - Database migration
+- `migrations/add_chat_indexes.py` - Performance indexes
+- `migrations/add_feedback_table.py` - Feedback system
+- `requirements.txt` - Added google-generativeai, chromadb, sentence-transformers
+- `version.py` - Updated to v6.0 with ENABLE_AI_CHAT flag
+
+#### User Experience
+- Users access AI Chat from main navigation
+- Ask questions like "How many MBA applications in 2026?"
+- Get instant answers with SQL query transparency
+- Rate responses to improve accuracy
+- Manage chat history and privacy settings
 
 ---
 

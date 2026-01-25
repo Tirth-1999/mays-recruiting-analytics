@@ -395,6 +395,16 @@ with st.sidebar:
     # Gold divider
     st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
     
+    # AI Chat Assistant (only show if authenticated)
+    if auth.is_authenticated():
+        if st.button("AI Chat Assistant", key="nav_ai_chat", use_container_width=True,
+                    type="primary" if st.session_state.current_page == 'AI_Chat' else "secondary"):
+            st.session_state.current_page = 'AI_Chat'
+            st.rerun()
+        
+        # Gold divider
+        st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
+    
     # Documentation & Help
     if st.button("Documentation & Help", key="nav_help", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Help' else "secondary"):
@@ -416,6 +426,7 @@ current_page_info = {
     'Marketing_Analysis': {'title': 'Marketing Analysis'},
     'Database': {'title': 'Data Explorer'},
     'Predictive_Analytics': {'title': 'Predictive Analytics'},
+    'AI_Chat': {'title': 'AI Chat Assistant'},
     'Help': {'title': 'Documentation & Help'}
 }
 
@@ -451,6 +462,10 @@ elif st.session_state.current_page == 'Database':
 elif st.session_state.current_page == 'Predictive_Analytics':
     from modules import predictive_analytics
     predictive_analytics.render()
+
+elif st.session_state.current_page == 'AI_Chat':
+    from modules import ai_chat
+    ai_chat.render()
 
 elif st.session_state.current_page == 'Help':
     from modules import help as help_page

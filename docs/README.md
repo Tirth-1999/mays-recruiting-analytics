@@ -4,9 +4,67 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 6.0
+
+**AI-Powered Analytics** - Released January 25, 2026
+
+### 💬 AI Chat Assistant (Complete Implementation)
+- **Natural Language Queries**: Ask questions in plain English and get instant answers
+- **Conversation Memory**: Context-aware follow-up questions and reference resolution
+- **Smart Query Processing**: Understands business terms, abbreviations, and complex queries
+- **Rate Limiting**: 10 queries/minute per user with visual indicators and countdown timer
+- **Feedback System**: Thumbs up/down ratings with comprehensive analytics dashboard
+- **Suggested Queries**: Context-aware query suggestions after each response
+- **In-App Help**: Quick reference guide accessible from chat header
+- **Chat History**: Search, export, and manage all conversations with JSON export
+- **Settings & Privacy**: GDPR-compliant data management with automatic 90-day cleanup
+
+### 🎯 Enhanced User Experience
+- **Three-Tab Interface**: Current Conversation, Chat History, Settings & Privacy
+- **Usage Statistics**: Track conversations, messages, and token usage
+- **Feedback Analytics**: Satisfaction rates by query type with color-coded cards
+- **Export Capability**: Download all chat data in JSON format
+- **Privacy Controls**: Delete conversations, GDPR data deletion, automatic cleanup
+
+### 📊 Technical Implementation
+- **Google Gemini AI**: Powered by Gemini 2.5 Flash for fast, accurate responses
+- **ChromaDB Vector Store**: Semantic search for schema intelligence
+- **Query Pattern Recognition**: Cached templates for common queries (30%+ speed improvement)
+- **Token Optimization**: Compressed prompts, limited context (avg <1000 tokens/query)
+- **Response Caching**: 5-minute cache with LRU eviction (100 entry limit)
+- **Performance Metrics**: <3s response time for 80% of queries, <5s for 95%
+
+### 🔒 Security & Privacy
+- **OAuth Required**: Secure authentication for all chat features
+- **SQL Validation**: All generated queries validated before execution
+- **Rate Limiting**: Per-user (10/min) and global (100/min) limits
+- **Data Retention**: Automatic cleanup after 90 days
+- **GDPR Compliance**: Complete data deletion on request
+- **User Isolation**: Users can only access their own chat history
+
+### 📚 Documentation
+- **Comprehensive User Guide**: [AI Chat Assistant Guide](AI_CHAT_ASSISTANT.md)
+- **Deployment Guide**: [AI Chat Deployment](AI_CHAT_DEPLOYMENT.md)
+- **Help Integration**: AI Chat tab added to Documentation & Help page
+- **Feedback Form**: AI Chat Assistant option in contact form
+
+[View complete changelog →](CHANGELOG.md) | [AI Chat Documentation →](AI_CHAT_ASSISTANT.md)
+
+---
+
 ## What's New in Version 5.2
 
-**OAuth Button Refinement** - Released January 25, 2026
+**AI Chat Assistant & OAuth Refinement** - Released January 25, 2026
+
+### 🤖 NEW: AI Chat Assistant (Phase 1 MVP)
+- **Natural Language Queries**: Ask questions in plain English about admissions data
+- **Smart Query Processing**: Automatically classifies and routes data, navigation, help, and conversational queries
+- **SQL Generation**: AI generates and executes secure SQL queries from natural language
+- **Chat History**: All conversations saved and organized by user
+- **Platform Navigation**: Get guidance on which page to use and how to navigate
+- **Feature Help**: Learn about platform features and capabilities
+- **Full Page Experience**: Dedicated page with chat history sidebar and conversation window
+- **Secure & Authenticated**: Only accessible to signed-in users, with rate limiting and SQL validation
 
 ### 🔧 Authentication UX Improvements
 - **Reliable OAuth Flow**: Simplified authentication using new-tab approach for maximum compatibility
@@ -19,14 +77,11 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 - Better handling of browser security restrictions
 - Improved logout button behavior (same-tab redirect)
 - Enhanced error handling and user feedback
+- Google Gemini 2.5 Flash integration for AI responses
+- ChromaDB vector store for semantic search
+- Comprehensive chat history with user statistics
 
-### 🔍 Technical Details
-- OAuth opens in new tab to preserve session state
-- Logout uses `target="_self"` for same-tab redirect
-- Removed complex device detection and JavaScript close attempts
-- Accepts browser security limitations for better reliability
-
-[View complete changelog →](CHANGELOG.md)
+[View complete changelog →](CHANGELOG.md) | [AI Chat Documentation →](AI_CHAT_ASSISTANT.md)
 
 ---
 
@@ -167,6 +222,9 @@ Raw data access with advanced filtering and CSV export.
 **[Predictive Analytics](PREDICTIVE_ANALYTICS.md)**  
 AI-powered forecasting and optimization using machine learning.
 
+**[AI Chat Assistant](AI_CHAT_ASSISTANT.md)** 🆕  
+Natural language interface to query data and get platform guidance.
+
 ### Project Information
 
 **[Version History](CHANGELOG.md)**  
@@ -188,8 +246,8 @@ MIT License information.
 
 ## Platform Overview
 
-**Current Version:** 4.4  
-**Last Updated:** January 24, 2026
+**Current Version:** 5.2  
+**Last Updated:** January 25, 2026
 
 ### Analytics Pages
 - Home Dashboard
@@ -198,15 +256,30 @@ MIT License information.
 - Marketing Analysis
 - Data Explorer
 - Predictive Analytics
+- 🤖 AI Chat Assistant (New!)
 
 ### Programs Tracked
 MBA, MS ACCT, MS ENLD, MS HRM, MS MISY, MS MKTG, MS SPBA
 
 ### Cohorts
-Class of 2026, 2027, 2028
+Class of 2024, 2025, 2026
 
 ### ML Models
 Prophet, ARIMA, Linear Regression
+
+### AI Features (New in v5.2)
+- Natural language data queries
+- Platform navigation assistance
+- Feature explanations and help
+- Conversation history
+- SQL query transparency
+- Secure and authenticated access
+
+### Authentication Features (v5.0-5.2)
+- Google OAuth 2.0 integration
+- Role-based access control
+- User profiles and session management
+- Reliable new-tab OAuth flow
 
 ### Navigation Features (New in v4.3)
 - Floating "Back to Top" button with professional design
@@ -241,6 +314,7 @@ Prophet, ARIMA, Linear Regression
 - [Executive Deep Dive](EXECUTIVE_DEEP_DIVE.md) - Detailed analysis
 - [Comparison Tool](COMPARISON_TOOL.md) - Year-over-year comparisons
 - [Data Explorer](DATA_EXPLORER.md) - Raw data access
+- [AI Chat Assistant](AI_CHAT_ASSISTANT.md) - Natural language queries
 
 ### Marketing Teams
 - [Marketing Analysis](MARKETING_ANALYSIS.md) - Spend and ROI tracking

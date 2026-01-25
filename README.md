@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 5.2** | **Last Updated: January 25, 2026**
+**Version 6.0** | **Last Updated: January 25, 2026**
 
-AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with secure Google OAuth authentication.
+AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, featuring natural language query interface, real-time insights, and secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-5.2-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.0-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,21 +17,34 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 5.2
+## What's New in Version 6.0
 
-**OAuth Button Refinement** - Released January 25, 2026
+**AI-Powered Analytics** - Released January 25, 2026
 
-### 🔧 Authentication UX Improvements
-- **Reliable OAuth Flow**: Simplified authentication using new-tab approach for maximum compatibility
-- **Session State Fix**: Resolved session persistence issues with Streamlit Cloud OAuth redirects
-- **Clean Implementation**: Removed complex JavaScript workarounds in favor of reliable `st.link_button`
-- **Production Tested**: Verified working on both desktop and mobile devices
+### 💬 AI Chat Assistant (Major Feature)
+- **Natural Language Queries**: Ask questions in plain English and get instant answers
+- **Conversation Memory**: Context-aware follow-up questions and reference resolution
+- **Smart Query Processing**: Understands business terms, abbreviations, and complex queries
+- **Rate Limiting**: 10 queries/minute per user with visual indicators
+- **Feedback System**: Thumbs up/down ratings with analytics dashboard
 
-### 📱 Technical Improvements
-- Streamlined OAuth button implementation
-- Better handling of browser security restrictions
-- Improved logout button behavior (same-tab redirect)
-- Enhanced error handling and user feedback
+### 🎯 Enhanced User Experience
+- **Suggested Queries**: Context-aware query suggestions after each response
+- **In-App Help**: Quick reference guide accessible from chat header
+- **Chat History**: Search, export, and manage all conversations
+- **Settings & Privacy**: GDPR-compliant data management with automatic cleanup
+
+### 📊 Analytics & Insights
+- **Feedback Analytics**: Track satisfaction rates by query type
+- **Usage Statistics**: Monitor conversations, messages, and token usage
+- **Query Pattern Recognition**: Cached templates for common queries
+- **Performance Tracking**: Real-time metrics and accuracy monitoring
+
+### 🔒 Security & Privacy
+- **OAuth Required**: Secure authentication for all chat features
+- **Data Retention**: Automatic cleanup after 90 days
+- **Export Capability**: Download chat history anytime
+- **GDPR Compliance**: Complete data deletion on request
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -39,14 +52,16 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ## Overview
 
-Mays Analytics is an AI-powered platform designed for Texas A&M Mays Business School to track, analyze, and predict admissions performance across 7 graduate programs. The platform combines real-time data visualization with machine learning and secure authentication to provide actionable insights for enrollment planning and marketing optimization.
+Mays Analytics is an AI-powered platform designed for Texas A&M Mays Business School to track, analyze, and predict admissions performance across 7 graduate programs. The platform combines real-time data visualization with machine learning, natural language query interface, and secure authentication to provide actionable insights for enrollment planning and marketing optimization.
 
 **Key Capabilities:**
+- **AI Chat Assistant**: Natural language interface for instant data queries and insights
 - **Secure Authentication**: Google OAuth 2.0 with role-based access control
 - **Real-time Analytics**: Track admissions metrics across cohorts and programs
 - **Predictive Forecasting**: AI-powered predictions with 95% confidence intervals
 - **Marketing ROI Analysis**: Comprehensive spend tracking and channel optimization
 - **Year-over-Year Comparisons**: Detailed cohort performance analysis
+- **Conversation Memory**: Context-aware follow-up questions and smart query processing
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Data Export**: Full CSV download capabilities with role-based permissions
 
@@ -90,8 +105,19 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 | **Marketing Analysis** | Spend tracking and ROI analysis | [Guide](docs/MARKETING_ANALYSIS.md) |
 | **Data Explorer** | Raw data access and CSV export | [Guide](docs/DATA_EXPLORER.md) |
 | **Predictive Analytics** | AI forecasting and optimization | [Guide](docs/PREDICTIVE_ANALYTICS.md) |
+| **AI Chat Assistant** | Natural language query interface | [Guide](docs/AI_CHAT_ASSISTANT.md) |
 
-### Predictive Analytics (New in v4.0)
+### AI Chat Assistant (New in v6.0)
+
+- **Natural Language Queries**: Ask questions in plain English about your data
+- **Conversation Memory**: Context-aware follow-ups and reference resolution
+- **Smart Processing**: Understands business terms, abbreviations, and complex queries
+- **Rate Limiting**: 10 queries/minute with visual indicators and countdown timer
+- **Feedback System**: Rate responses to improve accuracy over time
+- **Chat History**: Search, export, and manage all conversations
+- **Privacy Controls**: GDPR-compliant data management and automatic cleanup
+
+### Predictive Analytics (v4.0)
 
 - **Time Series Forecasting**: Predict inquiries, applications, and enrollments with 95% confidence intervals
 - **Channel Optimization**: AI-powered ROI analysis for marketing channels
@@ -175,6 +201,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **6.0** | Jan 25, 2026 | AI Chat Assistant with Natural Language Queries |
 | **5.2** | Jan 25, 2026 | OAuth Button Refinement |
 | **5.1** | Jan 25, 2026 | OAuth Fix & Consent Screen |
 | **5.0** | Jan 24, 2026 | Authentication & UI Optimization |
@@ -210,6 +237,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 5.2 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 6.0 • Built for Texas A&M Mays Business School
 
 </div>

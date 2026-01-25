@@ -271,13 +271,14 @@ def render():
     # Page-by-Page Guide with Chrome-style tabs
     st.markdown("<h3 style='text-align: center; color: #500000;'>Page-by-Page Guide</h3>", unsafe_allow_html=True)
     
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "🏠 Home",
         "📊 Executive",
         "🔄 Compare",
         "📈 Marketing",
         "🔮 Forecasting",
-        "💾 Database"
+        "💾 Database",
+        "💬 AI Chat"
     ])
     
     with tab1:
@@ -559,6 +560,167 @@ def render():
         **Pro Tip**: Export data to Excel for custom pivot tables and charts!
         """)
     
+    with tab7:
+        st.markdown("""
+        **Purpose**: Natural language interface to query and explore your analytics data using AI
+        
+        **Best For**:
+        - Quick data lookups without navigating pages
+        - Asking questions in plain English
+        - Getting instant answers about metrics
+        - Learning how to navigate the platform
+        - Exploring data conversationally
+        
+        **How to Use**:
+        1. **Sign In**: Must be authenticated with Google OAuth to access
+        2. **Ask Questions**: Type your question in natural language
+        3. **Get Answers**: AI generates SQL queries and returns results
+        4. **Follow Up**: Ask related questions to dig deeper
+        5. **Rate Responses**: Use 👍/👎 to help improve accuracy
+        
+        **What You Can Ask**:
+        
+        **Data Queries**:
+        - "How many MBA applications in 2026?"
+        - "Show me inquiries for MS ACCT"
+        - "What's the conversion rate for all programs?"
+        - "Compare enrollments between MBA and MS MKTG"
+        - "What's the cost per inquiry for each program?"
+        
+        **Navigation Questions**:
+        - "Where can I see year-over-year comparisons?"
+        - "How do I analyze marketing ROI?"
+        - "Which page shows forecasts?"
+        - "Where can I export data?"
+        
+        **Help Questions**:
+        - "What metrics are available?"
+        - "How do I filter by cohort?"
+        - "What's the difference between admissions offered and accepted?"
+        - "How is anticipated cohort size calculated?"
+        
+        **Three Tabs**:
+        
+        **1. Current Conversation**
+        - Active chat interface
+        - Message history
+        - Rate limit indicator (10 queries/minute)
+        - Help button for quick tips
+        - Clear chat button
+        
+        **2. Chat History**
+        - View all past conversations
+        - Search across messages
+        - Load previous conversations
+        - Export chat history to JSON
+        - Delete conversations
+        
+        **3. Settings & Privacy**
+        - Data retention settings
+        - Privacy controls
+        - Usage statistics
+        - Feedback analytics
+        - GDPR-compliant data deletion
+        
+        **Key Features**:
+        
+        **Conversation Memory**:
+        - Remembers context from previous messages
+        - Can reference "it", "that", "same" from earlier
+        - Maintains conversation flow naturally
+        
+        **Smart Query Processing**:
+        - Understands business terms (enrollments, apps, etc.)
+        - Handles abbreviations (MBA, MS ACCT)
+        - Supports complex queries with joins and aggregations
+        - Validates SQL for security
+        
+        **Rate Limiting**:
+        - 10 queries per minute per user
+        - Visual indicator shows remaining queries
+        - Countdown timer for reset
+        - Prevents API quota exhaustion
+        
+        **Feedback System**:
+        - Rate responses with thumbs up/down
+        - Track satisfaction rates by query type
+        - Identify areas for improvement
+        - View feedback analytics
+        
+        **Tips for Best Results**:
+        - Be specific about programs (MBA, MS ACCT, etc.)
+        - Include time periods (2026, last year, etc.)
+        - Ask one question at a time
+        - Use follow-up questions to refine results
+        - Try suggested queries after responses
+        
+        **Example Conversations**:
+        
+        **Simple Query**:
+        - You: "How many MBA applications in 2026?"
+        - AI: "There are 234 MBA applications for the Class of 2026."
+        
+        **Follow-Up**:
+        - You: "What about MS ACCT?"
+        - AI: "MS ACCT has 156 applications for the Class of 2026."
+        
+        **Complex Query**:
+        - You: "Compare MBA vs MS MKTG enrollments"
+        - AI: "MBA: 45 enrolled, MS MKTG: 28 enrolled (61% difference)"
+        
+        **Navigation**:
+        - You: "Where can I see year-over-year comparisons?"
+        - AI: "Use the Comparison Tool page. Select two cohorts to compare..."
+        
+        **Privacy & Data**:
+        - All conversations are saved to your account
+        - Automatic cleanup after 90 days
+        - Export your data anytime
+        - GDPR-compliant deletion available
+        - Only you can see your chat history
+        
+        **Rate Limits**:
+        - 10 queries per minute per user
+        - 100 queries per minute globally
+        - Resets automatically every 60 seconds
+        - Check header for remaining queries
+        
+        **Troubleshooting**:
+        
+        **"I'm getting rate limited"**:
+        - Wait for the countdown timer to reset
+        - You have 10 queries per minute
+        - Try asking more specific questions
+        
+        **"The answer seems wrong"**:
+        - Rate it with 👎 to help improve
+        - Try rephrasing your question
+        - Be more specific about programs/dates
+        - Check the SQL query in the expander
+        
+        **"Chat won't load"**:
+        - Ensure you're signed in with Google
+        - Check your Gemini API key is configured
+        - Refresh the page
+        - Contact support if issue persists
+        
+        **Pro Tips**:
+        - Use the Help button (❓) for quick reference
+        - Try example queries when starting
+        - Click suggested queries after responses
+        - Export chat history for record keeping
+        - Rate responses to improve accuracy
+        - Use conversation memory for follow-ups
+        
+        **Technical Details**:
+        - Powered by Google Gemini AI
+        - Uses ChromaDB for semantic search
+        - Generates secure SQL queries
+        - Validates all queries before execution
+        - Caches results for 5 minutes
+        - Tracks metrics for monitoring
+        """)
+    
     st.markdown("<br>", unsafe_allow_html=True)
     
     # Common Workflows - centered with responsive grid
@@ -811,7 +973,7 @@ def render():
         pages_affected = st.multiselect(
             "Pages Affected (optional)",
             ["Home Dashboard", "Executive Deep Dive", "Comparison Tool", "Marketing Analysis", 
-             "Data Explorer", "Predictive Analytics", "Documentation", "All Pages", "Other"],
+             "Data Explorer", "Predictive Analytics", "AI Chat Assistant", "Documentation", "All Pages", "Other"],
             help="Select the page(s) related to your feedback"
         )
         

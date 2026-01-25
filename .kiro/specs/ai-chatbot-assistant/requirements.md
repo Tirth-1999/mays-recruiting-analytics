@@ -132,33 +132,46 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 - AC-9.6: System can guide users to generate specific reports
 - AC-9.7: System provides clickable links or clear directions to navigate
 
-### US-10: User Authentication & Chat History
+### US-10: Authentication Gate & Access Control
+**As a** platform administrator  
+**I want to** restrict chat access to authenticated users only  
+**So that** we can track usage and maintain security
+
+**Acceptance Criteria:**
+- AC-10.1: Chat feature is only accessible after Google OAuth authentication
+- AC-10.2: Unauthenticated users see a "Sign in to use Chat" message
+- AC-10.3: System uses existing OAuth implementation (v5.2)
+- AC-10.4: System leverages existing `users` table for user identification
+- AC-10.5: System greets users by name from their OAuth profile
+- AC-10.6: Chat button is hidden/disabled for unauthenticated users
+
+### US-11: Chat History & Persistence
 **As a** returning user  
-**I want to** log in and access my previous chat conversations  
+**I want to** access my previous chat conversations  
 **So that** I can continue where I left off and maintain context
 
 **Acceptance Criteria:**
-- AC-10.1: Users can authenticate with email/password or SSO
-- AC-10.2: Chat history is stored per user account
-- AC-10.3: Users can view and search previous conversations
-- AC-10.4: Users can resume previous conversations
-- AC-10.5: Users can delete their chat history
-- AC-10.6: System greets users by name after authentication
-- AC-10.7: Chat history is encrypted and secure
-- AC-10.8: Users can export their chat history
+- AC-11.1: Chat history is stored per user account (linked to user_id)
+- AC-11.2: Users can view previous conversations in chronological order
+- AC-11.3: Users can search through their chat history
+- AC-11.4: Users can resume previous conversations
+- AC-11.5: Users can delete individual conversations or entire history
+- AC-11.6: Chat history is stored securely in the database
+- AC-11.7: Users can export their chat history (JSON or CSV)
+- AC-11.8: System maintains conversation threading (groups related messages)
 
-### US-11: Platform Knowledge Base
+### US-12: Platform Knowledge Base
 **As a** user  
 **I want to** ask questions about platform features and capabilities  
 **So that** I can learn how to use the platform effectively
 
 **Acceptance Criteria:**
-- AC-11.1: System has knowledge of all platform pages and their purposes
-- AC-11.2: System can explain available filters and their effects
-- AC-11.3: System can describe available metrics and calculations
-- AC-11.4: System provides examples of common workflows
-- AC-11.5: System can answer "how do I..." questions
-- AC-11.6: System references documentation when appropriate
+- AC-12.1: System has knowledge of all platform pages and their purposes
+- AC-12.2: System can explain available filters and their effects
+- AC-12.3: System can describe available metrics and calculations
+- AC-12.4: System provides examples of common workflows
+- AC-12.5: System can answer "how do I..." questions
+- AC-12.6: System references documentation when appropriate
 
 ---
 
@@ -191,20 +204,21 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
   - **Qdrant**: High-performance, free tier available
 
 ### TR-4: Authentication & User Management
-- TR-4.1: User authentication system (email/password)
-- TR-4.2: Optional SSO integration (Google, Microsoft)
-- TR-4.3: User profile storage (name, email, preferences)
-- TR-4.4: Session management and token handling
-- TR-4.5: Role-based access (optional: admin, user, viewer)
-- TR-4.6: Password reset functionality
+- TR-4.1: **Use existing Google OAuth 2.0 implementation** (v5.2)
+- TR-4.2: Leverage existing `users` table (user_id, google_id, email, name, profile_picture_url, role)
+- TR-4.3: Check authentication status using `auth.is_authenticated()`
+- TR-4.4: Get user info using `auth.get_current_user()`
+- TR-4.5: No additional authentication system needed
+- TR-4.6: Chat feature gated behind authentication check
 
 ### TR-5: Chat History Storage
-- TR-5.1: Per-user chat history database table
-- TR-5.2: Conversation threading and organization
-- TR-5.3: Search functionality across chat history
-- TR-5.4: Export chat history (JSON, CSV, or PDF)
-- TR-5.5: Automatic cleanup of old conversations (configurable retention)
-- TR-5.6: Encryption of stored conversations
+- TR-5.1: New `chat_history` table in existing SQLite database
+- TR-5.2: Schema: `chat_id`, `user_id` (FK to users), `conversation_id`, `message`, `role` (user/assistant), `timestamp`, `tokens_used`
+- TR-5.3: Conversation threading and organization by `conversation_id`
+- TR-5.4: Search functionality across chat history
+- TR-5.5: Export chat history (JSON or CSV format)
+- TR-5.6: Automatic cleanup of old conversations (configurable retention, default 90 days)
+- TR-5.7: Soft delete for user privacy (mark as deleted, actual deletion after 30 days)
 
 ### TR-6: Platform Navigation Knowledge
 - TR-6.1: Embedded knowledge base of all platform pages
@@ -214,15 +228,17 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 - TR-6.5: Deep linking to specific pages with pre-applied filters
 ### TR-7: UI/UX Requirements
 - TR-7.1: Chat interface integrated into main application
-- TR-7.2: Floating chat button (bottom-right corner, near back-to-top button)
-- TR-7.3: Expandable/collapsible chat window
-- TR-7.4: Message history display
+- TR-7.2: Floating chat button (bottom-right corner, positioned near back-to-top button)
+- TR-7.3: Expandable/collapsible chat window (overlay, doesn't shift content)
+- TR-7.4: Message history display with scrolling
 - TR-7.5: Typing indicators during processing
 - TR-7.6: Copy response functionality
 - TR-7.7: Clear conversation button
-- TR-7.8: Login/logout interface
-- TR-7.9: User profile display in chat header
+- TR-7.8: **Authentication gate**: Show "Sign in to use Chat" for unauthenticated users
+- TR-7.9: User profile display in chat header (name, profile picture from OAuth)
 - TR-7.10: Navigation suggestions with clickable links
+- TR-7.11: Chat button hidden/disabled when not authenticated
+- TR-7.12: Smooth animations matching platform design (maroon gradient theme)
 
 ### TR-8: Performance Requirements
 - TR-8.1: Response time < 3 seconds for 80% of queries
@@ -232,14 +248,14 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 - TR-8.5: Chat history loading < 1 second
 
 ### TR-9: Security & Privacy
-- TR-9.1: No storage of sensitive user data beyond authentication
-- TR-9.2: Query logging for debugging (anonymized)
+- TR-9.1: **Leverage existing OAuth security** (no additional auth needed)
+- TR-9.2: Query logging for debugging (anonymized, user_id only)
 - TR-9.3: Rate limiting to prevent abuse (10 queries/minute per user)
 - TR-9.4: Input sanitization to prevent SQL injection
-- TR-9.5: API key encryption and secure storage
-- TR-9.6: HTTPS for all communications
-- TR-9.7: Password hashing (bcrypt or argon2)
-- TR-9.8: GDPR compliance for data deletion requests
+- TR-9.5: API key encryption and secure storage (Streamlit secrets)
+- TR-9.6: HTTPS for all communications (Streamlit Cloud default)
+- TR-9.7: Chat history accessible only to owning user (user_id check)
+- TR-9.8: GDPR compliance for data deletion requests (soft delete + purge)
 
 ---
 
@@ -251,7 +267,7 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 3. **programs**: Active program list with codes
 4. **model_predictions**: ML forecasting results
 5. **marketing_campaigns**: Campaign tracking data
-6. **users** (new): User authentication and profiles
+6. **users** (existing): User authentication via Google OAuth (user_id, google_id, email, name, profile_picture_url, role, created_at, last_login)
 7. **chat_history** (new): Stored conversations per user
 
 ### Common Metrics
@@ -431,12 +447,12 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 - `chromadb` for vector storage (recommended)
 - `streamlit-chat` or `streamlit-extras` for chat UI
 - `sentence-transformers` for embeddings
-- `bcrypt` or `argon2` for password hashing
-- `pyjwt` for session tokens
+- **No additional auth libraries needed** (using existing OAuth)
 
 ### Infrastructure
-- Existing SQLite database
-- New tables: `users`, `chat_history`
+- Existing SQLite database (`edulytix.db`)
+- New table: `chat_history` (users table already exists)
+- Existing Google OAuth 2.0 authentication (v5.2)
 - Streamlit Cloud or local deployment
 - API key management system (Streamlit secrets)
 
@@ -445,19 +461,22 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 ## Implementation Phases
 
 ### Phase 1: MVP with Gemini (Week 1-2)
-- Basic chat interface (floating button)
+- Basic chat interface (floating button, positioned near back-to-top)
+- **Authentication gate** (check `auth.is_authenticated()`)
 - Google Gemini integration (free API)
 - Simple query understanding (single table queries)
 - Direct SQL generation with validation
 - Basic response formatting
 - ChromaDB for schema embeddings
+- User greeting with OAuth profile name
 
-### Phase 2: Authentication & History (Week 3)
-- User authentication system (email/password)
-- User profile management
-- Chat history storage per user
-- Session management
-- Login/logout UI
+### Phase 2: Chat History & Persistence (Week 3)
+- Create `chat_history` table (link to existing `users` table)
+- Store conversations per user (user_id from OAuth)
+- Display chat history in UI
+- Search and export functionality
+- Conversation threading
+- Clear/delete history options
 
 ### Phase 3: Navigation Intelligence (Week 4)
 - Platform pages knowledge base
@@ -510,15 +529,15 @@ An intelligent AI chatbot assistant that enables program directors and stakehold
 ## Open Questions
 
 1. **LLM Provider**: Start with Google Gemini (free) for testing, then evaluate OpenAI/Claude for production?
-2. **Vector Database**: ChromaDB (embedded, simple) or Supabase Vector (production-ready with auth)?
+2. **Vector Database**: ChromaDB (embedded, simple) or Supabase Vector (production-ready)?
 3. **Chat Placement**: Floating button next to back-to-top button (bottom-right)?
-4. **Memory Storage**: Session-based initially, then persistent with authentication?
+4. **Memory Storage**: Session-based initially, then persistent with user_id from OAuth?
 5. **Query Logging**: Store anonymized queries for improvement, with user consent?
-6. **Authentication Method**: Email/password only, or add Google/Microsoft SSO?
-7. **Chat History Retention**: How long to keep chat history? 30 days? 90 days? Forever?
-8. **Navigation Links**: Should chat provide clickable links to pages, or just text instructions?
-9. **Free Tier Limits**: What's acceptable for Gemini API usage? (Gemini has generous free tier)
-10. **User Roles**: Do we need different access levels (admin, user, viewer)?
+6. **Chat History Retention**: How long to keep chat history? 30 days? 90 days? Forever?
+7. **Navigation Links**: Should chat provide clickable links to pages, or just text instructions?
+8. **Free Tier Limits**: What's acceptable for Gemini API usage? (Gemini has generous free tier)
+9. **Chat Window Size**: Fixed size or resizable? Mobile responsive behavior?
+10. **Conversation Organization**: Group by date, topic, or simple chronological list?
 
 ---
 
@@ -529,14 +548,14 @@ Based on your requirements for free testing and quick implementation:
 ### **Recommended Stack for MVP**:
 - **LLM**: Google Gemini 1.5 Flash (free tier: 15 requests/minute, 1M tokens/day)
 - **Vector DB**: ChromaDB (embedded, no external service)
-- **Auth**: Simple email/password with bcrypt (upgrade to Supabase Auth later)
-- **Chat UI**: Floating button (bottom-right, near back-to-top)
-- **Storage**: SQLite for users and chat history (same DB)
+- **Auth**: **Existing Google OAuth 2.0** (v5.2 - already implemented!)
+- **Chat UI**: Floating button (bottom-right, near back-to-top button)
+- **Storage**: SQLite for chat history (same DB as existing `users` table)
 
 ### **Why This Stack**:
 1. **Zero Cost**: Gemini free tier is very generous
 2. **Fast Setup**: ChromaDB is embedded, no external services
-3. **Simple Auth**: Email/password is straightforward
+3. **Auth Already Done**: Leverage existing OAuth implementation (v5.2)
 4. **Familiar**: SQLite for everything keeps it simple
 5. **Upgradeable**: Easy to swap Gemini→OpenAI, ChromaDB→Pinecone later
 
@@ -544,6 +563,7 @@ Based on your requirements for free testing and quick implementation:
 - Gemini: $0 (free tier sufficient for testing)
 - ChromaDB: $0 (embedded)
 - Hosting: $0 (Streamlit Cloud free tier)
+- Auth: $0 (already implemented)
 - **Total MVP Cost**: $0
 
 ### **Production Costs (Estimated)**:
@@ -554,6 +574,7 @@ Based on your requirements for free testing and quick implementation:
 
 ---
 
-**Document Version**: 1.0  
+**Document Version**: 2.0  
 **Created**: January 24, 2026  
-**Status**: Draft - Awaiting Review
+**Updated**: January 25, 2026  
+**Status**: Updated - Ready for Design Phase

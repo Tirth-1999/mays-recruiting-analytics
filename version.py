@@ -4,7 +4,7 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "5.2"
+VERSION = "6.0"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
@@ -14,5 +14,9 @@ VERSION_SHORT = f"v{VERSION}"
 LAST_UPDATED = "January 25, 2026"
 
 # Version metadata
-VERSION_NAME = "OAuth Button Refinement"
-VERSION_STATUS = "Production Ready - Reliable New-Tab Authentication"
+VERSION_NAME = "AI-Powered Analytics"
+VERSION_STATUS = "Production Ready - AI Chat Assistant with Natural Language Queries"
+
+# Feature flags
+ENABLE_AI_CHAT = True
+ENABLE_FORECASTING = True

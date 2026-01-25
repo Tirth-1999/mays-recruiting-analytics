@@ -266,3 +266,288 @@ pip list | grep plotly
 ---
 
 [← Back to Documentation](README.md)
+
+
+---
+
+## AI Chat Assistant
+
+### Overview
+The AI Chat Assistant provides a natural language interface to query the Mays Analytics Platform. Users can ask questions about admissions data, marketing metrics, and platform navigation in plain English.
+
+### Architecture
+
+#### Components
+1. **Frontend (modules/ai_chat.py)**
+   - Floating chat button (bottom-right, above back-to-top)
+   - Chat window overlay (400px × 600px on desktop, full-screen on mobile)
+   - Message display with user/assistant differentiation
+   - Authentication gate (requires Google OAuth)
+
+2. **Backend Utilities (utils/ai_chat/)**
+   - `gemini_client.py`: Google Gemini API integration
+   - `vector_store.py`: ChromaDB for schema embeddings
+   - `sql_generator.py`: Query processing and SQL generation
+   - `chat_history.py`: Database operations for chat persistence
+   - `prompts.py`: Prompt templates for different query types
+
+3. **Database**
+   - `chat_history` table: Stores user conversations
+   - Linked to `users` table via `user_id` foreign key
+
+### Database Schema
+
+#### chat_history Table
+```sql
+CREATE TABLE chat_history (
+    chat_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    conversation_id TEXT NOT NULL,
+    message TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('user', 'assistant')),
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    tokens_used INTEGER DEFAULT 0,
+    query_type TEXT,
+    sql_query TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Indexes
+CREATE INDEX idx_chat_user ON chat_history(user_id);
+CREATE INDEX idx_chat_conversation ON chat_history(conversation_id);
+CREATE INDEX idx_chat_timestamp ON chat_history(timestamp);
+CREATE INDEX idx_chat_user_conversation ON chat_history(user_id, conversation_id);
+```
+
+### Query Processing Pipeline
+
+1. **Authentication Check**: Verify user is signed in via OAuth
+2. **Query Classification**: Determine query type (data, navigation, help, conversational)
+3. **Context Retrieval**: Get relevant schema/platform knowledge from ChromaDB
+4. **Prompt Construction**: Build prompt with context and conversation history
+5. **LLM Generation**: Call Gemini API to generate SQL or response
+6. **SQL Validation**: Ensure generated SQL is safe (SELECT only, no dangerous operations)
+7. **Execution**: Run SQL query against database
+8. **Response Formatting**: Format results into readable response
+9. **History Storage**: Save conversation to database
+
+### Query Types
+
+#### Data Queries
+- Keywords: "how many", "show me", "what is", "count", "total"
+- Process: Generate SQL → Validate → Execute → Format results
+- Example: "How many MBA applications in 2025?"
+
+#### Navigation Queries
+- Keywords: "where", "which page", "how do i", "navigate"
+- Process: Search platform knowledge → Recommend page → Provide steps
+- Example: "Where can I see year-over-year comparisons?"
+
+#### Help Queries
+- Keywords: "what does", "explain", "help", "how to use"
+- Process: Search platform knowledge → Explain feature
+- Example: "What does the Executive Deep Dive show?"
+
+#### Conversational Queries
+- Default for greetings and general chat
+- Process: Generate friendly response
+- Example: "Hello!"
+
+### Vector Store (ChromaDB)
+
+#### Collections
+
+**schema_collection**: Database schema embeddings
+- Tables: admissions_metrics, marketing_spend, programs, model_predictions
+- Metrics: Inquiries, Applications, Admits, Enrolled, etc.
+- Used for semantic search to find relevant schema for SQL generation
+
+**platform_collection**: Platform knowledge embeddings
+- Pages: Home, Executive Deep Dive, Comparison, Marketing, Data Explorer, Predictive
+- Features, filters, and use cases for each page
+- Used for navigation recommendations
+
+#### Embedding Model
+- Model: `all-MiniLM-L6-v2` (SentenceTransformers)
+- Fast, lightweight, good accuracy for semantic search
+- Embeddings stored persistently in `.chromadb/` directory
+
+### API Configuration
+
+#### Gemini API
+- Model: `gemini-1.5-flash` (free tier, fast)
+- Temperature: 0.1 (low for accuracy)
+- Max tokens: 1024 per response
+- Rate limit: 10 requests/minute (configurable)
+
+#### Secrets Configuration
+```toml
+# .streamlit/secrets.toml
+[gemini]
+api_key = "YOUR_GEMINI_API_KEY"
+
+[chat]
+rate_limit_requests = 10
+rate_limit_window = 60
+max_conversation_history = 5
+token_limit_per_query = 1000
+```
+
+### Security
+
+#### SQL Injection Prevention
+- Only SELECT statements allowed
+- Dangerous keywords blocked (DROP, DELETE, UPDATE, INSERT, ALTER, CREATE, EXEC)
+- Input sanitization for user queries
+- SQL validation before execution
+
+#### User Data Isolation
+- Chat history filtered by `user_id` from OAuth
+- Users can only access their own conversations
+- Foreign key constraint ensures data integrity
+
+#### Rate Limiting
+- Per-user rate limiting (10 queries/minute default)
+- Prevents API quota exhaustion
+- Graceful error messages when limit exceeded
+
+### Performance
+
+#### Token Optimization
+- Concise prompts (< 500 tokens context)
+- Semantic search retrieves only relevant schema
+- Conversation history limited to last 5 exchanges
+- Approximate token counting for monitoring
+
+#### Response Time
+- Target: < 3 seconds for 80% of queries
+- ChromaDB semantic search: ~100ms
+- Gemini API call: ~1-2 seconds
+- SQL execution: ~50-200ms
+
+#### Caching (Future)
+- Query result caching for common queries
+- Response caching for identical questions
+- LRU cache with configurable size
+
+### Error Handling
+
+#### Error Types
+- `no_data`: No results found for query
+- `sql_error`: Invalid SQL generated
+- `api_error`: Gemini API failure
+- `rate_limit`: Rate limit exceeded
+- `auth_required`: User not authenticated
+- `ambiguous`: Query too vague
+
+#### Error Messages
+- User-friendly explanations
+- Suggestions for rephrasing
+- Examples of supported queries
+- No technical details exposed to users
+
+### Monitoring
+
+#### Metrics to Track
+- Query volume per user
+- Response times by query type
+- Token usage per query
+- Error rates by type
+- User adoption rate
+
+#### Logging
+- All queries logged with user_id, query_type, tokens_used
+- SQL queries stored for debugging
+- Errors logged with context
+- Anonymized for privacy
+
+### Maintenance
+
+#### Database Cleanup
+```python
+# Delete conversations older than 90 days
+from utils.ai_chat import ChatHistory
+history = ChatHistory()
+deleted = history.cleanup_old_conversations(days=90)
+```
+
+#### Vector Store Reinitialization
+```python
+# Reinitialize embeddings (if schema changes)
+from utils.ai_chat import VectorStore
+store = VectorStore()
+store.initialize_schema_embeddings()
+store.initialize_platform_embeddings()
+```
+
+### Testing
+
+#### Unit Tests
+- Query classification accuracy
+- SQL validation logic
+- Number formatting
+- Error handling
+
+#### Integration Tests
+- End-to-end query processing
+- Database operations
+- API integration
+- Authentication flow
+
+#### Test Commands
+```bash
+# Test chat history
+python utils/ai_chat/chat_history.py
+
+# Test vector store
+python utils/ai_chat/vector_store.py
+
+# Test query classification
+python -c "from utils.ai_chat.sql_generator import QueryProcessor; ..."
+```
+
+### Deployment
+
+#### Requirements
+- Python packages: `google-genai`, `chromadb`, `sentence-transformers`, `streamlit-chat`
+- Gemini API key configured in Streamlit secrets
+- ChromaDB data directory (`.chromadb/`) persisted
+- Database migration run: `python migrations/add_chat_history_table.py up`
+
+#### Streamlit Cloud
+- Add Gemini API key to secrets
+- ChromaDB data persists in app storage
+- No additional infrastructure needed
+- OAuth already configured
+
+### Future Enhancements (Phase 2-6)
+
+#### Phase 2: Chat History UI
+- Conversation list sidebar
+- Search across history
+- Export conversations (JSON/CSV)
+- Delete conversations
+
+#### Phase 3: Navigation Intelligence
+- Deep linking to pages with filters
+- Clickable navigation links
+- Step-by-step workflow guides
+
+#### Phase 4: Enhanced RAG
+- Conversation memory (reference resolution)
+- Complex queries (joins, aggregations)
+- Multi-turn conversations
+
+#### Phase 5: Optimization
+- Response caching
+- Query pattern recognition
+- Async processing
+- Performance tuning
+
+#### Phase 6: Polish
+- User feedback buttons
+- Suggested queries
+- In-app help
+- Video tutorials
+
+---
