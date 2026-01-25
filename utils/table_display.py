@@ -8,8 +8,15 @@ import numpy as np
 from datetime import datetime
 
 
-def process_table_display(conn, selected_table):
-    """Helper function to display table data with filtering options - styled like Marketing Analysis"""
+def process_table_display(conn, selected_table, user_filter=None):
+    """
+    Helper function to display table data with filtering options - styled like Marketing Analysis
+    
+    Args:
+        conn: Database connection
+        selected_table: Name of the table to display
+        user_filter: Optional dict with column:value pairs to filter data (e.g., {'user_id': 123})
+    """
     try:
         # Table descriptions - what questions each table can help answer
         table_descriptions = {
@@ -71,6 +78,36 @@ def process_table_display(conn, selected_table):
                     'Which sources generate the most qualified leads?',
                     'How do different sources convert to applications?',
                     'What\'s the quality score by source?'
+                ]
+            },
+            'chat_history': {
+                'icon': '💬',
+                'title': 'AI Chat Conversation History',
+                'questions': [
+                    'What questions have I asked the AI assistant?',
+                    'What are my recent conversations?',
+                    'How many messages have I sent?',
+                    'What responses did I receive?'
+                ]
+            },
+            'chat_feedback': {
+                'icon': '👍',
+                'title': 'AI Chat Feedback & Ratings',
+                'questions': [
+                    'What feedback have I given to AI responses?',
+                    'Which responses did I rate positively?',
+                    'What was my satisfaction with the AI?',
+                    'How did I rate different query types?'
+                ]
+            },
+            'chat_metrics': {
+                'icon': '📊',
+                'title': 'AI Chat Performance Metrics',
+                'questions': [
+                    'How fast are AI responses?',
+                    'How many tokens have I used?',
+                    'What are my chat usage statistics?',
+                    'What is the AI performance over time?'
                 ]
             },
             'sqlite_sequence': {
@@ -138,9 +175,22 @@ def process_table_display(conn, selected_table):
         table_info_query = f"PRAGMA table_info({selected_table})"
         table_info = pd.read_sql(table_info_query, conn)
         
-        # Get row count
-        count_query = f"SELECT COUNT(*) as count FROM {selected_table}"
-        row_count = pd.read_sql(count_query, conn)['count'].iloc[0]
+        # Build query with user filter if provided
+        if user_filter:
+            where_clauses = [f"{col} = ?" for col in user_filter.keys()]
+            where_sql = " WHERE " + " AND ".join(where_clauses)
+            filter_values = tuple(user_filter.values())
+            
+            count_query = f"SELECT COUNT(*) as count FROM {selected_table}{where_sql}"
+            row_count = pd.read_sql(count_query, conn, params=filter_values)['count'].iloc[0]
+            
+            data_query = f"SELECT * FROM {selected_table}{where_sql}"
+        else:
+            count_query = f"SELECT COUNT(*) as count FROM {selected_table}"
+            row_count = pd.read_sql(count_query, conn)['count'].iloc[0]
+            
+            data_query = f"SELECT * FROM {selected_table}"
+            filter_values = None
         
         # Show row count centered
         st.markdown(f"""
@@ -165,8 +215,10 @@ def process_table_display(conn, selected_table):
         """, unsafe_allow_html=True)
         
         # Get all data first to enable filtering
-        data_query = f"SELECT * FROM {selected_table}"
-        full_data = pd.read_sql(data_query, conn)
+        if filter_values:
+            full_data = pd.read_sql(data_query, conn, params=filter_values)
+        else:
+            full_data = pd.read_sql(data_query, conn)
         
         if not full_data.empty:
             # Create filter columns

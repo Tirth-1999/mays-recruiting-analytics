@@ -15,18 +15,31 @@ from utils import auth
 def render():
     """Render the Database/Data Explorer page"""
     
+    # Check authentication first
+    if not auth.is_authenticated():
+        st.info("Please sign in to access the Data Explorer")
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            auth_url = auth.get_authorization_url()
+            st.link_button("Sign in with Google", auth_url, use_container_width=True, type="primary")
+        return
+    
+    user = auth.get_current_user()
+    
     # Tables to exclude from Data Explorer (sensitive data)
-    # Admins can see all tables, regular users cannot see sensitive tables
+    # Admins can see all tables including users table
+    # Regular users can see their own chat data but not other users' data
     if auth.is_admin():
         EXCLUDED_TABLES = ['sqlite_sequence']  # Only hide system tables for admins
     else:
         EXCLUDED_TABLES = [
-            'users',              # Personal data (emails, names, profiles)
-            'chat_history',       # Conversation history (future chatbot)
-            'metadata',           # System metadata (update timestamps)
+            'users',              # Personal data (emails, names, profiles) - admin only
+            'metadata',           # System metadata (update timestamps) - admin only
             'model_predictions',  # ML predictions (should be viewed via Predictive Analytics page)
             'sqlite_sequence'     # System table
         ]  # Hide sensitive tables for regular users
+        # Note: chat_history, chat_feedback, chat_metrics are now visible to logged-in users
+        # but queries will be filtered by user_id to show only their own data
     
     # Define searchable content for each table
     table_search_content = {
@@ -109,6 +122,33 @@ def render():
                 'Which sources generate the most qualified leads?',
                 'How do different sources convert to applications?',
                 'What\'s the quality score by source?'
+            ]
+        },
+        'chat_history': {
+            'keywords': ['chat', 'conversations', 'ai', 'assistant', 'messages', 'queries', 'history'],
+            'questions': [
+                'What questions have I asked the AI assistant?',
+                'What are my recent conversations?',
+                'How many messages have I sent?',
+                'What queries did I make?'
+            ]
+        },
+        'chat_feedback': {
+            'keywords': ['feedback', 'ratings', 'satisfaction', 'thumbs up', 'thumbs down', 'quality'],
+            'questions': [
+                'What feedback have I given?',
+                'Which responses did I rate positively?',
+                'What was my satisfaction with AI responses?',
+                'How did I rate the AI assistant?'
+            ]
+        },
+        'chat_metrics': {
+            'keywords': ['metrics', 'performance', 'response time', 'tokens', 'usage', 'analytics'],
+            'questions': [
+                'How fast are AI responses?',
+                'How many tokens have I used?',
+                'What are my chat usage statistics?',
+                'What is the AI performance?'
             ]
         }
     }
@@ -318,7 +358,10 @@ def render():
                     'Marketing Spend': 'Spend',
                     'Marketing Spend Totals': 'Spend Totals',
                     'Inquiry Sources': 'Sources',
-                    'Sqlite Sequence': 'System'
+                    'Sqlite Sequence': 'System',
+                    'Chat History': 'Chat History',
+                    'Chat Feedback': 'Feedback',
+                    'Chat Metrics': 'Metrics'
                 }
                 display_name = name_mapping.get(display_name, display_name)
                 tab_labels.append(display_name)
@@ -327,8 +370,19 @@ def render():
             
             for i, table in enumerate(available_tables):
                 with tabs[i]:
-                    # Process the table with new styling
-                    process_table_display(conn, table)
+                    # For chat tables, filter by user_id to show only user's own data
+                    if table in ['chat_history', 'chat_feedback', 'chat_metrics']:
+                        if not auth.is_admin():
+                            # Regular users see only their own chat data
+                            st.info(f"📊 Showing your personal {table.replace('_', ' ')} data")
+                            process_table_display(conn, table, user_filter={'user_id': user['user_id']})
+                        else:
+                            # Admins see all data
+                            st.info(f"👑 Admin view: Showing all {table.replace('_', ' ')} data")
+                            process_table_display(conn, table)
+                    else:
+                        # Other tables show all data
+                        process_table_display(conn, table)
     
     except Exception as e:
         st.error(f"Database connection error: {str(e)}")
