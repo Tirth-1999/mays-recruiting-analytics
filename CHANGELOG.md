@@ -7,6 +7,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [5.0.0] - 2026-01-24
+
+### 🔐 Major Release - Authentication & UI Optimization
+
+#### Added
+- **Google OAuth 2.0 Authentication System**:
+  - Full OAuth 2.0 flow with Google Cloud Console integration
+  - User database with `users` table (user_id, google_id, email, name, profile_picture_url, role, created_at, last_login)
+  - Secure session management with OAuth state validation (CSRF protection)
+  - User profile display with name, email, profile picture, and role
+  - Admin and regular user roles with permission controls
+  - Database migrations: `add_users_table.py`, `add_user_roles.py`
+  - New authentication module: `utils/auth.py`
+
+- **Role-Based Access Control**:
+  - Admin access to all tables in Data Explorer
+  - Regular users restricted from sensitive tables: `users`, `metadata`, `model_predictions`, `chat_history`
+  - Backend enforcement of access permissions
+  - Admin emails configured: `tirthdhara108@gmail.com`, `tirth.shah@tamu.edu`
+  - Regular user: `tirth.170410107110@gmail.com`
+
+- **Sidebar UI Complete Redesign**:
+  - Compact header with Texas A&M logo
+  - "Mays Analytics" title with "Flex Online Programs" subtitle
+  - Gold divider (2px solid #C5A572) below header
+  - Profile section with inline logout button
+  - Role display (Admin/User) in subtle italic text
+  - Navigation reordered: Home Dashboard, Executive Dive, Comparison Tool, Marketing Analysis, Predictive Analytics, Chat with AI, Data Explorer
+  - Documentation renamed to "Documentation & Help"
+  - Footer with version number and gold divider
+
+#### Changed
+- **Spacing Optimization**:
+  - Removed all Streamlit default gaps between elements
+  - Consistent 10px margins between all major sections (Laptop)
+  - Responsive spacing: Desktop (12px), Laptop (10px), Tablet (8px)
+  - Header padding-bottom: 6px
+  - Profile margin-top: 10px, margin-bottom: 12px
+  - No scrolling required on laptop/desktop screens
+
+- **Navigation Tabs**:
+  - White background on inactive tabs
+  - Maroon gradient on active tabs
+  - Compact button padding: 6px vertical, 0px margins
+  - Smooth hover animation: 3px slide with 0.2s transition
+  - Professional appearance without emojis
+
+- **Profile Section**:
+  - Consolidated design: picture, name, email, role in single card
+  - Full-width logout button integrated in profile card
+  - Role text on separate line below email
+  - Optimized padding: 10px internal
+  - White background with subtle border
+
+- **CSS Improvements**:
+  - Aggressive removal of default Streamlit spacing
+  - Added `margin-block-start: 0px` and `margin-block-end: 0px`
+  - Production-ready CSS with `!important` flags
+  - Fixed Streamlit Cloud caching issues
+
+#### Technical Implementation
+- **Dependencies Added**:
+  - `google-auth==2.27.0`
+  - `google-auth-oauthlib==1.2.0`
+  - `google-auth-httplib2==0.2.0`
+
+- **Files Modified**:
+  - `main_app.py` - Complete sidebar redesign (601 lines changed)
+  - `modules/database.py` - Role-based table filtering (54 lines added)
+  - `utils/auth.py` - New authentication module (complete OAuth flow)
+  - `requirements.txt` - Added Google auth packages
+
+- **Database Schema**:
+  - Users table with role field
+  - Indexes on google_id and email for performance
+  - Automatic role assignment on first login
+
+#### Security
+- OAuth state validation for CSRF protection
+- Secure credential storage (not in git)
+- Session-based authentication
+- Backend role verification
+- Admin role enforcement
+
+#### Removed
+- `GOOGLE_AUTH_SETUP_COMPLETE.md` - Temporary setup guide
+
+---
+
 ## [4.4.0] - 2026-01-24
 
 ### 🎨 Minor Release - Navigation & UX Enhancements (Final)
