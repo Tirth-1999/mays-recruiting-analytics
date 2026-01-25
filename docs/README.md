@@ -33,7 +33,7 @@ Version 5.0 is a major release featuring complete authentication system and opti
 - **Smooth Animations**: 3px slide on hover, maroon gradient for active tabs
 - **Gold Dividers**: 2px solid gold separators between sections
 
-[View complete changelog →](../CHANGELOG.md)
+[View complete changelog →](CHANGELOG.md)
 
 ---
 
@@ -52,7 +52,7 @@ Version 4.4 completes the navigation improvements with enhanced scroll functiona
 - 🔒 **Fixed Position**: Always visible in bottom-right corner (30px from edges)
 - ✨ **Smooth Animation**: Users can see content while scrolling to top
 
-[View complete changelog →](../CHANGELOG.md)
+[View complete changelog →](CHANGELOG.md)
 
 ---
 
@@ -70,7 +70,7 @@ Version 4.2 adds direct communication capabilities to the platform:
 - 📖 **Deployment Guide**: Complete DEPLOYMENT.md with Streamlit Cloud setup instructions
 - ✅ **Validation**: Required field validation and email format checking
 
-[View complete changelog →](../CHANGELOG.md) | [Deployment Guide →](../DEPLOYMENT.md)
+[View complete changelog →](CHANGELOG.md) | [Deployment Guide →](DEPLOYMENT_CHECKLIST.md)
 
 ---
 
@@ -88,7 +88,7 @@ Version 4.1 brings significant improvements to the user interface and responsive
 - 🔧 **Sidebar Fix**: Overlay behavior on all screen sizes - no content shifting when opening/closing
 - 📐 **Centered Mobile Content**: All text and boxes centered in mobile/tablet mode for better readability
 
-[View complete changelog →](../CHANGELOG.md)
+[View complete changelog →](CHANGELOG.md)
 
 ---
 
@@ -124,10 +124,10 @@ AI-powered forecasting and optimization using machine learning.
 
 ### Project Information
 
-**[Version History](../VERSIONING.md)**  
+**[Version History](VERSIONING.md)**  
 Complete development timeline and version details.
 
-**[Changelog](../CHANGELOG.md)**  
+**[Changelog](CHANGELOG.md)**  
 Detailed change log for all releases.
 
 **[Security Policy](../SECURITY.md)**  
@@ -203,7 +203,7 @@ Prophet, ARIMA, Linear Regression
 
 ### Developers
 - [Technical Guide](TECHNICAL_GUIDE.md) - Architecture and database schema
-- [Version History](../VERSIONING.md) - Development timeline
+- [Version History](VERSIONING.md) - Development timeline
 - [Code of Conduct](../CODE_OF_CONDUCT.md) - Contribution guidelines
 
 ---
@@ -241,7 +241,7 @@ Prophet, ARIMA, Linear Regression
 | 2.0 | Jan 14, 2026 | Marketing Spend Integration |
 | 1.0 | Apr 30, 2024 | Initial Release |
 
-[View complete version history](../VERSIONING.md)
+[View complete version history](VERSIONING.md)
 
 ---
 

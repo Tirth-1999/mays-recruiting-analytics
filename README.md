@@ -8,10 +8,10 @@
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-5.0-blue.svg)](VERSIONING.md)
+[![Version](https://img.shields.io/badge/version-5.0-blue.svg)](docs/VERSIONING.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
-[Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Deployment](DEPLOYMENT.md) • [Changelog](CHANGELOG.md)
+[Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md) • [Version History](docs/VERSIONING.md)
 
 </div>
 
@@ -44,7 +44,7 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 - **Smooth Animations**: 3px slide on hover, maroon gradient for active tabs
 - **Gold Dividers**: 2px solid gold separators between sections
 
-[View complete changelog →](CHANGELOG.md)
+[View complete changelog →](docs/CHANGELOG.md)
 
 ---
 
@@ -176,8 +176,8 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 - **[Complete Documentation](docs/README.md)** - Central documentation hub
 - **[Quick Start Guide](docs/QUICK_START.md)** - Installation and setup
-- **[Version History](VERSIONING.md)** - Complete development timeline
-- **[Changelog](CHANGELOG.md)** - Detailed change log
+- **[Version History](docs/VERSIONING.md)** - Complete development timeline
+- **[Changelog](docs/CHANGELOG.md)** - Detailed change log
 - **[Security Policy](SECURITY.md)** - Security guidelines
 - **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines
 
@@ -193,7 +193,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 | **2.0** | Jan 14, 2026 | Marketing Spend Integration |
 | **1.0** | Apr 30, 2024 | Initial Release |
 
-[View full version history →](VERSIONING.md)
+[View full version history →](docs/VERSIONING.md)
 
 ---
 

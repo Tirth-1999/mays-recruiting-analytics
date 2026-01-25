@@ -70,6 +70,10 @@
 
 ### 3. Code Quality
 - [ ] Remove all temporary files (.md test files, debug files)
+- [ ] Check for any .md files in root directory:
+  - [ ] If temporary → Delete them
+  - [ ] If essential for production → Move to `docs/` folder
+  - [ ] Keep only GitHub-required files in root: README.md, LICENSE, CODE_OF_CONDUCT.md, SECURITY.md
 - [ ] Remove console.log or debug print statements
 - [ ] Check for TODO comments that should be addressed
 - [ ] Verify all imports are used
@@ -191,11 +195,13 @@ git push origin vX.X
 3. Forget to create and push git tag
 4. Skip updating docs/README.md
 5. Leave temporary test files in repo
-6. Use weak commit messages
-7. Forget to test on production
-8. Skip CSS production compatibility checks
-9. Leave debug code or console logs
-10. Forget to update version.py
+6. Leave .md files in root (except GitHub-required ones)
+7. Use weak commit messages
+8. Forget to test on production
+9. Skip CSS production compatibility checks
+10. Leave debug code or console logs
+11. Forget to update version.py
+12. Forget to update Development Timeline and Summary table
 
 ### ✅ DO:
 1. Follow this checklist completely
@@ -203,11 +209,14 @@ git push origin vX.X
 3. Write clear commit messages
 4. Update ALL documentation files
 5. Remove old version from main README
-6. Create descriptive git tags
-7. Verify on production after deployment
-8. Add aggressive CSS for production
-9. Clean up temporary files
-10. Double-check version numbers everywhere
+6. Keep root directory clean (only GitHub-required .md files)
+7. Move all documentation to `docs/` folder
+8. Create descriptive git tags
+9. Verify on production after deployment
+10. Add aggressive CSS for production
+11. Clean up temporary files
+12. Double-check version numbers everywhere
+13. Update Development Timeline and Summary table
 
 ---
 
@@ -243,8 +252,35 @@ git push origin vX.X
 1. ✅ `version.py` - Version number and metadata
 2. ✅ `README.md` - Current version only (remove old), update Version History table, update footer
 3. ✅ `docs/README.md` - Add new version (keep old)
-4. ✅ `VERSIONING.md` - Complete changelog entry, update Development Timeline, update Summary table, update footer
+4. ✅ `docs/VERSIONING.md` - Complete changelog entry, update Development Timeline, update Summary table, update footer
 5. ✅ `CHANGELOG.md` - Structured changelog entry
+
+---
+
+## File Organization Rules
+
+### Root Directory (Keep Minimal)
+**Only GitHub-required files:**
+- ✅ `README.md` - Main project readme
+- ✅ `LICENSE` - License file
+- ✅ `CODE_OF_CONDUCT.md` - GitHub standard
+- ✅ `SECURITY.md` - GitHub standard
+- ✅ `.gitignore` - Git configuration
+
+### docs/ Directory (All Documentation)
+**All other .md files belong here:**
+- ✅ `docs/README.md` - Documentation hub
+- ✅ `docs/VERSIONING.md` - Version history
+- ✅ `docs/CHANGELOG.md` - Change log
+- ✅ `docs/DEPLOYMENT_CHECKLIST.md` - This file
+- ✅ `docs/QUICK_START.md` - Setup guide
+- ✅ `docs/[PAGE]_*.md` - Page-specific guides
+
+**Before deployment:**
+- Check root for any .md files not in the list above
+- Move essential files to `docs/`
+- Delete temporary files
+- Update all links to reflect new paths
 
 ---
 
