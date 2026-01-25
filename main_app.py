@@ -351,17 +351,12 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
     else:
-        if st.button("Sign in with Google", key="sidebar_signin", use_container_width=True, type="primary"):
-            try:
-                auth_url = auth.get_authorization_url()
-                # Use components.html for reliable redirect on all devices
-                components.html(f"""
-                    <script>
-                        window.parent.location.href = "{auth_url}";
-                    </script>
-                """, height=0)
-            except Exception as e:
-                st.error(f"❌ Error generating login URL: {str(e)}")
+        # Use link_button for OAuth - more reliable than JavaScript redirects
+        try:
+            auth_url = auth.get_authorization_url()
+            st.link_button("🔐 Sign in with Google", auth_url, use_container_width=True, type="primary")
+        except Exception as e:
+            st.error(f"❌ Error generating login URL: {str(e)}")
     
     # Gold divider
     st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
