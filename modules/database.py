@@ -9,13 +9,54 @@ import pandas as pd
 # Import utility functions
 from utils.database import get_connection
 from utils.table_display import process_table_display
+from utils import auth
 
 
 def render():
     """Render the Database/Data Explorer page"""
     
+    # Tables to exclude from Data Explorer (sensitive data)
+    # Admins can see all tables, regular users cannot see sensitive tables
+    if auth.is_admin():
+        EXCLUDED_TABLES = ['sqlite_sequence']  # Only hide system tables for admins
+    else:
+        EXCLUDED_TABLES = [
+            'users',              # Personal data (emails, names, profiles)
+            'chat_history',       # Conversation history (future chatbot)
+            'metadata',           # System metadata (update timestamps)
+            'model_predictions',  # ML predictions (should be viewed via Predictive Analytics page)
+            'sqlite_sequence'     # System table
+        ]  # Hide sensitive tables for regular users
+    
     # Define searchable content for each table
     table_search_content = {
+        'users': {
+            'keywords': ['users', 'accounts', 'authentication', 'admin', 'roles', 'login', 'profiles'],
+            'questions': [
+                'Who has access to the platform?',
+                'Which users have admin privileges?',
+                'When did users last log in?',
+                'What are the user roles?'
+            ]
+        },
+        'metadata': {
+            'keywords': ['metadata', 'system', 'updates', 'timestamps', 'etl', 'pipeline', 'last update'],
+            'questions': [
+                'When was the data last updated?',
+                'When did the ETL pipeline last run?',
+                'What is the system status?',
+                'When was marketing data last refreshed?'
+            ]
+        },
+        'model_predictions': {
+            'keywords': ['predictions', 'forecasts', 'ml', 'machine learning', 'models', 'ai', 'forecast'],
+            'questions': [
+                'What are the enrollment predictions?',
+                'How accurate are the model forecasts?',
+                'What metrics are being predicted?',
+                'What are the confidence intervals?'
+            ]
+        },
         'admissions_metrics': {
             'keywords': ['applications', 'admissions', 'inquiries', 'enrollment', 'conversion', 'cohort', 'metrics', 'performance'],
             'questions': [
@@ -92,7 +133,10 @@ def render():
         # Get available tables
         tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
         tables_df = pd.read_sql(tables_query, conn)
-        available_tables = tables_df['name'].tolist()
+        all_tables = tables_df['name'].tolist()
+        
+        # Filter out excluded tables
+        available_tables = [table for table in all_tables if table not in EXCLUDED_TABLES]
         
         # Filter tables based on search if provided
         if keyword_search:
@@ -246,11 +290,15 @@ def render():
             
             # Create tabs for each table with icons
             table_icons = {
+                'users': '👥',
+                'metadata': '⚙️',
+                'model_predictions': '🔮',
                 'admissions_metrics': '📊',
                 'programs': '🎓',
                 'marketing_metrics': '📈',
                 'marketing_campaigns': '📢',
                 'marketing_spend': '💰',
+                'marketing_spend_totals': '�',
                 'inquiry_sources': '🔍',
                 'sqlite_sequence': '⚙️'
             }
@@ -261,10 +309,14 @@ def render():
                 display_name = table.replace('_', ' ').title()
                 # Simplify multi-word names to single words where possible
                 name_mapping = {
+                    'Users': 'Users',
+                    'Metadata': 'Metadata',
+                    'Model Predictions': 'Predictions',
                     'Admissions Metrics': 'Admissions',
                     'Marketing Metrics': 'Marketing',
                     'Marketing Campaigns': 'Campaigns',
                     'Marketing Spend': 'Spend',
+                    'Marketing Spend Totals': 'Spend Totals',
                     'Inquiry Sources': 'Sources',
                     'Sqlite Sequence': 'System'
                 }

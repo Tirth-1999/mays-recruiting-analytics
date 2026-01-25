@@ -3,17 +3,48 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 4.4** | **Last Updated: January 24, 2026**
+**Version 5.0** | **Last Updated: January 24, 2026**
 
-AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness.
+AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-4.4-blue.svg)](VERSIONING.md)
+[![Version](https://img.shields.io/badge/version-5.0-blue.svg)](VERSIONING.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Deployment](DEPLOYMENT.md) • [Changelog](CHANGELOG.md)
 
 </div>
+
+---
+
+## What's New in Version 5.0
+
+**Authentication & UI Optimization** - Released January 24, 2026
+
+### 🔐 Google OAuth 2.0 Authentication
+- **Secure Login**: Full Google OAuth 2.0 integration with user profiles
+- **Role-Based Access**: Admin and regular user roles with permission controls
+- **Profile Management**: User name, email, profile picture, and role display
+- **Session Security**: OAuth state validation and secure session handling
+
+### 🎨 Sidebar UI Complete Redesign
+- **Optimized Layout**: Compact profile, navigation, and footer sections
+- **Minimal Spacing**: Perfect 10px margins between all sections
+- **No Scrolling**: Fits all elements on laptop/desktop screens
+- **Responsive Design**: Adapts to Desktop (12px), Laptop (10px), Tablet (8px)
+
+### 🔒 Role-Based Access Control
+- **Data Explorer**: Admins see all tables, users restricted from sensitive data
+- **Admin Tables**: `users`, `metadata`, `model_predictions`, `chat_history`
+- **Security**: Backend enforcement of access rules
+
+### 📱 Professional UI
+- **Clean Design**: No emojis, professional appearance
+- **White Backgrounds**: Visual distinction for navigation tabs
+- **Smooth Animations**: 3px slide on hover, maroon gradient for active tabs
+- **Gold Dividers**: 2px solid gold separators between sections
+
+[View complete changelog →](CHANGELOG.md)
 
 ---
 
@@ -31,60 +62,18 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 4.3
-
-**Navigation & UX Enhancements (Initial)** - Released January 24, 2026
-
-- 🎯 **Floating "Back to Top" Button**: Beautiful rounded square button with maroon gradient and white arrow
-- 📱 **Mobile Responsive**: Adapts perfectly to all screen sizes
-- 🎨 **Professional Design**: Smooth animations, glassmorphism effects, perfect centering
-- 📂 **Collapsed Sidebar**: Sidebar starts collapsed for cleaner interface
-- ⬆️ **Smooth Scrolling**: Instant scroll to absolute top of page
-
-[View complete changelog →](CHANGELOG.md)
-
----
-
-## What's New in Version 4.2
-
-**Contact & Feedback Integration** - Released January 24, 2026
-
-- 📧 **In-App Feedback Form**: Report bugs, suggest improvements, or ask questions directly in the Documentation page
-- 📨 **Email Integration**: Powered by Resend API for reliable delivery to tirth.shah@tamu.edu
-- 🎨 **Professional Formatting**: HTML emails with maroon/gold theme matching the platform
-- 🔒 **Secure Deployment**: Streamlit Cloud secrets integration for production
-- 📖 **Deployment Guide**: Complete setup instructions for Streamlit Cloud
-
-[View complete changelog →](CHANGELOG.md)
-
----
-
-## What's New in Version 4.1
-
-**UI/UX Refinements & Responsive Design** - Released January 24, 2026
-
-- ✨ **Standardized Design**: Consistent metric boxes and headers across all pages
-- 📱 **Responsive Layout**: Mobile-optimized with 1000px breakpoint
-- 🎨 **Professional Appearance**: Emoji-free headers, centered content
-- 📊 **Enhanced Data Explorer**: Individual question boxes with equal sizing
-- 📖 **Documentation Overhaul**: Chrome-style tabs with responsive grid system
-- 🔧 **Sidebar Fix**: Overlay behavior on all screen sizes (no content shifting)
-
-[View complete changelog →](CHANGELOG.md)
-
----
-
 ## Overview
 
-Mays Analytics is an AI-powered platform designed for Texas A&M Mays Business School to track, analyze, and predict admissions performance across 7 graduate programs. The platform combines real-time data visualization with machine learning to provide actionable insights for enrollment planning and marketing optimization.
+Mays Analytics is an AI-powered platform designed for Texas A&M Mays Business School to track, analyze, and predict admissions performance across 7 graduate programs. The platform combines real-time data visualization with machine learning and secure authentication to provide actionable insights for enrollment planning and marketing optimization.
 
 **Key Capabilities:**
-- Real-time analytics tracking admissions metrics across cohorts and programs
-- Predictive forecasting with AI-powered predictions and 95% confidence intervals
-- Marketing ROI analysis with comprehensive spend tracking and channel optimization
-- Year-over-year comparisons for detailed cohort performance analysis
-- Responsive design optimized for desktop, tablet, and mobile devices
-- Full data export capabilities with CSV download options
+- **Secure Authentication**: Google OAuth 2.0 with role-based access control
+- **Real-time Analytics**: Track admissions metrics across cohorts and programs
+- **Predictive Forecasting**: AI-powered predictions with 95% confidence intervals
+- **Marketing ROI Analysis**: Comprehensive spend tracking and channel optimization
+- **Year-over-Year Comparisons**: Detailed cohort performance analysis
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Data Export**: Full CSV download capabilities with role-based permissions
 
 ---
 

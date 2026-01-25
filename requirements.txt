@@ -13,3 +13,6 @@ hypothesis==6.150.3
 joblib==1.5.3
 numpy==2.3.5
 resend==2.4.0
+google-auth==2.27.0
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0

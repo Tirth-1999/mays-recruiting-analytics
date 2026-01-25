@@ -5,6 +5,7 @@ Single-Page Application with Navigation
 import streamlit as st
 import streamlit.components.v1 as components
 from version import VERSION_FULL
+from utils import auth
 
 # Page config
 st.set_page_config(
@@ -14,9 +15,49 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Remove top padding and adjust layout for sidebar
+# Initialize authentication session state
+auth.init_session_state()
+
+# Handle OAuth callback
+if 'code' in st.query_params and not st.session_state.get('auth_processed', False):
+    st.session_state.auth_processed = True
+    code = st.query_params['code']
+    state = st.query_params.get('state', '')
+    full_url = f"http://localhost:8501/?code={code}&state={state}"
+    
+    try:
+        user_info = auth.handle_oauth_callback(full_url)
+        if user_info:
+            if auth.login_user(user_info):
+                st.success(f"✅ Welcome, {user_info['name']}!")
+                st.query_params.clear()
+                st.session_state.auth_processed = False
+                st.rerun()
+            else:
+                st.error("Failed to log in. Please try again.")
+                st.query_params.clear()
+                st.session_state.auth_processed = False
+        else:
+            st.error("Authentication failed. Please try again.")
+            st.query_params.clear()
+            st.session_state.auth_processed = False
+    except Exception as e:
+        st.error(f"Authentication error: {str(e)}")
+        st.query_params.clear()
+        st.session_state.auth_processed = False
+elif 'code' not in st.query_params:
+    st.session_state.auth_processed = False
+
+# Handle logout via query param
+if 'logout' in st.query_params:
+    auth.logout_user()
+    st.query_params.clear()
+    st.rerun()
+
+# Global CSS
 st.markdown("""
 <style>
+    /* Main content styling */
     .main .block-container {
         padding-left: 1rem !important; 
         padding-right: 1rem !important;
@@ -26,6 +67,8 @@ st.markdown("""
     .block-container {
         padding-top: 0rem !important;
         margin-top: 0rem !important;
+        padding-bottom: 1rem !important;
+        border-bottom: none !important;
     }
     div[data-testid="stAppViewContainer"] > .main {
         padding-top: 0rem !important;
@@ -33,170 +76,11 @@ st.markdown("""
     .stApp > header {
         display: none !important;
     }
-    /* Ensure smooth scroll behavior */
     section.main {
         scroll-behavior: auto !important;
     }
-    /* div[data-testid="stToolbar"] {
-        display: none !important;
-    } */
-</style>
-""", unsafe_allow_html=True)
-
-# Initialize session state for navigation
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = 'Home'
-
-# Add anchor at the ABSOLUTE TOP of the page (before everything)
-st.markdown('<div id="page-top" style="position: absolute; top: 0;"></div>', unsafe_allow_html=True)
-
-# CSS for the entire application
-st.markdown("""
-<style>
-.nav-menu {
-    background: #f8f9fa;
-    padding: 10px 20px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.nav-button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-.nav-button.active {
-    background: #500000;
-    color: white !important;
-    border-color: #500000;
-}
-.nav-button.inactive {
-    background: white;
-    color: #500000;
-    border-color: #e9ecef;
-}
-.nav-button.inactive:hover {
-    background: #e9ecef;
-    border-color: #500000;
-}
-.metric-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 1rem;
-    text-align: center;
-}
-.insight-card {
-    background: linear-gradient(135deg, #500000 0%, #700000 100%);
-    color: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    margin: 1rem 0;
-}
-.section-divider {
-    height: 3px;
-    background: linear-gradient(90deg, #500000, #B00000);
-    border: none;
-    border-radius: 2px;
-    margin: 2rem 0;
-}
-.performance-indicator {
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 600;
-}
-.data-insight {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 1.5rem;
-    border-radius: 8px;
-    border-left: 4px solid #500000;
-    margin: 1rem 0;
-}
-.metric-highlight {
-    background: #500000;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    display: inline-block;
-    font-weight: bold;
-    margin: 0.25rem;
-}
-.indicator-excellent { background: #d4edda; color: #155724; }
-.indicator-good { background: #fff3cd; color: #856404; }
-.indicator-needs-attention { background: #f8d7da; color: #721c24; }
-
-/* Remove bottom border from block container */
-.block-container {
-    padding-bottom: 1rem !important;
-    border-bottom: none !important;
-}
-
-/* Footer responsive styling */
-@media (max-width: 768px) {
-    .footer-content {
-        text-align: center !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Professional Mays Business School Banner
-st.markdown("""
-    <div style='background: linear-gradient(135deg, #500000 0%, #700000 50%, #500000 100%); 
-                padding: 1.5rem 2rem; 
-                border-radius: 10px; 
-                text-align: center;
-                border: 3px solid #C5A572;
-                margin-bottom: 1rem;'>
-        <img src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICM1MDAwMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMSwgLmNscy0yLCAuY2xzLTMgewogICAgICAgIHN0cm9rZS13aWR0aDogMHB4OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNiMWIzYjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyMDEuMjgiIHk9IjIyMi41NyIgd2lkdGg9IjYyOS43OSIgaGVpZ2h0PSI2MzQuNzkiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iNzQ3LjQ0IDQ3NS4yMiA3MDAuNjcgNDc1LjIyIDY5Ny45NyA0NzUuMjIgNjk2Ljc1IDQ3Ny42NyA2NjIuODQgNTQ4LjI3IDYyOC44IDQ3Ny42MyA2MjcuNjEgNDc1LjIyIDYyNC45MiA0NzUuMjIgNTc5LjcxIDQ3NS4yMiA1NzUuNDQgNDc1LjIyIDU3NS40NCA0NzkuNTIgNTc1LjQ0IDUwMy41OSA1NzUuNDQgNTA3LjkgNTc5LjcxIDUwNy45IDU4Ny40NCA1MDcuOSA1ODcuNDQgNjA5LjAxIDU3OS4wOCA2MDkuMDEgNTc0Ljc4IDYwOS4wMSA1NzQuNzggNjEzLjMyIDU3NC43OCA2MzcuMzkgNTc0Ljc4IDY0MS42OSA1NzkuMDggNjQxLjY5IDYyOS44NSA2NDEuNjkgNjM0LjE1IDY0MS42OSA2MzQuMTUgNjM3LjM5IDYzNC4xNSA2MTMuMzIgNjM0LjE1IDYwOS4wMSA2MjkuODUgNjA5LjAxIDYyMS4wNyA2MDkuMDEgNjIxLjA3IDUzNy4yNSA2NTguOTkgNjE1LjQ1IDY2Mi44NCA2MjMuNDMgNjY2Ljc2IDYxNS40NSA3MDUuMDcgNTM3LjA4IDcwNS4wNyA2MDkuMDEgNjk2LjcxIDYwOS4wMSA2OTIuMzcgNjA5LjAxIDY5Mi4zNyA2MTMuMzIgNjkyLjM3IDYzNy4zOSA2OTIuMzcgNjQxLjY5IDY5Ni43MSA2NDEuNjkgNzQ3LjQ0IDY0MS42OSA3NTEuNzUgNjQxLjY5IDc1MS43NSA2MzcuMzkgNzUxLjc1IDYxMy4zMiA3NTEuNzUgNjA5LjAxIDc0Ny40NCA2MDkuMDEgNzM4LjcgNjA5LjAxIDczOC43IDUwNy45IDc0Ny40NCA1MDcuOSA3NTEuNzUgNTA3LjkgNzUxLjc1IDUwMy41OSA3NTEuNzUgNDc5LjUyIDc1MS43NSA0NzUuMjIgNzQ3LjQ0IDQ3NS4yMiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTQ1Mi42LDYwOC45MWgtMTMuNTFsLTQzLjk1LTEwMS40N2g4LjQ3di0zMi44MmgtNzAuNTR2MzIuNzFoOS43M2wtNDMuOTEsMTAxLjQ3aC0xOC4zdjMyLjcxaDY0LjAzdi0zMi43MWgtOS4zMWw3LjMxLTE2LjloNTIuODNsNy4yOCwxNi45aC05LjgzdjMyLjcxaDY0LjA2di0zMi43MWwtNC4zNy4xMVpNMzgxLjI5LDU1OS4zM2gtMjQuNDlsMTIuMjUtMjguMzgsMTIuMjUsMjguMzhaIi8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjY5My43IDM0OC4yNSAzMzcuNDkgMzQ4LjI1IDMzMi41NiAzNDguMjUgMzMyLjU2IDM1My4xOCAzMzIuNTYgNDQ4LjM1IDMzMi41NiA0NTMuMjggMzM3LjQ5IDQ1My4yOCAzOTkgNDUzLjI4IDQwMy45MyA0NTMuMjggNDAzLjkzIDQ0OC4zNSA0MDMuOTMgNDEzLjAxIDQ3OS45MyA0MTMuMDEgNDc5LjkzIDY2My43NyA0NDQuNTUgNjYzLjc3IDQzOS42NSA2NjMuNzcgNDM5LjY1IDY2OC43IDQzOS42NSA3MzAuMjEgNDM5LjY1IDczNS4xNSA0NDQuNTUgNzM1LjE1IDU4Ni42IDczNS4xNSA1OTEuNTQgNzM1LjE1IDU5MS41NCA3MzAuMjEgNTkxLjU0IDY2OC43IDU5MS41NCA2NjMuNzcgNTg2LjYgNjYzLjc3IDU1MS4zIDY2My43NyA1NTEuMyA0MTMuMDEgNjI2Ljg0IDQxMy4wMSA2MjYuODQgNDQ3Ljg5IDYyNi44NCA0NTIuODMgNjMxLjc3IDQ1Mi44MyA2OTMuNyA0NTIuODMgNjk4LjY0IDQ1Mi44MyA2OTguNjQgNDQ3Ljg5IDY5OC42NCAzNTMuMTggNjk4LjY0IDM0OC4yNSA2OTMuNyAzNDguMjUiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iNTYxLjgzIDY5My4wNiA1NzYuODggNjc3LjU2IDU3Ni44OCA3MjAuMDMgNTYxLjgzIDcwNS42NSA1NjEuODMgNjkzLjA2Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjUzNi43OCA2NzguNjggNTIxLjcgNjkzLjUxIDUyMS43IDM4My40NSA1MzYuNzggMzk4LjQ2IDUzNi43OCA2NzguNjgiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMzYyLjcyIDM3Ny45OSAzNDcuMjUgMzYyLjk0IDY3Ni40NSAzNjIuOTQgNjU3IDM3Ny45OSAzNjIuNzIgMzc3Ljk5Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjY4NC40MyA0MzkuMDQgNjY5LjM5IDQyNC42NiA2NjkuMzkgMzg2LjM4IDY4NC40MyAzNzAuOTIgNjg0LjQzIDQzOS4wNCIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1My40Niw4NDQuOGMwLTYuOTgsNS42NS0xMi42MywxMi42My0xMi42M3MxMi42Myw1LjY1LDEyLjYzLDEyLjYzLTUuNjUsMTIuNjMtMTIuNjMsMTIuNjMtMTIuNjMtNS42NS0xMi42My0xMi42M2gwWk04NzUuNjQsODQ0LjhjLS4zNS01LjI2LTQuOS05LjI1LTEwLjE2LTguOS01LjI2LjM1LTkuMjUsNC45LTguOSwxMC4xNi4zMyw1LjAxLDQuNDksOC45MSw5LjUxLDguOTIsNS4zNS0uMDcsOS42My00LjQ3LDkuNTYtOS44MiwwLS4xMiwwLS4yNC0uMDEtLjM2Wk04NjEuMjMsODM3LjU5aDUuMzJjMy41LDAsNS4yOCwxLjE5LDUuMjgsNC4yLjIsMS45Mi0xLjIsMy42NC0zLjEyLDMuODQtLjIxLjAyLS40Mi4wMi0uNjIsMGwzLjg1LDYuMjZoLTIuNzNsLTMuNzQtNi4yM2gtMS42MXY2LjEyaC0yLjY2bC4wNC0xNC4yMVpNODYzLjg4LDg0My43MWgyLjM0YzEuNTcsMCwyLjk0LS4yMSwyLjk0LTIuMTNzLTEuNTQtMS45Ni0yLjktMS45NmgtMi4zOHY0LjA5WiIvPgo8L3N2Zz4=' 
-             style='width: 90px; height: 90px; margin-bottom: 0.5rem;' />
-        <h1 style='color: white; margin: 0.3rem 0; font-size: 2.5rem; font-weight: bold;'>
-            Mays Online Flex Recruiting Analytics Platform
-        </h1>
-        <p style='color: #C5A572; margin: 0.3rem 0; font-size: 1.1rem;'>
-            Admissions Analytics & Strategic Insights
-        </p>
-        <p style='color: white; margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;'>
-            MBA • ACCT • HRM • MISY • MKTG • ENLD • SPBA
-        </p>
-    </div>
-""", unsafe_allow_html=True)
-
-# Navigation Menu with forced equal heights using aggressive CSS
-st.markdown("""
-<style>
-/* Active navigation button styling */
-div[data-testid="stButton"] button[kind="primary"] {
-    background-color: #500000 !important;
-    color: white !important;
-    border: 2px solid #500000 !important;
-}
-div[data-testid="stButton"] button[kind="secondary"] {
-    background-color: white !important;
-    color: #500000 !important;
-    border: 2px solid #e0e0e0 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Sidebar Navigation with elegant design
-with st.sidebar:
-    st.markdown("""
-    <style>
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
-    }
     
-    /* Sidebar overlay behavior on ALL screen sizes - never shrink content */
+    /* Sidebar overlay - never shrink content */
     [data-testid="stSidebar"][aria-expanded="true"] {
         position: fixed !important;
         z-index: 999999 !important;
@@ -205,86 +89,81 @@ with st.sidebar:
         height: 100vh !important;
         box-shadow: 2px 0 10px rgba(0,0,0,0.3) !important;
     }
-    
-    /* Hide sidebar when collapsed - no space taken */
     [data-testid="stSidebar"][aria-expanded="false"] {
         display: none !important;
     }
-    
-    /* Main content always stays full width - no shifting */
     .main .block-container {
         max-width: 100% !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
         transition: none !important;
     }
-    
-    /* Prevent any margin/padding changes on main content */
     .main {
         margin-left: 0 !important;
         transition: none !important;
     }
     
-    /* Reduce top padding of sidebar */
+    /* Remove all top padding from sidebar */
     [data-testid="stSidebar"] > div:first-child {
-        padding-top: 10px;
+        padding-top: 0px !important;
+        padding-bottom: 5px !important;
+    }
+    [data-testid="stSidebarContent"] {
+        padding-top: 0px !important;
     }
     
-    /* Elegant logo/brand section - more compact */
+    /* Remove default gaps between sidebar elements */
+    [data-testid="stSidebar"] .element-container {
+        margin-bottom: 0px !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown {
+        margin-bottom: 0px !important;
+    }
+    [data-testid="stSidebar"] > div > div {
+        gap: 0px !important;
+    }
+    
+    /* Sidebar brand/header */
     .sidebar-brand {
         text-align: center;
-        padding: 5px 10px 10px 10px;
-        margin-bottom: 15px;
+        padding: 8px 10px 6px 10px;
+        margin-top: 0px;
+        margin-bottom: 0px;
         border-bottom: 2px solid #C5A572;
     }
-    
+    .sidebar-logo {
+        width: 32px;
+        height: 32px;
+    }
     .sidebar-brand-title {
         color: #500000;
-        font-size: 18px;
+        font-size: 13px;
         font-weight: bold;
-        margin: 8px 0 3px 0;
+        margin: 4px 0 2px 0;
     }
-    
     .sidebar-brand-subtitle {
         color: #666;
-        font-size: 11px;
+        font-size: 10px;
         margin: 0;
     }
     
-    /* Navigation section divider */
-    .nav-section-title {
-        color: #500000;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin: 20px 0 10px 0;
-        padding-left: 5px;
-        opacity: 0.7;
-    }
-    
-    /* Style sidebar buttons - elegant and minimal */
+    /* Sidebar buttons */
     [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         text-align: left !important;
-        padding: 10px 15px !important;
-        margin: 2px 0 !important;
-        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        margin: 0px 0 !important;
+        border-radius: 6px !important;
         border: none !important;
-        background: transparent !important;
+        background: white !important;
         color: #495057 !important;
         font-weight: 500 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         transition: all 0.2s ease !important;
     }
-    
     [data-testid="stSidebar"] .stButton > button:hover {
         background: #f0f2f6 !important;
         color: #500000 !important;
         transform: translateX(3px) !important;
     }
-    
-    /* Active/Primary button styling - elegant highlight */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
         background: linear-gradient(90deg, #500000 0%, #700000 100%) !important;
         color: white !important;
@@ -292,117 +171,215 @@ with st.sidebar:
         box-shadow: 0 2px 8px rgba(80, 0, 0, 0.2) !important;
     }
     
-    [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-        transform: translateX(3px) !important;
-        box-shadow: 0 4px 12px rgba(80, 0, 0, 0.3) !important;
+    /* Responsive spacing - Desktop (>900px height) */
+    @media (min-height: 900px) {
+        .sidebar-brand { padding: 12px 10px 12px 10px; margin-bottom: 0px; }
+        .sidebar-logo { width: 40px !important; height: 40px !important; }
+        .sidebar-brand-title { font-size: 15px !important; margin: 6px 0 2px 0 !important; }
+        .sidebar-brand-subtitle { font-size: 11px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 8px 15px !important; margin: 0px 0 !important; font-size: 14px !important; }
+        .sidebar-divider { margin: 12px 0 !important; }
+        .sidebar-profile-card { padding: 15px !important; margin-top: 10px !important; margin-bottom: 12px !important; }
+        .sidebar-profile-img { width: 50px !important; height: 50px !important; }
+        .sidebar-profile-name { font-size: 14px !important; }
+        .sidebar-profile-email { font-size: 11px !important; }
+        .sidebar-logout-btn { padding: 9px 12px !important; font-size: 11px !important; }
+        .sidebar-footer { padding: 12px 10px !important; margin-top: 12px !important; font-size: 10px !important; }
     }
     
-    /* Info cards in sidebar */
-    .sidebar-info-card {
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 12px;
-        margin: 15px 0;
-        font-size: 12px;
+    /* Responsive spacing - Laptop (700-900px height) */
+    @media (min-height: 700px) and (max-height: 899px) {
+        .sidebar-brand { padding: 8px 10px 6px 10px; margin-bottom: 0px; }
+        .sidebar-logo { width: 34px !important; height: 34px !important; }
+        .sidebar-brand-title { font-size: 13px !important; margin: 4px 0 2px 0 !important; }
+        .sidebar-brand-subtitle { font-size: 10px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 6px 12px !important; margin: 0px 0 !important; font-size: 13px !important; }
+        .sidebar-divider { margin: 10px 0 !important; }
+        .sidebar-profile-card { padding: 10px !important; margin-top: 10px !important; margin-bottom: 10px !important; }
+        .sidebar-profile-img { width: 36px !important; height: 36px !important; }
+        .sidebar-profile-name { font-size: 12px !important; }
+        .sidebar-profile-email { font-size: 9px !important; }
+        .sidebar-logout-btn { padding: 7px 10px !important; font-size: 10px !important; }
+        .sidebar-footer { padding: 10px 10px !important; margin-top: 10px !important; font-size: 9px !important; }
     }
     
-    .sidebar-info-card strong {
-        color: #500000;
-        display: block;
-        margin-bottom: 5px;
+    /* Responsive spacing - Tablet (<700px height) */
+    @media (max-height: 699px) {
+        .sidebar-brand { padding: 6px 10px 6px 10px; margin-bottom: 0px; }
+        .sidebar-logo { width: 28px !important; height: 28px !important; }
+        .sidebar-brand-title { font-size: 11px !important; margin: 3px 0 1px 0 !important; }
+        .sidebar-brand-subtitle { font-size: 9px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 5px 10px !important; margin: 0px 0 !important; font-size: 12px !important; }
+        .sidebar-divider { margin: 8px 0 !important; }
+        .sidebar-profile-card { padding: 8px !important; margin-top: 10px !important; margin-bottom: 8px !important; }
+        .sidebar-profile-img { width: 30px !important; height: 30px !important; }
+        .sidebar-profile-name { font-size: 11px !important; }
+        .sidebar-profile-email { font-size: 8px !important; }
+        .sidebar-logout-btn { padding: 6px 8px !important; font-size: 9px !important; }
+        .sidebar-footer { padding: 8px 5px !important; margin-top: 8px !important; font-size: 8px !important; }
     }
+
+    /* Navigation and content styling */
+    .nav-button { display: inline-block; padding: 10px 20px; margin: 0 5px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; }
+    .nav-button.active { background: #500000; color: white !important; border-color: #500000; }
+    .nav-button.inactive { background: white; color: #500000; border-color: #e9ecef; }
+    .nav-button.inactive:hover { background: #e9ecef; border-color: #500000; }
+    .metric-card { background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid #e0e0e0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; text-align: center; }
+    .insight-card { background: linear-gradient(135deg, #500000 0%, #700000 100%); color: white; padding: 1.5rem; border-radius: 12px; margin: 1rem 0; }
+    .section-divider { height: 3px; background: linear-gradient(90deg, #500000, #B00000); border: none; border-radius: 2px; margin: 2rem 0; }
+    .performance-indicator { padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; }
+    .data-insight { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #500000; margin: 1rem 0; }
+    .metric-highlight { background: #500000; color: white; padding: 0.5rem 1rem; border-radius: 6px; display: inline-block; font-weight: bold; margin: 0.25rem; }
+    .indicator-excellent { background: #d4edda; color: #155724; }
+    .indicator-good { background: #fff3cd; color: #856404; }
+    .indicator-needs-attention { background: #f8d7da; color: #721c24; }
     
-    .sidebar-stat {
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        border-left: 3px solid #C5A572;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 4px;
-        font-size: 11px;
+    @media (max-width: 768px) {
+        .footer-content { text-align: center !important; }
     }
-    
-    .sidebar-stat-value {
-        color: #500000;
-        font-size: 18px;
-        font-weight: bold;
-        display: block;
-    }
-    
-    .sidebar-stat-label {
-        color: #666;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Brand/Logo Section - more compact
+</style>
+""", unsafe_allow_html=True)
+
+# Page top anchor - MUST be at the very top
+st.markdown('<div id="page-top"></div>', unsafe_allow_html=True)
+
+# Professional Banner
+st.markdown("""
+<div style='background: linear-gradient(135deg, #500000 0%, #700000 50%, #500000 100%); 
+            padding: 1.5rem 2rem; border-radius: 10px; text-align: center;
+            border: 3px solid #C5A572; margin-bottom: 1rem;'>
+    <img src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICM1MDAwMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMSwgLmNscy0yLCAuY2xzLTMgewogICAgICAgIHN0cm9rZS13aWR0aDogMHB4OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNiMWIzYjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyMDEuMjgiIHk9IjIyMi41NyIgd2lkdGg9IjYyOS43OSIgaGVpZ2h0PSI2MzQuNzkiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iNzQ3LjQ0IDQ3NS4yMiA3MDAuNjcgNDc1LjIyIDY5Ny45NyA0NzUuMjIgNjk2Ljc1IDQ3Ny42NyA2NjIuODQgNTQ4LjI3IDYyOC44IDQ3Ny42MyA2MjcuNjEgNDc1LjIyIDYyNC45MiA0NzUuMjIgNTc5LjcxIDQ3NS4yMiA1NzUuNDQgNDc1LjIyIDU3NS40NCA0NzkuNTIgNTc1LjQ0IDUwMy41OSA1NzUuNDQgNTA3LjkgNTc5LjcxIDUwNy45IDU4Ny40NCA1MDcuOSA1ODcuNDQgNjA5LjAxIDU3OS4wOCA2MDkuMDEgNTc0Ljc4IDYwOS4wMSA1NzQuNzggNjEzLjMyIDU3NC43OCA2MzcuMzkgNTc0Ljc4IDY0MS42OSA1NzkuMDggNjQxLjY5IDYyOS44NSA2NDEuNjkgNjM0LjE1IDY0MS42OSA2MzQuMTUgNjM3LjM5IDYzNC4xNSA2MTMuMzIgNjM0LjE1IDYwOS4wMSA2MjkuODUgNjA5LjAxIDYyMS4wNyA2MDkuMDEgNjIxLjA3IDUzNy4yNSA2NTguOTkgNjE1LjQ1IDY2Mi44NCA2MjMuNDMgNjY2Ljc2IDYxNS40NSA3MDUuMDcgNTM3LjA4IDcwNS4wNyA2MDkuMDEgNjk2LjcxIDYwOS4wMSA2OTIuMzcgNjA5LjAxIDY5Mi4zNyA2MTMuMzIgNjkyLjM3IDYzNy4zOSA2OTIuMzcgNjQxLjY5IDY5Ni43MSA2NDEuNjkgNzQ3LjQ0IDY0MS42OSA3NTEuNzUgNjQxLjY5IDc1MS43NSA2MzcuMzkgNzUxLjc1IDYxMy4zMiA3NTEuNzUgNjA5LjAxIDc0Ny40NCA2MDkuMDEgNzM4LjcgNjA5LjAxIDczOC43IDUwNy45IDc0Ny40NCA1MDcuOSA3NTEuNzUgNTA3LjkgNzUxLjc1IDUwMy41OSA3NTEuNzUgNDc5LjUyIDc1MS43NSA0NzUuMjIgNzQ3LjQ0IDQ3NS4yMiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTQ1Mi42LDYwOC45MWgtMTMuNTFsLTQzLjk1LTEwMS40N2g4LjQ3di0zMi44MmgtNzAuNTR2MzIuNzFoOS43M2wtNDMuOTEsMTAxLjQ3aC0xOC4zdjMyLjcxaDY0LjAzdi0zMi43MWgtOS4zMWw3LjMxLTE2LjloNTIuODNsNy4yOCwxNi45aC05LjgzdjMyLjcxaDY0LjA2di0zMi43MWwtNC4zNy4xMVpNMzgxLjI5LDU1OS4zM2gtMjQuNDlsMTIuMjUtMjguMzgsMTIuMjUsMjguMzhaIi8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjY5My43IDM0OC4yNSAzMzcuNDkgMzQ4LjI1IDMzMi41NiAzNDguMjUgMzMyLjU2IDM1My4xOCAzMzIuNTYgNDQ4LjM1IDMzMi41NiA0NTMuMjggMzM3LjQ5IDQ1My4yOCAzOTkgNDUzLjI4IDQwMy45MyA0NTMuMjggNDAzLjkzIDQ0OC4zNSA0MDMuOTMgNDEzLjAxIDQ3OS45MyA0MTMuMDEgNDc5LjkzIDY2My43NyA0NDQuNTUgNjYzLjc3IDQzOS42NSA2NjMuNzcgNDM5LjY1IDY2OC43IDQzOS42NSA3MzAuMjEgNDM5LjY1IDczNS4xNSA0NDQuNTUgNzM1LjE1IDU4Ni42IDczNS4xNSA1OTEuNTQgNzM1LjE1IDU5MS41NCA3MzAuMjEgNTkxLjU0IDY2OC43IDU5MS41NCA2NjMuNzcgNTg2LjYgNjYzLjc3IDU1MS4zIDY2My43NyA1NTEuMyA0MTMuMDEgNjI2Ljg0IDQxMy4wMSA2MjYuODQgNDQ3Ljg5IDYyNi44NCA0NTIuODMgNjMxLjc3IDQ1Mi44MyA2OTMuNyA0NTIuODMgNjk4LjY0IDQ1Mi44MyA2OTguNjQgNDQ3Ljg5IDY5OC42NCAzNTMuMTggNjk4LjY0IDM0OC4yNSA2OTMuNyAzNDguMjUiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iNTYxLjgzIDY5My4wNiA1NzYuODggNjc3LjU2IDU3Ni44OCA3MjAuMDMgNTYxLjgzIDcwNS42NSA1NjEuODMgNjkzLjA2Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjUzNi43OCA2NzguNjggNTIxLjcgNjkzLjUxIDUyMS43IDM4My40NSA1MzYuNzggMzk4LjQ2IDUzNi43OCA2NzguNjgiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMzYyLjcyIDM3Ny45OSAzNDcuMjUgMzYyLjk0IDY3Ni40NSAzNjIuOTQgNjU3IDM3Ny45OSAzNjIuNzIgMzc3Ljk5Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjY4NC40MyA0MzkuMDQgNjY5LjM5IDQyNC42NiA2NjkuMzkgMzg2LjM4IDY4NC40MyAzNzAuOTIgNjg0LjQzIDQzOS4wNCIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1My40Niw4NDQuOGMwLTYuOTgsNS42NS0xMi42MywxMi42My0xMi42M3MxMi42Myw1LjY1LDEyLjYzLDEyLjYzLTUuNjUsMTIuNjMtMTIuNjMsMTIuNjMtMTIuNjMtNS42NS0xMi42My0xMi42M2gwWk04NzUuNjQsODQ0LjhjLS4zNS01LjI2LTQuOS05LjI1LTEwLjE2LTguOS01LjI2LjM1LTkuMjUsNC45LTguOSwxMC4xNi4zMyw1LjAxLDQuNDksOC45MSw5LjUxLDguOTIsNS4zNS0uMDcsOS42My00LjQ3LDkuNTYtOS44MiwwLS4xMiwwLS4yNC0uMDEtLjM2Wk04NjEuMjMsODM3LjU5aDUuMzJjMy41LDAsNS4yOCwxLjE5LDUuMjgsNC4yLjIsMS45Mi0xLjIsMy42NC0zLjEyLDMuODQtLjIxLjAyLS40Mi4wMi0uNjIsMGwzLjg1LDYuMjZoLTIuNzNsLTMuNzQtNi4yM2gtMS42MXY2LjEyaC0yLjY2bC4wNC0xNC4yMVpNODYzLjg4LDg0My43MWgyLjM0YzEuNTcsMCwyLjk0LS4yMSwyLjk0LTIuMTNzLTEuNTQtMS45Ni0yLjktMS45NmgtMi4zOHY0LjA5WiIvPgo8L3N2Zz4=' 
+         style='width: 90px; height: 90px; margin-bottom: 0.5rem;' />
+    <h1 style='color: white; margin: 0.3rem 0; font-size: 2.5rem; font-weight: bold;'>
+        Mays Online Flex Recruiting Analytics Platform
+    </h1>
+    <p style='color: #C5A572; margin: 0.3rem 0; font-size: 1.1rem;'>
+        Admissions Analytics & Strategic Insights
+    </p>
+    <p style='color: white; margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;'>
+        MBA • ACCT • HRM • MISY • MKTG • ENLD • SPBA
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Initialize session state for navigation
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = 'Home'
+
+# Sidebar Navigation
+with st.sidebar:
+    # Compact Header with Logo
     st.markdown("""
     <div class="sidebar-brand">
         <img src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICM1MDAwMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMSwgLmNscy0yLCAuY2xzLTMgewogICAgICAgIHN0cm9rZS13aWR0aDogMHB4OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNiMWIzYjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyMDEuMjgiIHk9IjIyMi41NyIgd2lkdGg9IjYyOS43OSIgaGVpZ2h0PSI2MzQuNzkiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iNzQ3LjQ0IDQ3NS4yMiA3MDAuNjcgNDc1LjIyIDY5Ny45NyA0NzUuMjIgNjk2Ljc1IDQ3Ny42NyA2NjIuODQgNTQ4LjI3IDYyOC44IDQ3Ny42MyA2MjcuNjEgNDc1LjIyIDYyNC45MiA0NzUuMjIgNTc5LjcxIDQ3NS4yMiA1NzUuNDQgNDc1LjIyIDU3NS40NCA0NzkuNTIgNTc1LjQ0IDUwMy41OSA1NzUuNDQgNTA3LjkgNTc5LjcxIDUwNy45IDU4Ny40NCA1MDcuOSA1ODcuNDQgNjA5LjAxIDU3OS4wOCA2MDkuMDEgNTc0Ljc4IDYwOS4wMSA1NzQuNzggNjEzLjMyIDU3NC43OCA2MzcuMzkgNTc0Ljc4IDY0MS42OSA1NzkuMDggNjQxLjY5IDYyOS44NSA2NDEuNjkgNjM0LjE1IDY0MS42OSA2MzQuMTUgNjM3LjM5IDYzNC4xNSA2MTMuMzIgNjM0LjE1IDYwOS4wMSA2MjkuODUgNjA5LjAxIDYyMS4wNyA2MDkuMDEgNjIxLjA3IDUzNy4yNSA2NTguOTkgNjE1LjQ1IDY2Mi44NCA2MjMuNDMgNjY2Ljc2IDYxNS40NSA3MDUuMDcgNTM3LjA4IDcwNS4wNyA2MDkuMDEgNjk2LjcxIDYwOS4wMSA2OTIuMzcgNjA5LjAxIDY5Mi4zNyA2MTMuMzIgNjkyLjM3IDYzNy4zOSA2OTIuMzcgNjQxLjY5IDY5Ni43MSA2NDEuNjkgNzQ3LjQ0IDY0MS42OSA3NTEuNzUgNjQxLjY5IDc1MS43NSA2MzcuMzkgNzUxLjc1IDYxMy4zMiA3NTEuNzUgNjA5LjAxIDc0Ny40NCA2MDkuMDEgNzM4LjcgNjA5LjAxIDczOC43IDUwNy45IDc0Ny40NCA1MDcuOSA3NTEuNzUgNTA3LjkgNzUxLjc1IDUwMy41OSA3NTEuNzUgNDc5LjUyIDc1MS43NSA0NzUuMjIgNzQ3LjQ0IDQ3NS4yMiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTQ1Mi42LDYwOC45MWgtMTMuNTFsLTQzLjk1LTEwMS40N2g4LjQ3di0zMi44MmgtNzAuNTR2MzIuNzFoOS43M2wtNDMuOTEsMTAxLjQ3aC0xOC4zdjMyLjcxaDY0LjAzdi0zMi43MWgtOS4zMWw3LjMxLTE2LjloNTIuODNsNy4yOCwxNi45aC05LjgzdjMyLjcxaDY0LjA2di0zMi43MWwtNC4zNy4xMVpNMzgxLjI5LDU1OS4zM2gtMjQuNDlsMTIuMjUtMjguMzgsMTIuMjUsMjguMzhaIi8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjY5My43IDM0OC4yNSAzMzcuNDkgMzQ4LjI1IDMzMi41NiAzNDguMjUgMzMyLjU2IDM1My4xOCAzMzIuNTYgNDQ4LjM1IDMzMi41NiA0NTMuMjggMzM3LjQ5IDQ1My4yOCAzOTkgNDUzLjI4IDQwMy45MyA0NTMuMjggNDAzLjkzIDQ0OC4zNSA0MDMuOTMgNDEzLjAxIDQ3OS45MyA0MTMuMDEgNDc5LjkzIDY2My43NyA0NDQuNTUgNjYzLjc3IDQzOS42NSA2NjMuNzcgNDM5LjY1IDY2OC43IDQzOS42NSA3MzAuMjEgNDM5LjY1IDczNS4xNSA0NDQuNTUgNzM1LjE1IDU4Ni42IDczNS4xNSA1OTEuNTQgNzM1LjE1IDU5MS41NCA3MzAuMjEgNTkxLjU0IDY2OC43IDU5MS41NCA2NjMuNzcgNTg2LjYgNjYzLjc3IDU1MS4zIDY2My43NyA1NTEuMyA0MTMuMDEgNjI2Ljg0IDQxMy4wMSA2MjYuODQgNDQ3Ljg5IDYyNi44NCA0NTIuODMgNjMxLjc3IDQ1Mi44MyA2OTMuNyA0NTIuODMgNjk4LjY0IDQ1Mi44MyA2OTguNjQgNDQ3Ljg5IDY5OC42NCAzNTMuMTggNjk4LjY0IDM0OC4yNSA2OTMuNyAzNDguMjUiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iNTYxLjgzIDY5My4wNiA1NzYuODggNjc3LjU2IDU3Ni44OCA3MjAuMDMgNTYxLjgzIDcwNS42NSA1NjEuODMgNjkzLjA2Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjUzNi43OCA2NzguNjggNTIxLjcgNjkzLjUxIDUyMS43IDM4My40NSA1MzYuNzggMzk4LjQ2IDUzNi43OCA2NzguNjgiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMzYyLjcyIDM3Ny45OSAzNDcuMjUgMzYyLjk0IDY3Ni40NSAzNjIuOTQgNjU3IDM3Ny45OSAzNjIuNzIgMzc3Ljk5Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjY4NC40MyA0MzkuMDQgNjY5LjM5IDQyNC42NiA2NjkuMzkgMzg2LjM4IDY4NC40MyAzNzAuOTIgNjg0LjQzIDQzOS4wNCIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1My40Niw4NDQuOGMwLTYuOTgsNS42NS0xMi42MywxMi42My0xMi42M3MxMi42Myw1LjY1LDEyLjYzLDEyLjYzLTUuNjUsMTIuNjMtMTIuNjMsMTIuNjMtMTIuNjMtNS42NS0xMi42My0xMi42M2gwWk04NzUuNjQsODQ0LjhjLS4zNS01LjI2LTQuOS05LjI1LTEwLjE2LTguOS01LjI2LjM1LTkuMjUsNC45LTguOSwxMC4xNi4zMyw1LjAxLDQuNDksOC45MSw5LjUxLDguOTIsNS4zNS0uMDcsOS42My00LjQ3LDkuNTYtOS44MiwwLS4xMiwwLS4yNC0uMDEtLjM2Wk04NjEuMjMsODM3LjU5aDUuMzJjMy41LDAsNS4yOCwxLjE5LDUuMjgsNC4yLjIsMS45Mi0xLjIsMy42NC0zLjEyLDMuODQtLjIxLjAyLS40Mi4wMi0uNjIsMGwzLjg1LDYuMjZoLTIuNzNsLTMuNzQtNi4yM2gtMS42MXY2LjEyaC0yLjY2bC4wNC0xNC4yMVpNODYzLjg4LDg0My43MWgyLjM0YzEuNTcsMCwyLjk0LS4yMSwyLjk0LTIuMTNzLTEuNTQtMS45Ni0yLjktMS45NmgtMi4zOHY0LjA5WiIvPgo8L3N2Zz4=' 
-             style='width: 40px; height: 40px;' />
+             class="sidebar-logo" />
         <div class="sidebar-brand-title">Mays Analytics</div>
         <div class="sidebar-brand-subtitle">Flex Online Programs</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Navigation Section
+    # Consolidated Profile Section with inline logout
+    if auth.is_authenticated():
+        user = auth.get_current_user()
+        user_role = auth.get_user_role()
+        
+        # Smaller, subtle role text
+        role_text = user_role.capitalize() if user_role else 'User'
+        
+        st.markdown(f"""
+        <div class="sidebar-profile-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; margin-top: 10px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <img src="{user.get('profile_picture', '')}" 
+                     class="sidebar-profile-img"
+                     style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #C5A572;" 
+                     onerror="this.style.display='none'"/>
+                <div style="flex: 1; min-width: 0;">
+                    <div class="sidebar-profile-name" style="font-weight: 600; font-size: 12px; color: #212529; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {user['name']}
+                    </div>
+                    <div class="sidebar-profile-email" style="font-size: 9px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">
+                        {user['email']}
+                    </div>
+                    <div style="font-size: 9px; color: #999; font-style: italic;">
+                        {role_text}
+                    </div>
+                </div>
+            </div>
+            <a href="?logout=true" style="text-decoration: none; display: block;">
+                <button class="sidebar-logout-btn" style="width: 100%; background: #f8f9fa; border: 1px solid #e0e0e0; color: #495057; padding: 8px 12px; border-radius: 4px; font-size: 11px; font-weight: 500; cursor: pointer;">
+                    Logout
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        if st.button("Sign in with Google", key="sidebar_signin", use_container_width=True, type="primary"):
+            auth_url = auth.get_authorization_url()
+            st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
     
-    if st.button("Home Dashboard", key="sidebar_nav_home", use_container_width=True,
+    # Gold divider
+    st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
+    
+    # Navigation - 7 main pages (reordered: Chat with AI before Data Explorer)
+    if st.button("Home Dashboard", key="nav_home", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Home' else "secondary"):
         st.session_state.current_page = 'Home'
         st.rerun()
     
-    if st.button("Executive Dive", key="sidebar_nav_executive", use_container_width=True,
+    if st.button("Executive Dive", key="nav_executive", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Executive_Deep_Dive' else "secondary"):
         st.session_state.current_page = 'Executive_Deep_Dive'
         st.rerun()
     
-    if st.button("Comparison Tool", key="sidebar_nav_comparison", use_container_width=True,
+    if st.button("Comparison Tool", key="nav_comparison", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Comparison_Tool' else "secondary"):
         st.session_state.current_page = 'Comparison_Tool'
         st.rerun()
     
-    if st.button("Marketing Analysis", key="sidebar_nav_marketing", use_container_width=True,
+    if st.button("Marketing Analysis", key="nav_marketing", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Marketing_Analysis' else "secondary"):
         st.session_state.current_page = 'Marketing_Analysis'
         st.rerun()
     
-    if st.button("Data Explorer", key="sidebar_nav_database", use_container_width=True,
-                type="primary" if st.session_state.current_page == 'Database' else "secondary"):
-        st.session_state.current_page = 'Database'
-        st.rerun()
-    
-    if st.button("Predictive Analytics", key="sidebar_nav_predictive", use_container_width=True,
+    if st.button("Predictive Analytics", key="nav_predictive", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Predictive_Analytics' else "secondary"):
         st.session_state.current_page = 'Predictive_Analytics'
         st.rerun()
     
-    st.markdown('<div style="margin: 15px 0; border-top: 1px solid #e0e0e0;"></div>', unsafe_allow_html=True)
+    # Chat with AI - BEFORE Data Explorer
+    if st.button("Chat with AI", key="nav_chat", use_container_width=True, type="secondary"):
+        st.info("AI Chatbot coming soon!")
     
-    if st.button("Documentation", key="sidebar_nav_help", use_container_width=True,
+    if st.button("Data Explorer", key="nav_database", use_container_width=True,
+                type="primary" if st.session_state.current_page == 'Database' else "secondary"):
+        st.session_state.current_page = 'Database'
+        st.rerun()
+    
+    # Gold divider
+    st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
+    
+    # Documentation & Help
+    if st.button("Documentation & Help", key="nav_help", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Help' else "secondary"):
         st.session_state.current_page = 'Help'
         st.rerun()
     
     # Footer with version
     st.markdown(f"""
-    <div style="text-align: center; padding: 20px 10px; margin-top: 30px; border-top: 1px solid #e0e0e0; font-size: 10px; color: #999;">
-        <div>{VERSION_FULL}</div>
+    <div style="text-align: center; padding: 8px 5px; border-top: 2px solid #C5A572; font-size: 9px; color: #999;">
+        {VERSION_FULL}
     </div>
     """, unsafe_allow_html=True)
 
-# Display current page indicator
+# Current page indicator
 current_page_info = {
-    'Home': {'icon': '🏠', 'title': 'Home Dashboard'},
-    'Executive_Deep_Dive': {'icon': '📊', 'title': 'Executive Dive'},
-    'Comparison_Tool': {'icon': '🔄', 'title': 'Comparison Tool'},
-    'Marketing_Analysis': {'icon': '📢', 'title': 'Marketing Analysis'},
-    'Database': {'icon': '🗄️', 'title': 'Data Explorer'},
-    'Predictive_Analytics': {'icon': '🔮', 'title': 'Predictive Analytics'},
-    'Help': {'icon': '📖', 'title': 'Documentation'}
+    'Home': {'title': 'Home Dashboard'},
+    'Executive_Deep_Dive': {'title': 'Executive Dive'},
+    'Comparison_Tool': {'title': 'Comparison Tool'},
+    'Marketing_Analysis': {'title': 'Marketing Analysis'},
+    'Database': {'title': 'Data Explorer'},
+    'Predictive_Analytics': {'title': 'Predictive Analytics'},
+    'Help': {'title': 'Documentation & Help'}
 }
 
 current_info = current_page_info[st.session_state.current_page]
@@ -413,7 +390,50 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Add floating "Back to Top" button - Option 6: Chevron Style with Circular Border
+# Page Content Routing
+if st.session_state.current_page == 'Home':
+    from modules import home_dashboard
+    home_dashboard.render()
+
+elif st.session_state.current_page == 'Executive_Deep_Dive':
+    from modules import executive_deep_dive
+    executive_deep_dive.render()
+
+elif st.session_state.current_page == 'Comparison_Tool':
+    from modules import comparison_tool
+    comparison_tool.render()
+
+elif st.session_state.current_page == 'Marketing_Analysis':
+    from modules import marketing_analysis
+    marketing_analysis.render()
+
+elif st.session_state.current_page == 'Database':
+    from modules import database
+    database.render()
+
+elif st.session_state.current_page == 'Predictive_Analytics':
+    from modules import predictive_analytics
+    predictive_analytics.render()
+
+elif st.session_state.current_page == 'Help':
+    from modules import help as help_page
+    help_page.render()
+
+# Footer
+st.markdown("<hr style='margin-top: 3rem; margin-bottom: 1rem; border: none; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
+st.markdown(f"""
+<div style='text-align: center; padding: 1rem; color: #666; font-size: 0.9rem;'>
+    <p style='margin: 0.5rem 0;'>
+        <strong>Mays Business School</strong> | Texas A&M University<br>
+        Flex Online Programs Analytics Platform
+    </p>
+    <p style='margin: 0.5rem 0; font-size: 0.8rem; color: #999;'>
+        {VERSION_FULL} | © 2026 Texas A&M University
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Back to Top Button with smooth scroll
 st.markdown("""
 <style>
     /* Back to Top Button - Chevron Style with Circular Border */
@@ -500,7 +520,7 @@ st.markdown("""
 </a>
 """, unsafe_allow_html=True)
 
-# Add smooth scroll JavaScript using components.html
+# Smooth scroll JavaScript
 components.html("""
 <script>
 function smoothScrollToTop(e) {
@@ -537,6 +557,7 @@ window.parent.smoothScrollToTop = smoothScrollToTop;
 </script>
 """, height=0)
 
+# Scroll to top on page load
 st.markdown("""
 <script>
     // Scroll to top on page load
@@ -550,39 +571,3 @@ st.markdown("""
     });
 </script>
 """, unsafe_allow_html=True)
-
-# Page Content Based on Navigation
-if st.session_state.current_page == 'Home':
-    # HOME PAGE CONTENT
-    from modules import home_dashboard
-    home_dashboard.render()
-
-elif st.session_state.current_page == 'Executive_Deep_Dive':
-    # EXECUTIVE DEEP DIVE PAGE
-    from modules import executive_deep_dive
-    executive_deep_dive.render()
-
-elif st.session_state.current_page == 'Comparison_Tool':
-    # COMPARISON TOOL PAGE
-    from modules import comparison_tool
-    comparison_tool.render()
-
-elif st.session_state.current_page == 'Marketing_Analysis':
-    # MARKETING ANALYSIS PAGE
-    from modules import marketing_analysis
-    marketing_analysis.render()
-
-elif st.session_state.current_page == 'Database':
-    # DATA EXPLORER PAGE
-    from modules import database
-    database.render()
-
-elif st.session_state.current_page == 'Predictive_Analytics':
-    # PREDICTIVE ANALYTICS PAGE
-    from modules import predictive_analytics
-    predictive_analytics.render()
-
-elif st.session_state.current_page == 'Help':
-    # HELP & DOCUMENTATION PAGE
-    from modules import help as help_page
-    help_page.render()
