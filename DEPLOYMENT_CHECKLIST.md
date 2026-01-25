@@ -21,6 +21,8 @@
 - [ ] Update "Last Updated: Date"
 - [ ] Add "What's New in Version X.X" section with features
 - [ ] **REMOVE previous version's "What's New" section** (keep only current)
+- [ ] **Update Version History table** (add new version at top)
+- [ ] Update footer version number at bottom
 - [ ] Verify all links work
 - [ ] Update key capabilities if changed
 
@@ -236,7 +238,7 @@ git push origin vX.X
 ## Files That MUST Be Updated Every Release
 
 1. ✅ `version.py` - Version number and metadata
-2. ✅ `README.md` - Current version only (remove old)
+2. ✅ `README.md` - Current version only (remove old), update Version History table, update footer
 3. ✅ `docs/README.md` - Add new version (keep old)
 4. ✅ `VERSIONING.md` - Complete changelog entry
 5. ✅ `CHANGELOG.md` - Structured changelog entry

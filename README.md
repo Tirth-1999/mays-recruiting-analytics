@@ -187,6 +187,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **5.0** | Jan 24, 2026 | Authentication & UI Optimization |
 | **4.0** | Jan 23, 2026 | Predictive Analytics & ML Integration |
 | **3.0** | Jan 23, 2026 | Complete Modular Architecture |
 | **2.0** | Jan 14, 2026 | Marketing Spend Integration |
