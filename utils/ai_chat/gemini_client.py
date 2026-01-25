@@ -65,34 +65,70 @@ class GeminiClient:
             raise ImportError("google-genai package not installed")
         
         # Load API key from Streamlit secrets
+        api_key = None
+        error_details = []
+        
         try:
             # Check if secrets exist
             if not hasattr(st, 'secrets'):
                 raise ValueError("Streamlit secrets not available")
             
+            # Debug: Check what's in secrets
+            try:
+                secrets_keys = list(st.secrets.keys()) if hasattr(st.secrets, 'keys') else []
+                error_details.append(f"Available secret sections: {secrets_keys}")
+            except Exception as e:
+                error_details.append(f"Cannot list secrets: {e}")
+            
             # Try to access gemini section
             if "gemini" not in st.secrets:
-                raise ValueError("Gemini configuration not found in secrets. Please add [gemini] section with api_key.")
+                raise ValueError(f"Gemini configuration not found in secrets. Please add [gemini] section with api_key. {error_details[0] if error_details else ''}")
             
             gemini_config = st.secrets["gemini"]
+            error_details.append(f"Gemini config type: {type(gemini_config)}")
             
-            # Handle both dict and AttrDict from Streamlit
-            if hasattr(gemini_config, 'get'):
-                api_key = gemini_config.get("api_key", "")
-            elif hasattr(gemini_config, 'api_key'):
-                api_key = gemini_config.api_key
-            else:
-                raise ValueError("Cannot access api_key from gemini configuration")
+            # Try multiple ways to access the API key
+            try:
+                # Method 1: Direct attribute access
+                if hasattr(gemini_config, 'api_key'):
+                    api_key = gemini_config.api_key
+                    error_details.append("Method: Direct attribute access")
+            except Exception as e:
+                error_details.append(f"Attribute access failed: {e}")
             
-            if not api_key or api_key == "YOUR_GEMINI_API_KEY":
-                raise ValueError("Gemini API key not configured. Please set a valid API key in Streamlit secrets.")
+            if not api_key:
+                try:
+                    # Method 2: Dictionary-style access
+                    if hasattr(gemini_config, '__getitem__'):
+                        api_key = gemini_config["api_key"]
+                        error_details.append("Method: Dictionary access")
+                except Exception as e:
+                    error_details.append(f"Dictionary access failed: {e}")
+            
+            if not api_key:
+                try:
+                    # Method 3: get() method
+                    if hasattr(gemini_config, 'get'):
+                        api_key = gemini_config.get("api_key", "")
+                        error_details.append("Method: get() method")
+                except Exception as e:
+                    error_details.append(f"get() method failed: {e}")
+            
+            if not api_key:
+                raise ValueError(f"Cannot access api_key from gemini configuration. Debug info: {' | '.join(error_details)}")
+            
+            if api_key == "YOUR_GEMINI_API_KEY":
+                raise ValueError("Gemini API key is still set to placeholder. Please set a valid API key in Streamlit secrets.")
                 
         except KeyError as e:
-            raise ValueError(f"Missing configuration in secrets: {e}")
+            raise ValueError(f"Missing configuration key: {e}. Debug: {' | '.join(error_details)}")
         except AttributeError as e:
-            raise ValueError(f"Invalid secrets structure: {e}")
+            raise ValueError(f"Invalid secrets structure (AttributeError): {e}. Debug: {' | '.join(error_details)}")
+        except ValueError as e:
+            # Re-raise ValueError with details
+            raise
         except Exception as e:
-            raise ValueError(f"Failed to load Gemini API key: {e}")
+            raise ValueError(f"Unexpected error loading Gemini API key: {type(e).__name__}: {e}. Debug: {' | '.join(error_details)}")
         
         # Configure Gemini client
         self.client = genai.Client(api_key=api_key)

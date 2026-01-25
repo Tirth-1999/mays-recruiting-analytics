@@ -238,10 +238,14 @@ def render():
         
         error_msg = st.session_state.chat_error
         
+        # Show the actual error for debugging
+        with st.expander("🔍 Error Details", expanded=True):
+            st.code(error_msg, language="text")
+        
         # Provide specific guidance based on error
-        if "api_key" in error_msg.lower() or "gemini" in error_msg.lower():
+        if "api_key" in error_msg.lower() or "gemini" in error_msg.lower() or "secret" in error_msg.lower():
             st.markdown("""
-            ### 🔑 Gemini API Key Not Configured
+            ### 🔑 Gemini API Key Configuration Required
             
             The AI Chat Assistant requires a Google Gemini API key to function. 
             
@@ -261,21 +265,28 @@ def render():
             token_limit_per_query = 1000
             ```
             
-            4. Get your free API key from: [Google AI Studio](https://makersuite.google.com/app/apikey)
-            5. Save the secrets and restart your app
+            4. **Get your free API key:**
+               - Visit: [Google AI Studio](https://makersuite.google.com/app/apikey)
+               - Sign in with your Google account
+               - Click "Create API Key"
+               - Copy the key
+            
+            5. **Paste the key** in the secrets (replace `YOUR_ACTUAL_GEMINI_API_KEY`)
+            6. **Save** the secrets
+            7. Your app will automatically restart
             
             **For Local Development:**
-            1. Create/edit `.streamlit/secrets.toml` in your project
+            1. Create/edit `.streamlit/secrets.toml` in your project root
             2. Add the same configuration as above
             3. Restart your Streamlit app
             
             ---
             
-            **Error Details:** `{error_msg}`
+            **Need Help?** Check the [AI Chat Deployment Guide](https://github.com/Tirth-1999/mays-recruiting-analytics/blob/main/docs/AI_CHAT_DEPLOYMENT.md)
             """)
         else:
-            st.warning(f"**Error:** {error_msg}")
-            st.info("Please check your configuration and try again.")
+            st.warning("**Unexpected Configuration Error**")
+            st.info("Please check the error details above and verify your Streamlit secrets configuration.")
         
         return
     
