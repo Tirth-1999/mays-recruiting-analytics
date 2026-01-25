@@ -9,7 +9,7 @@ from utils import auth
 
 # Page config
 st.set_page_config(
-    page_title="Mays Online Flex Recruiting Analytics Platform",
+    page_title="Mays Online Flex Recruiting Analytics",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -17,7 +17,6 @@ st.set_page_config(
 
 # Initialize authentication session state
 auth.init_session_state()
-
 # Handle OAuth callback
 if 'code' in st.query_params and not st.session_state.get('auth_processed', False):
     st.session_state.auth_processed = True
