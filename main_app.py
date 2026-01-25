@@ -24,6 +24,16 @@ if 'code' in st.query_params and not st.session_state.get('auth_processed', Fals
     code = st.query_params['code']
     state = st.query_params.get('state', '')
     
+    # Validate state for CSRF protection
+    stored_state = st.session_state.get('oauth_state', '')
+    if state != stored_state:
+        st.error("⚠️ Security error: Invalid state parameter. Please try signing in again.")
+        st.query_params.clear()
+        st.session_state.auth_processed = False
+        if 'oauth_state' in st.session_state:
+            del st.session_state.oauth_state
+        st.stop()
+    
     # Get the redirect URI from auth module (matches production or localhost)
     try:
         from utils.auth import GOOGLE_REDIRECT_URI
@@ -39,17 +49,19 @@ if 'code' in st.query_params and not st.session_state.get('auth_processed', Fals
                 st.success(f"✅ Welcome, {user_info['name']}!")
                 st.query_params.clear()
                 st.session_state.auth_processed = False
+                if 'oauth_state' in st.session_state:
+                    del st.session_state.oauth_state
                 st.rerun()
             else:
-                st.error("Failed to log in. Please try again.")
+                st.error("❌ Failed to create user account. Please contact support.")
                 st.query_params.clear()
                 st.session_state.auth_processed = False
         else:
-            st.error("Authentication failed. Please try again.")
+            st.error("❌ Authentication failed. Please try again.")
             st.query_params.clear()
             st.session_state.auth_processed = False
     except Exception as e:
-        st.error(f"Authentication error: {str(e)}")
+        st.error(f"❌ Authentication error: {str(e)}")
         st.query_params.clear()
         st.session_state.auth_processed = False
 elif 'code' not in st.query_params:
@@ -58,6 +70,8 @@ elif 'code' not in st.query_params:
 # Handle logout via query param
 if 'logout' in st.query_params:
     auth.logout_user()
+    st.query_params.clear()
+    st.rerun()
     st.query_params.clear()
     st.rerun()
 
@@ -339,17 +353,9 @@ with st.sidebar:
         if st.button("Sign in with Google", key="sidebar_signin", use_container_width=True, type="primary"):
             try:
                 auth_url = auth.get_authorization_url()
-                # Debug: Show the auth URL with expandable details
-                with st.expander("🔍 Debug Info - Click to see OAuth URL", expanded=True):
-                    st.code(auth_url, language=None)
-                    st.warning("⏳ Redirecting in 5 seconds... Check the URL above!")
-                
-                # Delay redirect so user can see the URL
-                import time
-                time.sleep(5)
                 st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
             except Exception as e:
-                st.error(f"Error generating auth URL: {str(e)}")
+                st.error(f"❌ Error generating login URL: {str(e)}")
     
     # Gold divider
     st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)

@@ -124,10 +124,12 @@ def handle_oauth_callback(authorization_response):
         return user_info
         
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        st.error(f"Authentication error: {str(e)}")
-        st.code(error_details)  # Show full error for debugging
+        # Log error but don't show full traceback in production
+        st.error(f"OAuth callback error: {str(e)}")
+        # Only show traceback if in development
+        if 'localhost' in GOOGLE_REDIRECT_URI:
+            import traceback
+            st.code(traceback.format_exc())
         return None
 
 
