@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 5.1** | **Last Updated: January 25, 2026**
+**Version 5.2** | **Last Updated: January 25, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-5.1-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.2-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,20 +17,21 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 5.1
+## What's New in Version 5.2
 
-**OAuth Fix & Consent Screen** - Released January 25, 2026
+**OAuth Button Refinement** - Released January 25, 2026
 
-### 🔧 Authentication Fixes
-- **Fixed 403 Error**: Created new OAuth client to resolve persistent 403 authentication errors
-- **Consent Screen**: Added proper consent screen showing permissions to users
-- **State Validation**: Improved OAuth state handling for Streamlit Cloud compatibility
-- **Production Ready**: Fully working authentication in production environment
+### 🔧 Authentication UX Improvements
+- **Reliable OAuth Flow**: Simplified authentication using new-tab approach for maximum compatibility
+- **Session State Fix**: Resolved session persistence issues with Streamlit Cloud OAuth redirects
+- **Clean Implementation**: Removed complex JavaScript workarounds in favor of reliable `st.link_button`
+- **Production Tested**: Verified working on both desktop and mobile devices
 
-### 🔒 Security Improvements
-- New OAuth 2.0 Client ID with proper configuration
-- Better error handling and user feedback
-- Improved session state management during OAuth redirects
+### 📱 Technical Improvements
+- Streamlined OAuth button implementation
+- Better handling of browser security restrictions
+- Improved logout button behavior (same-tab redirect)
+- Enhanced error handling and user feedback
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -174,6 +175,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **5.2** | Jan 25, 2026 | OAuth Button Refinement |
 | **5.1** | Jan 25, 2026 | OAuth Fix & Consent Screen |
 | **5.0** | Jan 24, 2026 | Authentication & UI Optimization |
 | **4.0** | Jan 23, 2026 | Predictive Analytics & ML Integration |
@@ -208,6 +210,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 5.1 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 5.2 • Built for Texas A&M Mays Business School
 
 </div>

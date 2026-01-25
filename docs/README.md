@@ -4,6 +4,32 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 5.2
+
+**OAuth Button Refinement** - Released January 25, 2026
+
+### 🔧 Authentication UX Improvements
+- **Reliable OAuth Flow**: Simplified authentication using new-tab approach for maximum compatibility
+- **Session State Fix**: Resolved Streamlit Cloud session persistence issues during OAuth redirects
+- **Clean Implementation**: Removed complex JavaScript workarounds in favor of reliable `st.link_button`
+- **Production Tested**: Verified working on both desktop and mobile devices
+
+### 📱 Technical Improvements
+- Streamlined OAuth button implementation
+- Better handling of browser security restrictions
+- Improved logout button behavior (same-tab redirect)
+- Enhanced error handling and user feedback
+
+### 🔍 Technical Details
+- OAuth opens in new tab to preserve session state
+- Logout uses `target="_self"` for same-tab redirect
+- Removed complex device detection and JavaScript close attempts
+- Accepts browser security limitations for better reliability
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 5.1
 
 **OAuth Fix & Consent Screen** - Released January 25, 2026

@@ -350,7 +350,7 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
     else:
-        # Simple OAuth button
+        # Simple OAuth button - opens in new tab
         try:
             auth_url = auth.get_authorization_url()
             st.link_button("🔐 Sign in with Google", auth_url, use_container_width=True)

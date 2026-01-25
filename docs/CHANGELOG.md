@@ -37,6 +37,8 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 Jan 2026  ████████████████████████████  v5.0 - Authentication & UI Optimization
           │
 Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v5.1 - OAuth Fix & Consent Screen
+          │
+Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v5.2 - OAuth Button Refinement
 ```
 
 ---
@@ -45,6 +47,7 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **5.2** | Minor | OAuth Button Refinement | 2 | +15 |
 | **5.1** | Minor | OAuth Fix & Consent Screen | 3 | +25 |
 | **5.0** | Major | Authentication & UI Optimization | 7 | +601 |
 | **4.4** | Minor | Navigation & UX (Final) | 2 | +120 |
@@ -59,6 +62,45 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 | **2.1** | Minor | Global Filters | 4 | +289 |
 | **2.0** | Major | Marketing Integration | 6 | +1,234 |
 | **1.0** | Major | Initial Release | - | +3,500 |
+
+---
+
+## [5.2.0] - 2026-01-25
+
+### 🔧 Minor Release - OAuth Button Refinement
+
+#### Changed
+- **OAuth Button Implementation**: Simplified to use `st.link_button` for maximum reliability
+- **New-Tab Approach**: OAuth now opens in new tab to preserve Streamlit session state
+- **Logout Behavior**: Added `target="_self"` to logout link for same-tab redirect
+- **Removed Complexity**: Eliminated JavaScript workarounds and device detection code
+
+#### Fixed
+- **Session State Persistence**: Resolved issue where OAuth state was lost during same-tab redirects
+- **Browser Compatibility**: Accepted browser security limitations instead of fighting them
+- **403 Errors**: Eliminated 403 errors caused by session state loss during redirects
+
+#### Technical Implementation
+- Streamlit's `st.session_state` is tied to WebSocket connection
+- Same-tab redirect closes connection and loses session
+- New-tab approach keeps original session alive during OAuth
+- Simple, reliable solution that works on all devices
+
+#### Removed
+- Complex JavaScript button with `components.html`
+- Device detection logic for mobile vs desktop
+- Attempts to programmatically close tabs (browser security prevents this)
+- Custom HTML/CSS OAuth button implementations
+
+#### Files Modified
+- `main_app.py` - Simplified OAuth button to `st.link_button`, added `target="_self"` to logout
+- `version.py` - Updated to v5.2
+
+#### User Experience
+- Users click "Sign in with Google" → opens in new tab
+- Complete authentication in new tab
+- Manually close original tab (browser security prevents auto-close)
+- Clean, working solution that prioritizes reliability over perfect UX
 
 ---
 
