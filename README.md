@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 5.0** | **Last Updated: January 24, 2026**
+**Version 5.1** | **Last Updated: January 25, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-5.0-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,32 +17,20 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 5.0
+## What's New in Version 5.1
 
-**Authentication & UI Optimization** - Released January 24, 2026
+**OAuth Fix & Consent Screen** - Released January 25, 2026
 
-### 🔐 Google OAuth 2.0 Authentication
-- **Secure Login**: Full Google OAuth 2.0 integration with user profiles
-- **Role-Based Access**: Admin and regular user roles with permission controls
-- **Profile Management**: User name, email, profile picture, and role display
-- **Session Security**: OAuth state validation and secure session handling
+### 🔧 Authentication Fixes
+- **Fixed 403 Error**: Created new OAuth client to resolve persistent 403 authentication errors
+- **Consent Screen**: Added proper consent screen showing permissions to users
+- **State Validation**: Improved OAuth state handling for Streamlit Cloud compatibility
+- **Production Ready**: Fully working authentication in production environment
 
-### 🎨 Sidebar UI Complete Redesign
-- **Optimized Layout**: Compact profile, navigation, and footer sections
-- **Minimal Spacing**: Perfect 10px margins between all sections
-- **No Scrolling**: Fits all elements on laptop/desktop screens
-- **Responsive Design**: Adapts to Desktop (12px), Laptop (10px), Tablet (8px)
-
-### 🔒 Role-Based Access Control
-- **Data Explorer**: Admins see all tables, users restricted from sensitive data
-- **Admin Tables**: `users`, `metadata`, `model_predictions`, `chat_history`
-- **Security**: Backend enforcement of access rules
-
-### 📱 Professional UI
-- **Clean Design**: No emojis, professional appearance
-- **White Backgrounds**: Visual distinction for navigation tabs
-- **Smooth Animations**: 3px slide on hover, maroon gradient for active tabs
-- **Gold Dividers**: 2px solid gold separators between sections
+### 🔒 Security Improvements
+- New OAuth 2.0 Client ID with proper configuration
+- Better error handling and user feedback
+- Improved session state management during OAuth redirects
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -186,6 +174,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **5.1** | Jan 25, 2026 | OAuth Fix & Consent Screen |
 | **5.0** | Jan 24, 2026 | Authentication & UI Optimization |
 | **4.0** | Jan 23, 2026 | Predictive Analytics & ML Integration |
 | **3.0** | Jan 23, 2026 | Complete Modular Architecture |
@@ -219,6 +208,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 5.0 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 5.1 • Built for Texas A&M Mays Business School
 
 </div>

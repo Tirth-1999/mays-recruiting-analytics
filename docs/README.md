@@ -4,6 +4,25 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 5.1
+
+**OAuth Fix & Consent Screen** - Released January 25, 2026
+
+### 🔧 Authentication Fixes
+- **Fixed 403 Error**: Resolved persistent authentication errors with new OAuth client
+- **Consent Screen**: Added proper Google consent screen showing permissions
+- **State Validation**: Improved OAuth state handling for Streamlit Cloud
+- **Production Ready**: Fully working authentication in production
+
+### 🔒 Security Improvements
+- New OAuth 2.0 Client ID with proper configuration
+- Better error handling and user feedback
+- Improved session state management during redirects
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 5.0
 
 **Authentication & UI Optimization** - Released January 24, 2026

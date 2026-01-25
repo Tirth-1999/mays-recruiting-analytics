@@ -35,6 +35,8 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v4.4 - Navigation & UX (Final)
           │
 Jan 2026  ████████████████████████████  v5.0 - Authentication & UI Optimization
+          │
+Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v5.1 - OAuth Fix & Consent Screen
 ```
 
 ---
@@ -43,6 +45,7 @@ Jan 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **5.1** | Minor | OAuth Fix & Consent Screen | 3 | +25 |
 | **5.0** | Major | Authentication & UI Optimization | 7 | +601 |
 | **4.4** | Minor | Navigation & UX (Final) | 2 | +120 |
 | **4.3** | Minor | Navigation & UX (Initial) | 2 | +80 |
@@ -56,6 +59,38 @@ Jan 2026  ███████████████████████�
 | **2.1** | Minor | Global Filters | 4 | +289 |
 | **2.0** | Major | Marketing Integration | 6 | +1,234 |
 | **1.0** | Major | Initial Release | - | +3,500 |
+
+---
+
+## [5.1.0] - 2026-01-25
+
+### 🔧 Minor Release - OAuth Fix & Consent Screen
+
+#### Fixed
+- **403 Authentication Error**: Created new OAuth 2.0 Client ID to resolve persistent 403 errors
+- **State Validation**: Improved OAuth state handling to work with Streamlit Cloud session persistence
+- **Redirect URI**: Fixed callback URL construction to use production redirect URI dynamically
+
+#### Added
+- **Consent Screen**: Added `prompt='consent'` to show users what permissions they're granting
+- **Better Error Messages**: Improved user feedback with clear error messages and emojis
+- **Session Cleanup**: Proper cleanup of oauth_state after successful login
+
+#### Changed
+- **OAuth Client**: Switched to new OAuth 2.0 Client ID with proper web application configuration
+- **State Validation Logic**: Only validates state if it exists in session (handles session loss gracefully)
+- **Error Handling**: Production-ready error handling without debug tracebacks
+
+#### Technical Implementation
+- New OAuth Client ID: `944889847818-oqkqt241omg77kbqth0p1vp5jmlro5id.apps.googleusercontent.com`
+- Improved `get_authorization_url()` with consent prompt
+- Enhanced callback handling in `main_app.py`
+- Better session state management
+
+#### Files Modified
+- `utils/auth.py` - Added consent prompt, improved error handling
+- `main_app.py` - Fixed state validation, better error messages
+- `config_secrets.py` - Updated with new OAuth credentials
 
 ---
 

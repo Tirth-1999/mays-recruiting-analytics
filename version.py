@@ -4,15 +4,15 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "5.0"
+VERSION = "5.1"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
 VERSION_SHORT = f"v{VERSION}"
 
 # Last updated date
-LAST_UPDATED = "January 24, 2026"
+LAST_UPDATED = "January 25, 2026"
 
 # Version metadata
-VERSION_NAME = "Authentication & UI Optimization"
-VERSION_STATUS = "Production Ready - Complete Auth System with Optimized Sidebar"
+VERSION_NAME = "OAuth Fix & Consent Screen"
+VERSION_STATUS = "Production Ready - Working Authentication with Consent"
