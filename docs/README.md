@@ -4,6 +4,39 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 5.0
+
+**Authentication & UI Optimization** - Released January 24, 2026
+
+Version 5.0 is a major release featuring complete authentication system and optimized UI:
+
+### 🔐 Google OAuth 2.0 Authentication
+- **Secure Login**: Full Google OAuth 2.0 integration with user profiles
+- **Role-Based Access**: Admin and regular user roles with permission controls
+- **Profile Management**: User name, email, profile picture, and role display
+- **Session Security**: OAuth state validation and secure session handling
+
+### 🎨 Sidebar UI Complete Redesign
+- **Optimized Layout**: Compact profile, navigation, and footer sections
+- **Minimal Spacing**: Perfect 10px margins between all sections
+- **No Scrolling**: Fits all elements on laptop/desktop screens
+- **Responsive Design**: Adapts to Desktop (12px), Laptop (10px), Tablet (8px)
+
+### 🔒 Role-Based Access Control
+- **Data Explorer**: Admins see all tables, users restricted from sensitive data
+- **Admin Tables**: `users`, `metadata`, `model_predictions`, `chat_history`
+- **Security**: Backend enforcement of access rules
+
+### 📱 Professional UI
+- **Clean Design**: No emojis, professional appearance
+- **White Backgrounds**: Visual distinction for navigation tabs
+- **Smooth Animations**: 3px slide on hover, maroon gradient for active tabs
+- **Gold Dividers**: 2px solid gold separators between sections
+
+[View complete changelog →](../CHANGELOG.md)
+
+---
+
 ## What's New in Version 4.4
 
 **Navigation & UX Enhancements (Final)** - Released January 24, 2026
@@ -18,24 +51,6 @@ Version 4.4 completes the navigation improvements with enhanced scroll functiona
 - 📱 **Mobile Responsive**: Adapts to 50px on mobile devices
 - 🔒 **Fixed Position**: Always visible in bottom-right corner (30px from edges)
 - ✨ **Smooth Animation**: Users can see content while scrolling to top
-
-[View complete changelog →](../CHANGELOG.md)
-
----
-
-## What's New in Version 4.3
-
-**Navigation & UX Enhancements (Initial)** - Released January 24, 2026
-
-Version 4.3 brings significant navigation and user experience improvements:
-
-- 🎯 **Floating "Back to Top" Button**: Beautiful rounded square design with maroon gradient and white arrow icon
-- 📱 **Mobile Responsive**: Button adapts from 56x56px (desktop) to 48x48px (mobile)
-- 🎨 **Professional Styling**: Smooth animations, glassmorphism effects, perfect centering with flexbox
-- 📂 **Collapsed Sidebar**: Sidebar now starts collapsed by default for cleaner interface
-- ⬆️ **Smooth Scrolling**: Instant scroll to absolute top of page including headers
-- 💫 **Hover Effects**: Button lifts 4px and scales to 105% on hover with darker gradient
-- 🔒 **Fixed Position**: Always visible in bottom-right corner (30px from edges)
 
 [View complete changelog →](../CHANGELOG.md)
 

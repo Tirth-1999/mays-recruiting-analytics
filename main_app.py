@@ -104,21 +104,37 @@ st.markdown("""
     /* Remove all top padding from sidebar */
     [data-testid="stSidebar"] > div:first-child {
         padding-top: 0px !important;
-        padding-bottom: 5px !important;
+        padding-bottom: 0px !important;
     }
     [data-testid="stSidebarContent"] {
         padding-top: 0px !important;
+        padding-bottom: 0px !important;
     }
     
-    /* Remove default gaps between sidebar elements */
+    /* Remove default gaps between sidebar elements - AGGRESSIVE */
     [data-testid="stSidebar"] .element-container {
+        margin-top: 0px !important;
         margin-bottom: 0px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
     }
     [data-testid="stSidebar"] .stMarkdown {
+        margin-top: 0px !important;
         margin-bottom: 0px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
     }
     [data-testid="stSidebar"] > div > div {
         gap: 0px !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown > div {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
+    /* Force remove all vertical spacing in sidebar */
+    [data-testid="stSidebar"] * {
+        margin-block-start: 0px !important;
+        margin-block-end: 0px !important;
     }
     
     /* Sidebar brand/header */
