@@ -219,6 +219,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 4.3 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 5.0 • Built for Texas A&M Mays Business School
 
 </div>
