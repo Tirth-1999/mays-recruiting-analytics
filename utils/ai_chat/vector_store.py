@@ -3,6 +3,7 @@ Vector store for schema embeddings using ChromaDB
 """
 
 import os
+import tempfile
 from typing import List, Dict, Optional
 
 try:
@@ -24,18 +25,31 @@ except ImportError:
 class VectorStore:
     """Manages vector embeddings for schema and platform knowledge."""
     
-    def __init__(self, persist_directory: str = ".chromadb"):
+    def __init__(self, persist_directory: Optional[str] = None):
         """
         Initialize vector store.
         
         Args:
-            persist_directory: Directory to persist ChromaDB data
+            persist_directory: Directory to persist ChromaDB data (defaults to temp dir for Streamlit Cloud)
         """
         if not CHROMADB_AVAILABLE:
             raise ImportError("chromadb package not installed")
         
         if not SENTENCE_TRANSFORMERS_AVAILABLE:
             raise ImportError("sentence-transformers package not installed")
+        
+        # Use temp directory for Streamlit Cloud compatibility
+        if persist_directory is None:
+            # Try to use a writable directory
+            if os.path.exists("/tmp") and os.access("/tmp", os.W_OK):
+                persist_directory = "/tmp/chromadb"
+            else:
+                persist_directory = os.path.join(tempfile.gettempdir(), "chromadb")
+        
+        # Ensure directory exists
+        os.makedirs(persist_directory, exist_ok=True)
+        
+        print(f"📁 ChromaDB persist directory: {persist_directory}")
         
         # Initialize ChromaDB client
         self.client = chromadb.PersistentClient(path=persist_directory)
