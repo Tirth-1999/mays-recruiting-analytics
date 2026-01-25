@@ -48,20 +48,6 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 4.4
-
-**Navigation & UX Enhancements (Final)** - Released January 24, 2026
-
-- 🔼 **Back to Top Button - Chevron Style**: Circular button with triangle icon (▲) and 2.5-second smooth scroll
-- 📐 **Collapsed Sidebar**: Starts closed by default, overlay mode prevents content shifting
-- ✨ **Smooth Animations**: Ease-in-out scrolling with visible content during animation
-- 📱 **Mobile Responsive**: Button adapts to mobile screens (50px)
-- 🎨 **Professional Design**: Maroon gradient, white icon, glassmorphism effects
-
-[View complete changelog →](CHANGELOG.md)
-
----
-
 ## Overview
 
 Mays Analytics is an AI-powered platform designed for Texas A&M Mays Business School to track, analyze, and predict admissions performance across 7 graduate programs. The platform combines real-time data visualization with machine learning and secure authentication to provide actionable insights for enrollment planning and marketing optimization.
