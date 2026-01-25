@@ -351,87 +351,10 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
     else:
-        # OAuth button - device-aware with Google logo
+        # Simple OAuth button
         try:
             auth_url = auth.get_authorization_url()
-            
-            # Use components.html for better rendering
-            import streamlit.components.v1 as components
-            
-            components.html(f"""
-                <style>
-                    .oauth-button {{
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: flex-start !important;
-                        gap: 8px !important;
-                        width: 100% !important;
-                        background: white !important;
-                        color: #495057 !important;
-                        border: none !important;
-                        border-radius: 6px !important;
-                        padding: 6px 12px !important;
-                        margin: 0px !important;
-                        font-size: 13px !important;
-                        font-weight: 500 !important;
-                        text-decoration: none !important;
-                        transition: all 0.2s ease !important;
-                        cursor: pointer !important;
-                        box-sizing: border-box !important;
-                        text-align: left !important;
-                    }}
-                    .oauth-button:hover {{
-                        background: #f0f2f6 !important;
-                        color: #500000 !important;
-                        transform: translateX(3px) !important;
-                    }}
-                    .google-logo {{
-                        width: 16px !important;
-                        height: 16px !important;
-                        flex-shrink: 0 !important;
-                    }}
-                </style>
-                
-                <div id="oauth-container">
-                    <a href="{auth_url}" 
-                       target="_self"
-                       class="oauth-button" 
-                       id="oauth-desktop"
-                       style="display: none;">
-                        <svg class="google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                        <span>Sign in with Google</span>
-                    </a>
-                    
-                    <a href="{auth_url}" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="oauth-button" 
-                       id="oauth-mobile"
-                       style="display: none;">
-                        <svg class="google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                        <span>Sign in with Google</span>
-                    </a>
-                </div>
-                
-                <script>
-                    const isMobile = window.innerWidth <= 768;
-                    if (isMobile) {{
-                        document.getElementById('oauth-mobile').style.display = 'flex';
-                    }} else {{
-                        document.getElementById('oauth-desktop').style.display = 'flex';
-                    }}
-                </script>
-            """, height=50)
+            st.link_button("🔐 Sign in with Google", auth_url, use_container_width=True)
             
         except Exception as e:
             st.error(f"❌ Error generating login URL: {str(e)}")
