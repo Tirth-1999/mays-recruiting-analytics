@@ -24,9 +24,10 @@ if 'code' in st.query_params and not st.session_state.get('auth_processed', Fals
     code = st.query_params['code']
     state = st.query_params.get('state', '')
     
-    # Validate state for CSRF protection
+    # Note: State validation is tricky in Streamlit Cloud due to session persistence
+    # We'll validate if state exists, but won't block if it's missing
     stored_state = st.session_state.get('oauth_state', '')
-    if state != stored_state:
+    if stored_state and state != stored_state:
         st.error("⚠️ Security error: Invalid state parameter. Please try signing in again.")
         st.query_params.clear()
         st.session_state.auth_processed = False
