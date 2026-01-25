@@ -351,28 +351,10 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
     else:
-        # Generate OAuth URL and create a styled link button that opens in same tab
+        # Use link_button - opens in new tab but works reliably on all devices
         try:
             auth_url = auth.get_authorization_url()
-            st.markdown(f"""
-                <a href="{auth_url}" target="_self" style="
-                    display: block;
-                    width: 100%;
-                    padding: 0.5rem 1rem;
-                    background: linear-gradient(135deg, #500000 0%, #800000 100%);
-                    color: white;
-                    text-align: center;
-                    text-decoration: none;
-                    border-radius: 0.5rem;
-                    font-weight: 600;
-                    font-size: 14px;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    transition: all 0.3s ease;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                ">
-                    🔐 Sign in with Google
-                </a>
-            """, unsafe_allow_html=True)
+            st.link_button("🔐 Sign in with Google", auth_url, use_container_width=True, type="primary")
         except Exception as e:
             st.error(f"❌ Error generating login URL: {str(e)}")
     
