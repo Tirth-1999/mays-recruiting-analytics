@@ -8,10 +8,10 @@
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, providing real-time insights into admissions performance and marketing effectiveness with secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-5.0-blue.svg)](docs/VERSIONING.md)
+[![Version](https://img.shields.io/badge/version-5.0-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
-[Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md) • [Version History](docs/VERSIONING.md)
+[Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
 
 </div>
 
@@ -176,8 +176,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 - **[Complete Documentation](docs/README.md)** - Central documentation hub
 - **[Quick Start Guide](docs/QUICK_START.md)** - Installation and setup
-- **[Version History](docs/VERSIONING.md)** - Complete development timeline
-- **[Changelog](docs/CHANGELOG.md)** - Detailed change log
+- **[Changelog](docs/CHANGELOG.md)** - Complete version history and changes
 - **[Security Policy](SECURITY.md)** - Security guidelines
 - **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines
 
@@ -193,7 +192,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 | **2.0** | Jan 14, 2026 | Marketing Spend Integration |
 | **1.0** | Apr 30, 2024 | Initial Release |
 
-[View full version history →](docs/VERSIONING.md)
+[View full version history →](docs/CHANGELOG.md)
 
 ---
 

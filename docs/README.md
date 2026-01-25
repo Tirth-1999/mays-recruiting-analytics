@@ -124,7 +124,7 @@ AI-powered forecasting and optimization using machine learning.
 
 ### Project Information
 
-**[Version History](VERSIONING.md)**  
+**[Version History](CHANGELOG.md)**  
 Complete development timeline and version details.
 
 **[Changelog](CHANGELOG.md)**  
@@ -203,7 +203,7 @@ Prophet, ARIMA, Linear Regression
 
 ### Developers
 - [Technical Guide](TECHNICAL_GUIDE.md) - Architecture and database schema
-- [Version History](VERSIONING.md) - Development timeline
+- [Version History](CHANGELOG.md) - Development timeline
 - [Code of Conduct](../CODE_OF_CONDUCT.md) - Contribution guidelines
 
 ---
@@ -241,7 +241,7 @@ Prophet, ARIMA, Linear Regression
 | 2.0 | Jan 14, 2026 | Marketing Spend Integration |
 | 1.0 | Apr 30, 2024 | Initial Release |
 
-[View complete version history](VERSIONING.md)
+[View complete version history](CHANGELOG.md)
 
 ---
 

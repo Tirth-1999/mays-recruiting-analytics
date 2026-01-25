@@ -31,22 +31,7 @@
 - [ ] Keep previous versions for reference (don't remove)
 - [ ] Update any changed documentation links
 
-#### VERSIONING.md
-- [ ] Add complete version entry at the top
-- [ ] Include:
-  - [ ] Version number and date
-  - [ ] Status (Current Release)
-  - [ ] Type (Major/Minor/Patch)
-  - [ ] All features added
-  - [ ] All changes made
-  - [ ] Technical implementation details
-  - [ ] Files modified with line counts
-  - [ ] Key achievements
-- [ ] **Update Development Timeline** (add new version to timeline graphic)
-- [ ] **Update Summary by Version table** (add new row at top)
-- [ ] Update footer with current version number
-
-#### CHANGELOG.md
+#### docs/CHANGELOG.md
 - [ ] Add version entry at the top following format:
   ```markdown
   ## [X.X.X] - YYYY-MM-DD
@@ -67,6 +52,8 @@
   #### Technical Implementation
   - Details
   ```
+- [ ] **Update Development Timeline** (add new version to timeline graphic)
+- [ ] **Update Summary by Version table** (add new row at top)
 
 ### 3. Code Quality
 - [ ] Remove all temporary files (.md test files, debug files)
@@ -252,8 +239,7 @@ git push origin vX.X
 1. ✅ `version.py` - Version number and metadata
 2. ✅ `README.md` - Current version only (remove old), update Version History table, update footer
 3. ✅ `docs/README.md` - Add new version (keep old)
-4. ✅ `docs/VERSIONING.md` - Complete changelog entry, update Development Timeline, update Summary table, update footer
-5. ✅ `CHANGELOG.md` - Structured changelog entry
+4. ✅ `docs/CHANGELOG.md` - Structured changelog entry, update Development Timeline, update Summary table
 
 ---
 
@@ -270,8 +256,7 @@ git push origin vX.X
 ### docs/ Directory (All Documentation)
 **All other .md files belong here:**
 - ✅ `docs/README.md` - Documentation hub
-- ✅ `docs/VERSIONING.md` - Version history
-- ✅ `docs/CHANGELOG.md` - Change log
+- ✅ `docs/CHANGELOG.md` - Complete version history with timeline
 - ✅ `docs/DEPLOYMENT_CHECKLIST.md` - This file
 - ✅ `docs/QUICK_START.md` - Setup guide
 - ✅ `docs/[PAGE]_*.md` - Page-specific guides
