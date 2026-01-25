@@ -339,8 +339,14 @@ with st.sidebar:
         if st.button("Sign in with Google", key="sidebar_signin", use_container_width=True, type="primary"):
             try:
                 auth_url = auth.get_authorization_url()
-                # Debug: Show the auth URL being generated
-                st.info(f"Redirecting to Google... If nothing happens, the URL is: {auth_url[:100]}...")
+                # Debug: Show the auth URL with expandable details
+                with st.expander("🔍 Debug Info - Click to see OAuth URL", expanded=True):
+                    st.code(auth_url, language=None)
+                    st.warning("⏳ Redirecting in 5 seconds... Check the URL above!")
+                
+                # Delay redirect so user can see the URL
+                import time
+                time.sleep(5)
                 st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
             except Exception as e:
                 st.error(f"Error generating auth URL: {str(e)}")
