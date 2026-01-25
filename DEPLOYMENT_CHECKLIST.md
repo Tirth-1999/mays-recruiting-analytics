@@ -42,6 +42,9 @@
   - [ ] Technical implementation details
   - [ ] Files modified with line counts
   - [ ] Key achievements
+- [ ] **Update Development Timeline** (add new version to timeline graphic)
+- [ ] **Update Summary by Version table** (add new row at top)
+- [ ] Update footer with current version number
 
 #### CHANGELOG.md
 - [ ] Add version entry at the top following format:
@@ -240,7 +243,7 @@ git push origin vX.X
 1. ✅ `version.py` - Version number and metadata
 2. ✅ `README.md` - Current version only (remove old), update Version History table, update footer
 3. ✅ `docs/README.md` - Add new version (keep old)
-4. ✅ `VERSIONING.md` - Complete changelog entry
+4. ✅ `VERSIONING.md` - Complete changelog entry, update Development Timeline, update Summary table, update footer
 5. ✅ `CHANGELOG.md` - Structured changelog entry
 
 ---
