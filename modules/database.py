@@ -5,6 +5,7 @@ Extracted from main_app.py as part of Phase 4 refactoring
 
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
 # Import utility functions
 from utils.database import get_connection
@@ -153,19 +154,41 @@ def render():
         }
     }
     
-    # FULL-WIDTH KEYWORD SEARCH - Centered
-    st.markdown("""
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h4 style="color: #500000; margin-bottom: 10px;">🔍 Find Your Data</h4>
+    # Initialize last refresh time in session state
+    if 'data_explorer_last_refresh' not in st.session_state:
+        st.session_state.data_explorer_last_refresh = datetime.now()
+    
+    # REFRESH BUTTON AND KEYWORD SEARCH - Side by side
+    col_search, col_refresh = st.columns([4, 1])
+    
+    with col_search:
+        st.markdown("""
+        <div style="text-align: center; margin-bottom: 10px;">
+            <h4 style="color: #500000; margin-bottom: 10px;">🔍 Find Your Data</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        keyword_search = st.text_input(
+            "Search tables, questions, or data types",
+            placeholder="Type keywords like 'applications', 'marketing', 'programs', 'inquiries'...",
+            key="table_keyword_search",
+            label_visibility="collapsed"
+        )
+    
+    with col_refresh:
+        st.markdown("<div style='height: 44px;'></div>", unsafe_allow_html=True)  # Spacer to align with search
+        if st.button("🔄 Refresh Data", use_container_width=True, type="primary"):
+            st.cache_data.clear()  # Clear any cached data
+            st.session_state.data_explorer_last_refresh = datetime.now()
+            st.rerun()
+    
+    # Show last refresh time
+    last_refresh = st.session_state.data_explorer_last_refresh.strftime('%b %d, %Y at %I:%M:%S %p')
+    st.markdown(f"""
+    <div style="text-align: center; margin: 10px 0; color: #6c757d; font-size: 13px;">
+        📊 Data last refreshed: <strong>{last_refresh}</strong>
     </div>
     """, unsafe_allow_html=True)
-    
-    keyword_search = st.text_input(
-        "Search tables, questions, or data types",
-        placeholder="Type keywords like 'applications', 'marketing', 'programs', 'inquiries'...",
-        key="table_keyword_search",
-        label_visibility="collapsed"
-    )
     
     try:
         conn = get_connection()
