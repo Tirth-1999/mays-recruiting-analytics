@@ -158,16 +158,16 @@ def render():
     if 'data_explorer_last_refresh' not in st.session_state:
         st.session_state.data_explorer_last_refresh = datetime.now()
     
-    # REFRESH BUTTON AND KEYWORD SEARCH - Side by side
+    # REFRESH BUTTON AND KEYWORD SEARCH - Side by side, aligned
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 10px;">
+        <h4 style="color: #500000; margin-bottom: 10px;">🔍 Find Your Data</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
     col_search, col_refresh = st.columns([4, 1])
     
     with col_search:
-        st.markdown("""
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h4 style="color: #500000; margin-bottom: 10px;">🔍 Find Your Data</h4>
-        </div>
-        """, unsafe_allow_html=True)
-        
         keyword_search = st.text_input(
             "Search tables, questions, or data types",
             placeholder="Type keywords like 'applications', 'marketing', 'programs', 'inquiries'...",
@@ -176,8 +176,7 @@ def render():
         )
     
     with col_refresh:
-        st.markdown("<div style='height: 44px;'></div>", unsafe_allow_html=True)  # Spacer to align with search
-        if st.button("🔄 Refresh Data", use_container_width=True, type="primary"):
+        if st.button("Refresh", use_container_width=True, type="primary"):
             st.cache_data.clear()  # Clear any cached data
             st.session_state.data_explorer_last_refresh = datetime.now()
             st.rerun()
