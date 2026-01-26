@@ -661,7 +661,14 @@ def render():
         if 'selected_conv_id' not in st.session_state:
             st.session_state.selected_conv_id = None
         
-        conversations = manager.history.get_user_conversations(user['user_id'])
+        # Admins can see all conversations, regular users see only their own
+        if auth.is_admin():
+            st.info("👑 Admin view: Showing all user conversations")
+            # Get all conversations across all users
+            conversations = manager.history.get_all_conversations()
+        else:
+            conversations = manager.history.get_user_conversations(user['user_id'])
+        
         st.markdown("<h3 style='text-align: center; color: #500000;'>Recent Conversations</h3>", unsafe_allow_html=True)
         
         history_container = st.container(height=400, border=True)
@@ -669,9 +676,17 @@ def render():
             if conversations:
                 for conv in conversations[:10]:
                     conv_id = conv['conversation_id']
+                    conv_user_id = conv.get('user_id', user['user_id'])  # For admin view
                     started_at = datetime.fromisoformat(conv['started_at']).strftime('%b %d, %I:%M %p')
                     message_count = conv['message_count']
-                    preview = manager.history.get_conversation_preview(user['user_id'], conv_id)
+                    
+                    # For admin view, show which user the conversation belongs to
+                    if auth.is_admin() and conv_user_id != user['user_id']:
+                        user_label = f" (User {conv_user_id})"
+                    else:
+                        user_label = ""
+                    
+                    preview = manager.history.get_conversation_preview(conv_user_id, conv_id)
                     preview_text = preview[:60] + "..." if preview and len(preview) > 60 else preview or "New conversation"
                     
                     is_current = conv_id == st.session_state.chat_conversation_id
@@ -679,15 +694,17 @@ def render():
                     
                     # Fix: Don't use type=None, just omit the type parameter
                     if is_current:
-                        if st.button(f"{preview_text}\n{started_at} • {message_count} messages", key=f"conv_{conv_id}", use_container_width=True, disabled=True, type="secondary"):
+                        if st.button(f"{preview_text}{user_label}\n{started_at} • {message_count} messages", key=f"conv_{conv_id}", use_container_width=True, disabled=True, type="secondary"):
                             pass
                     elif is_selected:
-                        if st.button(f"{preview_text}\n{started_at} • {message_count} messages", key=f"conv_{conv_id}", use_container_width=True, type="primary"):
+                        if st.button(f"{preview_text}{user_label}\n{started_at} • {message_count} messages", key=f"conv_{conv_id}", use_container_width=True, type="primary"):
                             st.session_state.selected_conv_id = conv_id
+                            st.session_state.selected_conv_user_id = conv_user_id
                             st.rerun()
                     else:
-                        if st.button(f"{preview_text}\n{started_at} • {message_count} messages", key=f"conv_{conv_id}", use_container_width=True):
+                        if st.button(f"{preview_text}{user_label}\n{started_at} • {message_count} messages", key=f"conv_{conv_id}", use_container_width=True):
                             st.session_state.selected_conv_id = conv_id
+                            st.session_state.selected_conv_user_id = conv_user_id
                             st.rerun()
             else:
                 st.info("No previous conversations. Start chatting to create your first one!")
@@ -695,8 +712,11 @@ def render():
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Load Selected", use_container_width=True, type="primary", disabled=(st.session_state.selected_conv_id is None)):
-                manager.load_conversation(user['user_id'], st.session_state.selected_conv_id)
+                # Load conversation with the correct user_id (for admin viewing other users' chats)
+                load_user_id = st.session_state.get('selected_conv_user_id', user['user_id'])
+                manager.load_conversation(load_user_id, st.session_state.selected_conv_id)
                 st.session_state.selected_conv_id = None
+                st.session_state.selected_conv_user_id = None
                 st.rerun()
         with col2:
             if st.button("Delete Selected", use_container_width=True, type="secondary", disabled=(st.session_state.selected_conv_id is None)):

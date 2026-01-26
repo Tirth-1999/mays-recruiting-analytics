@@ -154,13 +154,14 @@ class ChatHistory:
             cursor.execute('''
                 SELECT 
                     conversation_id,
+                    user_id,
                     MIN(timestamp) as started_at,
                     MAX(timestamp) as last_message_at,
                     COUNT(*) as message_count,
                     SUM(tokens_used) as total_tokens
                 FROM chat_history
                 WHERE user_id = ?
-                GROUP BY conversation_id
+                GROUP BY conversation_id, user_id
                 ORDER BY last_message_at DESC
             ''', (user_id,))
             
@@ -168,10 +169,51 @@ class ChatHistory:
             for row in cursor.fetchall():
                 conversations.append({
                     'conversation_id': row[0],
-                    'started_at': row[1],
-                    'last_message_at': row[2],
-                    'message_count': row[3],
-                    'total_tokens': row[4]
+                    'user_id': row[1],
+                    'started_at': row[2],
+                    'last_message_at': row[3],
+                    'message_count': row[4],
+                    'total_tokens': row[5]
+                })
+            
+            return conversations
+            
+        finally:
+            conn.close()
+    
+    def get_all_conversations(self) -> List[Dict]:
+        """
+        Get all conversations across all users (admin only).
+        
+        Returns:
+            List of conversation summaries with user_id
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute('''
+                SELECT 
+                    conversation_id,
+                    user_id,
+                    MIN(timestamp) as started_at,
+                    MAX(timestamp) as last_message_at,
+                    COUNT(*) as message_count,
+                    SUM(tokens_used) as total_tokens
+                FROM chat_history
+                GROUP BY conversation_id, user_id
+                ORDER BY last_message_at DESC
+            ''')
+            
+            conversations = []
+            for row in cursor.fetchall():
+                conversations.append({
+                    'conversation_id': row[0],
+                    'user_id': row[1],
+                    'started_at': row[2],
+                    'last_message_at': row[3],
+                    'message_count': row[4],
+                    'total_tokens': row[5]
                 })
             
             return conversations
