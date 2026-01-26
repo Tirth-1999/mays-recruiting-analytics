@@ -75,6 +75,14 @@ if 'logout' in st.query_params:
     st.query_params.clear()
     st.rerun()
 
+# Keep Streamlit menu visible but hide footer
+hide_st_style = """
+<style>
+footer {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
 # Global CSS
 st.markdown("""
 <style>
@@ -113,6 +121,18 @@ st.markdown("""
     [data-testid="stSidebar"][aria-expanded="false"] {
         display: none !important;
     }
+    
+    /* Sidebar content styling */
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    
+    [data-testid="stSidebarContent"] {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    
     .main .block-container {
         max-width: 100% !important;
         transition: none !important;
@@ -120,16 +140,6 @@ st.markdown("""
     .main {
         margin-left: 0 !important;
         transition: none !important;
-    }
-    
-    /* Remove all top padding from sidebar */
-    [data-testid="stSidebar"] > div:first-child {
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-    }
-    [data-testid="stSidebarContent"] {
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
     }
     
     /* Remove default gaps between sidebar elements - AGGRESSIVE */
@@ -156,6 +166,13 @@ st.markdown("""
     [data-testid="stSidebar"] * {
         margin-block-start: 0px !important;
         margin-block-end: 0px !important;
+    }
+    /* Remove spacing from link buttons */
+    [data-testid="stSidebar"] .stLinkButton {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
     }
     
     /* Sidebar brand/header */
@@ -216,11 +233,6 @@ st.markdown("""
         .sidebar-brand-subtitle { font-size: 11px !important; }
         [data-testid="stSidebar"] .stButton > button { padding: 8px 15px !important; margin: 0px 0 !important; font-size: 14px !important; }
         .sidebar-divider { margin: 12px 0 !important; }
-        .sidebar-profile-card { padding: 15px !important; margin-top: 10px !important; margin-bottom: 12px !important; }
-        .sidebar-profile-img { width: 50px !important; height: 50px !important; }
-        .sidebar-profile-name { font-size: 14px !important; }
-        .sidebar-profile-email { font-size: 11px !important; }
-        .sidebar-logout-btn { padding: 9px 12px !important; font-size: 11px !important; }
         .sidebar-footer { padding: 12px 10px !important; margin-top: 12px !important; font-size: 10px !important; }
     }
     
@@ -232,11 +244,6 @@ st.markdown("""
         .sidebar-brand-subtitle { font-size: 10px !important; }
         [data-testid="stSidebar"] .stButton > button { padding: 6px 12px !important; margin: 0px 0 !important; font-size: 13px !important; }
         .sidebar-divider { margin: 10px 0 !important; }
-        .sidebar-profile-card { padding: 10px !important; margin-top: 10px !important; margin-bottom: 10px !important; }
-        .sidebar-profile-img { width: 36px !important; height: 36px !important; }
-        .sidebar-profile-name { font-size: 12px !important; }
-        .sidebar-profile-email { font-size: 9px !important; }
-        .sidebar-logout-btn { padding: 7px 10px !important; font-size: 10px !important; }
         .sidebar-footer { padding: 10px 10px !important; margin-top: 10px !important; font-size: 9px !important; }
     }
     
@@ -248,11 +255,6 @@ st.markdown("""
         .sidebar-brand-subtitle { font-size: 9px !important; }
         [data-testid="stSidebar"] .stButton > button { padding: 5px 10px !important; margin: 0px 0 !important; font-size: 12px !important; }
         .sidebar-divider { margin: 8px 0 !important; }
-        .sidebar-profile-card { padding: 8px !important; margin-top: 10px !important; margin-bottom: 8px !important; }
-        .sidebar-profile-img { width: 30px !important; height: 30px !important; }
-        .sidebar-profile-name { font-size: 11px !important; }
-        .sidebar-profile-email { font-size: 8px !important; }
-        .sidebar-logout-btn { padding: 6px 8px !important; font-size: 9px !important; }
         .sidebar-footer { padding: 8px 5px !important; margin-top: 8px !important; font-size: 8px !important; }
     }
 
@@ -304,10 +306,11 @@ if 'current_page' not in st.session_state:
     st.session_state.current_page = 'Home'
 
 # Sidebar Navigation
+# Sidebar Navigation
 with st.sidebar:
-    # Compact Header with Logo
+    # Header with Logo - with top spacing
     st.markdown("""
-    <div class="sidebar-brand">
+    <div class="sidebar-brand" style="margin-top: 30px;">
         <img src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICM1MDAwMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMSwgLmNscy0yLCAuY2xzLTMgewogICAgICAgIHN0cm9rZS13aWR0aDogMHB4OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNiMWIzYjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyMDEuMjgiIHk9IjIyMi41NyIgd2lkdGg9IjYyOS43OSIgaGVpZ2h0PSI2MzQuNzkiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iNzQ3LjQ0IDQ3NS4yMiA3MDAuNjcgNDc1LjIyIDY5Ny45NyA0NzUuMjIgNjk2Ljc1IDQ3Ny42NyA2NjIuODQgNTQ4LjI3IDYyOC44IDQ3Ny42MyA2MjcuNjEgNDc1LjIyIDYyNC45MiA0NzUuMjIgNTc5LjcxIDQ3NS4yMiA1NzUuNDQgNDc1LjIyIDU3NS40NCA0NzkuNTIgNTc1LjQ0IDUwMy41OSA1NzUuNDQgNTA3LjkgNTc5LjcxIDUwNy45IDU4Ny40NCA1MDcuOSA1ODcuNDQgNjA5LjAxIDU3OS4wOCA2MDkuMDEgNTc0Ljc4IDYwOS4wMSA1NzQuNzggNjEzLjMyIDU3NC43OCA2MzcuMzkgNTc0Ljc4IDY0MS42OSA1NzkuMDggNjQxLjY5IDYyOS44NSA2NDEuNjkgNjM0LjE1IDY0MS42OSA2MzQuMTUgNjM3LjM5IDYzNC4xNSA2MTMuMzIgNjM0LjE1IDYwOS4wMSA2MjkuODUgNjA5LjAxIDYyMS4wNyA2MDkuMDEgNjIxLjA3IDUzNy4yNSA2NTguOTkgNjE1LjQ1IDY2Mi44NCA2MjMuNDMgNjY2Ljc2IDYxNS40NSA3MDUuMDcgNTM3LjA4IDcwNS4wNyA2MDkuMDEgNjk2LjcxIDYwOS4wMSA2OTIuMzcgNjA5LjAxIDY5Mi4zNyA2MTMuMzIgNjkyLjM3IDYzNy4zOSA2OTIuMzcgNjQxLjY5IDY5Ni43MSA2NDEuNjkgNzQ3LjQ0IDY0MS42OSA3NTEuNzUgNjQxLjY5IDc1MS43NSA2MzcuMzkgNzUxLjc1IDYxMy4zMiA3NTEuNzUgNjA5LjAxIDc0Ny40NCA2MDkuMDEgNzM4LjcgNjA5LjAxIDczOC43IDUwNy45IDc0Ny40NCA1MDcuOSA3NTEuNzUgNTA3LjkgNzUxLjc1IDUwMy41OSA3NTEuNzUgNDc5LjUyIDc1MS43NSA0NzUuMjIgNzQ3LjQ0IDQ3NS4yMiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTQ1Mi42LDYwOC45MWgtMTMuNTFsLTQzLjk1LTEwMS40N2g4LjQ3di0zMi44MmgtNzAuNTR2MzIuNzFoOS43M2wtNDMuOTEsMTAxLjQ3aC0xOC4zdjMyLjcxaDY0LjAzdi0zMi43MWgtOS4zMWw3LjMxLTE2LjloNTIuODNsNy4yOCwxNi45aC05LjgzdjMyLjcxaDY0LjA2di0zMi43MWwtNC4zNy4xMVpNMzgxLjI5LDU1OS4zM2gtMjQuNDlsMTIuMjUtMjguMzgsMTIuMjUsMjguMzhaIi8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjY5My43IDM0OC4yNSAzMzcuNDkgMzQ4LjI1IDMzMi41NiAzNDguMjUgMzMyLjU2IDM1My4xOCAzMzIuNTYgNDQ4LjM1IDMzMi41NiA0NTMuMjggMzM3LjQ5IDQ1My4yOCAzOTkgNDUzLjI4IDQwMy45MyA0NTMuMjggNDAzLjkzIDQ0OC4zNSA0MDMuOTMgNDEzLjAxIDQ3OS45MyA0MTMuMDEgNDc5LjkzIDY2My43NyA0NDQuNTUgNjYzLjc3IDQzOS42NSA2NjMuNzcgNDM5LjY1IDY2OC43IDQzOS42NSA3MzAuMjEgNDM5LjY1IDczNS4xNSA0NDQuNTUgNzM1LjE1IDU4Ni42IDczNS4xNSA1OTEuNTQgNzM1LjE1IDU5MS41NCA3MzAuMjEgNTkxLjU0IDY2OC43IDU5MS41NCA2NjMuNzcgNTg2LjYgNjYzLjc3IDU1MS4zIDY2My43NyA1NTEuMyA0MTMuMDEgNjI2Ljg0IDQxMy4wMSA2MjYuODQgNDQ3Ljg5IDYyNi44NCA0NTIuODMgNjMxLjc3IDQ1Mi44MyA2OTMuNyA0NTIuODMgNjk4LjY0IDQ1Mi44MyA2OTguNjQgNDQ3Ljg5IDY5OC42NCAzNTMuMTggNjk4LjY0IDM0OC4yNSA2OTMuNyAzNDguMjUiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iNTYxLjgzIDY5My4wNiA1NzYuODggNjc3LjU2IDU3Ni44OCA3MjAuMDMgNTYxLjgzIDcwNS42NSA1NjEuODMgNjkzLjA2Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjUzNi43OCA2NzguNjggNTIxLjcgNjkzLjUxIDUyMS43IDM4My40NSA1MzYuNzggMzk4LjQ2IDUzNi43OCA2NzguNjgiLz4KICA8cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMzYyLjcyIDM3Ny45OSAzNDcuMjUgMzYyLjk0IDY3Ni40NSAzNjIuOTQgNjU3IDM3Ny45OSAzNjIuNzIgMzc3Ljk5Ii8+CiAgPHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjY4NC40MyA0MzkuMDQgNjY5LjM5IDQyNC42NiA2NjkuMzkgMzg2LjM4IDY4NC40MyAzNzAuOTIgNjg0LjQzIDQzOS4wNCIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1My40Niw4NDQuOGMwLTYuOTgsNS42NS0xMi42MywxMi42My0xMi42M3MxMi42Myw1LjY1LDEyLjYzLDEyLjYzLTUuNjUsMTIuNjMtMTIuNjMsMTIuNjMtMTIuNjMtNS42NS0xMi42My0xMi42M2gwWk04NzUuNjQsODQ0LjhjLS4zNS01LjI2LTQuOS05LjI1LTEwLjE2LTguOS01LjI2LjM1LTkuMjUsNC45LTguOSwxMC4xNi4zMyw1LjAxLDQuNDksOC45MSw5LjUxLDguOTIsNS4zNS0uMDcsOS42My00LjQ3LDkuNTYtOS44MiwwLS4xMiwwLS4yNC0uMDEtLjM2Wk04NjEuMjMsODM3LjU5aDUuMzJjMy41LDAsNS4yOCwxLjE5LDUuMjgsNC4yLjIsMS45Mi0xLjIsMy42NC0zLjEyLDMuODQtLjIxLjAyLS40Mi4wMi0uNjIsMGwzLjg1LDYuMjZoLTIuNzNsLTMuNzQtNi4yM2gtMS42MXY2LjEyaC0yLjY2bC4wNC0xNC4yMVpNODYzLjg4LDg0My43MWgyLjM0YzEuNTcsMCwyLjk0LS4yMSwyLjk0LTIuMTNzLTEuNTQtMS45Ni0yLjktMS45NmgtMi4zOHY0LjA5WiIvPgo8L3N2Zz4=' 
              class="sidebar-logo" />
         <div class="sidebar-brand-title">Mays Analytics</div>
@@ -324,7 +327,7 @@ with st.sidebar:
         role_text = user_role.capitalize() if user_role else 'User'
         
         st.markdown(f"""
-        <div class="sidebar-profile-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; margin-top: 10px; margin-bottom: 12px;">
+        <div class="sidebar-profile-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; margin-top: 24px; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <img src="{user.get('profile_picture', '')}" 
                      class="sidebar-profile-img"
@@ -360,8 +363,9 @@ with st.sidebar:
     
     # Gold divider
     st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
+
     
-    # Navigation - 6 main pages
+    # Main Navigation - 6 pages
     if st.button("Home Dashboard", key="nav_home", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Home' else "secondary"):
         st.session_state.current_page = 'Home'
@@ -392,33 +396,27 @@ with st.sidebar:
         st.session_state.current_page = 'Database'
         st.rerun()
     
-    # Gold divider
-    st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
+    # Divider with top spacing for toggle button clearance
+    st.markdown('<div style="border-top: 2px solid #C5A572; margin: 16px 0 8px 0;"></div>', unsafe_allow_html=True)
     
-    # AI Chat Assistant (only show if authenticated)
+    # AI Chat & Help Section (grouped together, no divider between them)
     if auth.is_authenticated():
         if st.button("AI Chat Assistant", key="nav_ai_chat", use_container_width=True,
                     type="primary" if st.session_state.current_page == 'AI_Chat' else "secondary"):
             st.session_state.current_page = 'AI_Chat'
             st.rerun()
-        
-        # Gold divider
-        st.markdown('<div style="border-top: 2px solid #C5A572;"></div>', unsafe_allow_html=True)
     
-    # Documentation & Help
     if st.button("Documentation & Help", key="nav_help", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Help' else "secondary"):
         st.session_state.current_page = 'Help'
         st.rerun()
     
-    # Footer with version
+    # Footer with version - minimal spacing
     st.markdown(f"""
-    <div style="text-align: center; padding: 8px 5px; border-top: 2px solid #C5A572; font-size: 9px; color: #999;">
+    <div style="text-align: center; padding: 8px 5px; border-top: 2px solid #C5A572; margin-top: auto; font-size: 9px; color: #999;">
         {VERSION_FULL}
     </div>
-    """, unsafe_allow_html=True)
-
-# Current page indicator
+    """, unsafe_allow_html=True)# Current page indicator
 current_page_info = {
     'Home': {'title': 'Home Dashboard'},
     'Executive_Deep_Dive': {'title': 'Executive Dive'},
@@ -564,6 +562,13 @@ st.markdown("""
             right: 20px;
             font-size: 22px;
         }
+        .close-sidebar-btn {
+            width: 50px;
+            height: 50px;
+            bottom: 80px;
+            right: 20px;
+            font-size: 20px;
+        }
     }
 </style>
 
@@ -602,7 +607,7 @@ function smoothScrollToTop(e) {
     }
     
     requestAnimationFrame(animateScroll);
-}
+}}
 
 // Make function globally available
 window.parent.smoothScrollToTop = smoothScrollToTop;

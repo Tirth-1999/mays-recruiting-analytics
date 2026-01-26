@@ -233,9 +233,10 @@ def render():
             /* Chrome-style tabs for Data Explorer */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 2px !important;
-                justify-content: center !important;
+                justify-content: flex-start !important;
                 background-color: transparent !important;
                 padding: 0px 20px !important;
+                padding-left: 40px !important;
                 border-bottom: none !important;
                 margin-bottom: 30px !important;
                 margin-top: 20px !important;

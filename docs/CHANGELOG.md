@@ -41,6 +41,8 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v5.2 - OAuth Button Refinement
           │
 Jan 2026  ████████████████████████████  v6.0 - AI-Powered Analytics
+          │
+Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v6.1 - Sidebar Profile Enhancement
 ```
 
 ---
@@ -48,6 +50,7 @@ Jan 2026  ███████████████████████�
 ## Summary by Version
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
+| 6.1 | UI Enhancement | Restored profile card with scrollable sidebar | 2 | ~50 |
 |---------|------|----------------|---------------|-------------|
 | **6.0** | Major | AI Chat Assistant with NLP | 25+ | +3,500 |
 | **5.2** | Minor | OAuth Button Refinement | 2 | +15 |
@@ -65,6 +68,37 @@ Jan 2026  ███████████████████████�
 | **2.1** | Minor | Global Filters | 4 | +289 |
 | **2.0** | Major | Marketing Integration | 6 | +1,234 |
 | **1.0** | Major | Initial Release | - | +3,500 |
+
+---
+
+## [6.1.0] - 2026-01-26
+
+### 🎨 Minor Release - Sidebar Profile Enhancement
+
+#### Added
+- **Profile Card**: Restored user profile card in sidebar with compact design
+  - Circular profile picture with gold border
+  - User name, email, and role display
+  - Inline logout button within card
+  - White card background with subtle border
+  - Positioned above navigation buttons
+- **Sidebar Spacing**: Added 30px top margin to header for better visual balance
+- **Gold Divider**: Restored gold divider after profile section
+
+#### Changed
+- **Sidebar Scrolling**: Enabled default Streamlit scrollbar for sidebar overflow
+  - Removed forced non-scrollable constraints
+  - Allows natural scrolling when content exceeds viewport
+- **Profile Card Styling**: Matched original GitHub version exactly
+  - 36px circular profile image
+  - 12px name font, 9px email/role fonts
+  - Proper color hierarchy for text readability
+
+#### Technical Implementation
+- Updated `main_app.py` sidebar section with profile card HTML
+- Modified CSS to remove overflow restrictions
+- Maintained fixed sidebar overlay behavior
+- Profile card uses inline styles for production compatibility
 
 ---
 
