@@ -401,12 +401,14 @@ def render():
                     xaxis_title='Date',
                     yaxis_title='Count',
                     legend=dict(
-                        x=1, y=1,
-                        xanchor='right', yanchor='top',
+                        orientation='h',
+                        x=0.5, y=-0.15,
+                        xanchor='center', yanchor='top',
                         bgcolor='rgba(255,255,255,0.9)',
                         bordercolor='rgba(0,0,0,0.2)',
                         borderwidth=1
-                    )
+                    ),
+                    margin=dict(b=80)  # Add bottom margin for legend
                 )
                 st.plotly_chart(fig_trend1, use_container_width=True)
             
@@ -490,12 +492,14 @@ def render():
                         xaxis_title='Date',
                         yaxis_title='Conversion Rate (%)',
                         legend=dict(
-                            x=1, y=1,
-                            xanchor='right', yanchor='top',
+                            orientation='h',
+                            x=0.5, y=-0.15,
+                            xanchor='center', yanchor='top',
                             bgcolor='rgba(255,255,255,0.9)',
                             bordercolor='rgba(0,0,0,0.2)',
                             borderwidth=1
-                        )
+                        ),
+                        margin=dict(b=80)  # Add bottom margin for legend
                     )
                     st.plotly_chart(fig_trend2, use_container_width=True)
 
