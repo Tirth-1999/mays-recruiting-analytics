@@ -416,7 +416,6 @@ with st.sidebar:
 current_page_info = {
     'Home': {'title': 'Executive Dashboard'},
     'Executive_Deep_Dive': {'title': "Director's Deep Dive"},
-    'Comparison_Tool': {'title': 'Comparison Tool'},
     'Marketing_Analysis': {'title': 'Marketing Analysis'},
     'Database': {'title': 'Data Explorer'},
     'Predictive_Analytics': {'title': 'Predictive Analytics'},
@@ -440,10 +439,6 @@ if st.session_state.current_page == 'Home':
 elif st.session_state.current_page == 'Executive_Deep_Dive':
     from modules import directors_deep_dive
     directors_deep_dive.render()
-
-elif st.session_state.current_page == 'Comparison_Tool':
-    from modules import comparison_tool
-    comparison_tool.render()
 
 elif st.session_state.current_page == 'Marketing_Analysis':
     from modules import marketing_analysis
