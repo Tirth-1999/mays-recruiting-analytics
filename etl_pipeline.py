@@ -6,6 +6,9 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 import re
+import sys
+sys.path.append('.')
+from utils.program_mapping import get_program_display_name, PROGRAM_CODE_TO_NAME
 
 def clean_value(val):
     """Clean data values - handle NaN, '- NA -', etc."""
@@ -28,6 +31,9 @@ def parse_date(date_str):
 def extract_program_data(file_path, sheet_name, cohort_year):
     """Extract data from a program sheet"""
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+    
+    # Convert sheet name (short code) to display name
+    program_display_name = get_program_display_name(sheet_name)
     
     # Find the row with dates (usually row 2)
     date_row_idx = None
@@ -89,7 +95,7 @@ def extract_program_data(file_path, sheet_name, cohort_year):
                     
                     records.append({
                         'report_date': report_date,
-                        'program': sheet_name,
+                        'program': program_display_name,  # Use display name, not sheet name
                         'cohort_year': cohort_year,
                         'metric_name': metric_key,
                         'metric_value': value
@@ -123,16 +129,8 @@ def load_all_data():
         )
     ''')
     
-    # Insert program data
-    programs = [
-        ('MBA', 'Flex Online MBA'),
-        ('MS ACCT', 'MS Accounting'),
-        ('MS HRM', 'MS Human Resource Management'),
-        ('MS MISY', 'MS Management Information Systems'),
-        ('MS MKTG', 'MS Marketing'),
-        ('MS ENLD', 'MS Engineering Leadership'),
-        ('MS SPBA', 'MS Sport Business Analytics'),
-    ]
+    # Insert program data using official mapping
+    programs = [(code, name) for code, name in PROGRAM_CODE_TO_NAME.items()]
     
     conn.executemany(
         'INSERT OR IGNORE INTO programs (program_code, program_name) VALUES (?, ?)',

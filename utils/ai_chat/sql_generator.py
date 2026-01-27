@@ -66,6 +66,24 @@ class QueryProcessor:
         'admitted': 'admits'
     }
     
+    # Program name mappings (short code to full name)
+    PROGRAM_MAPPINGS = {
+        'mba': 'Flex Online MBA',
+        'ms acct': 'Flex Online MS Accounting',
+        'acct': 'Flex Online MS Accounting',
+        'ms hrm': 'Flex Online MS Human Resource Management',
+        'hrm': 'Flex Online MS Human Resource Management',
+        'ms misy': 'Flex Online MS Management Information Systems',
+        'misy': 'Flex Online MS Management Information Systems',
+        'ms mktg': 'Flex Online MS Marketing',
+        'mktg': 'Flex Online MS Marketing',
+        'ms enld': 'Flex Online MS Entrepreneurial Leadership',
+        'enld': 'Flex Online MS Entrepreneurial Leadership',
+        'ms spba': 'Flex Online AI in Business Program',
+        'spba': 'Flex Online AI in Business Program',
+        'ai': 'Flex Online AI in Business Program'
+    }
+    
     def __init__(self, db_path: str = 'edulytix.db', enable_cache: bool = True, enable_metrics: bool = True):
         """
         Initialize query processor.
@@ -429,12 +447,11 @@ class QueryProcessor:
                     if param_name == 'metric':
                         value = self.METRIC_MAPPINGS.get(value, value)
                     
-                    # Uppercase program codes
+                    # Map program names (short code to full name)
                     if param_name in ['program', 'program1', 'program2']:
-                        value = value.upper()
-                        # Handle MS programs
-                        if value in ['ACCT', 'HRM', 'MISY', 'MKTG', 'ENLD', 'SPBA']:
-                            value = f'MS {value}'
+                        value_lower = value.lower()
+                        # Try to map short code to full name
+                        value = self.PROGRAM_MAPPINGS.get(value_lower, value)
                     
                     params[param_name] = value
                 
@@ -464,8 +481,15 @@ class QueryProcessor:
         
         message_lower = user_message.lower()
         
-        # Extract entities from context
-        programs = ['mba', 'ms acct', 'ms hrm', 'ms misy', 'ms mktg', 'ms enld', 'ms spba', 'acct', 'hrm', 'misy', 'mktg', 'enld', 'spba']
+        # Extract entities from context - use full program names
+        programs = [
+            'flex online mba', 'flex online ms accounting', 'flex online ms human resource management',
+            'flex online ms management information systems', 'flex online ms marketing',
+            'flex online ms entrepreneurial leadership', 'flex online ai in business program',
+            # Also check for short codes
+            'mba', 'ms acct', 'acct', 'ms hrm', 'hrm', 'ms misy', 'misy', 
+            'ms mktg', 'mktg', 'ms enld', 'enld', 'ms spba', 'spba'
+        ]
         metrics = ['applications', 'inquiries', 'admits', 'enrolled', 'deposits', 'confirmed']
         years = ['2024', '2025', '2026']
         
@@ -474,6 +498,10 @@ class QueryProcessor:
         for program in programs:
             if program in conversation_context.lower():
                 last_program = program
+                # Convert short code to full name if needed
+                if last_program in self.PROGRAM_MAPPINGS:
+                    last_program = self.PROGRAM_MAPPINGS[last_program]
+                break
         
         # Find last mentioned metric
         last_metric = None
@@ -506,9 +534,11 @@ class QueryProcessor:
             # Extract the program mentioned after "what about"
             for program in programs:
                 if program in message_lower:
+                    # Convert to full name if it's a short code
+                    full_program = self.PROGRAM_MAPPINGS.get(program, program)
                     # Add the last metric if available
                     if last_metric:
-                        resolved = f"How many {last_metric} for {program.upper()}?"
+                        resolved = f"How many {last_metric} for {full_program}?"
                     break
         
         # Resolve year references like "for 2024"
@@ -704,7 +734,7 @@ if __name__ == "__main__":
     test_queries = [
         "How many MBA applications in 2025?",
         "Where can I see year-over-year comparisons?",
-        "What does the Executive Deep Dive show?",
+        "What does the Director's Deep Dive show?",
         "Hello!"
     ]
     

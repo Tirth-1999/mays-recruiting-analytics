@@ -1,18 +1,23 @@
 """
-Comparison Tool Page Module
-Extracted from main_app.py as part of Phase 5 refactoring
+Comparison Tool Content - Reusable function for both standalone page and tab
 """
-
 import streamlit as st
-from modules.comparison_tool_content import render_comparison_tool
+import pandas as pd
+import plotly.graph_objects as go
+import numpy as np
+from datetime import datetime
+from utils.database import load_programs, load_yoy_comparison_data
 
 
-def render():
-    """Render the Comparison Tool page"""
-    render_comparison_tool(key_prefix="comparison_tool")
-
+def render_comparison_tool(key_prefix="comp_tool"):
+    """
+    Render the complete comparison tool content.
+    Can be used in standalone page or as a tab.
     
-    # Cohort selection filters - directly after page header
+    Args:
+        key_prefix: Prefix for session state keys to avoid conflicts
+    """
+    # Cohort selection filters
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -22,7 +27,7 @@ def render():
             "Primary Cohort",
             options=cohort_options,
             index=0,
-            key="comparison_tool_primary",
+            key=f"{key_prefix}_primary",
             label_visibility="collapsed"
         )
     
@@ -33,7 +38,7 @@ def render():
             comparison_cohort = st.selectbox(
                 "Comparison Cohort",
                 options=comparison_cohorts,
-                key="comparison_tool_secondary",
+                key=f"{key_prefix}_secondary",
                 label_visibility="collapsed"
             )
         else:
@@ -47,10 +52,11 @@ def render():
         program_filter_comp = st.selectbox(
             "Program Filter",
             options=program_options,
-            key="comparison_tool_program",
+            key=f"{key_prefix}_program",
             label_visibility="collapsed"
         )
-    # How to Use This Comparison Tool - Collapsible
+    
+    # How to Use - Collapsible
     with st.expander("💡 How to Use This Comparison Tool", expanded=False):
         st.markdown("""
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057;">
@@ -133,61 +139,39 @@ def render():
                 primary_val = row[f'Class of {primary_cohort}']
                 comparison_val = row[f'Class of {comparison_cohort}']
                 
-                # Case 1: Both are zero - no change
                 if primary_val == 0 and comparison_val == 0:
                     return 0.0
-                
-                # Case 2: Comparison is zero but primary is not - show as N/A (will be handled in display)
                 if comparison_val == 0 and primary_val > 0:
-                    return np.nan  # Not applicable - no base for comparison
-                
-                # Case 3: Primary is zero but comparison is not - 100% decline
+                    return np.nan
                 if primary_val == 0 and comparison_val > 0:
                     return -100.0
-                
-                # Case 4: Normal calculation
                 return ((primary_val / comparison_val) - 1) * 100
             
             yoy_comparison['% Change'] = yoy_comparison.apply(calculate_pct_change, axis=1).round(1)
             
-            # Calculate variance metrics (statistical variance for two data points)
-            # Mean of the two cohorts
+            # Calculate variance metrics
             yoy_comparison['Mean'] = yoy_comparison[[f'Class of {primary_cohort}', f'Class of {comparison_cohort}']].mean(axis=1)
-            
-            # Variance: average of squared deviations from mean
             yoy_comparison['Variance'] = (
                 ((yoy_comparison[f'Class of {primary_cohort}'] - yoy_comparison['Mean']) ** 2 + 
                  (yoy_comparison[f'Class of {comparison_cohort}'] - yoy_comparison['Mean']) ** 2) / 2
             )
-            
-            # Standard Deviation: square root of variance
             yoy_comparison['Std Deviation'] = np.sqrt(yoy_comparison['Variance'])
-            
-            # Coefficient of Variation: (Std Dev / Mean) × 100
-            # Avoid division by zero
             yoy_comparison['Coefficient of Variation'] = np.where(
                 yoy_comparison['Mean'] != 0,
                 (yoy_comparison['Std Deviation'] / yoy_comparison['Mean']) * 100,
                 0
             ).round(2)
             
-            # Add performance indicators with proper edge case handling
-            
-            # Add performance indicators with proper edge case handling
+            # Add performance indicators
             def get_performance_indicator(row):
                 pct_change = row['% Change']
                 primary_val = row[f'Class of {primary_cohort}']
                 comparison_val = row[f'Class of {comparison_cohort}']
                 
-                # Special case: no base for comparison (comparison was 0)
                 if comparison_val == 0 and primary_val > 0:
                     return '🟢 New Metric - Strong Growth (No Base Year Data)'
-                
-                # Special case: metric disappeared (primary is 0, comparison had value)
                 if primary_val == 0 and comparison_val > 0:
                     return '🔴 Complete Decline (Metric Discontinued)'
-                
-                # Normal cases based on % change
                 if pct_change > 15:
                     return '🟢 Strong Growth'
                 elif pct_change > 5:
@@ -199,32 +183,30 @@ def render():
             
             yoy_comparison['Performance Indicator'] = yoy_comparison.apply(get_performance_indicator, axis=1)
             
-            # Filter out metrics where BOTH cohorts have zero values (no data for either)
+            # Filter out metrics where BOTH cohorts have zero values
             metrics_with_data = yoy_comparison[
                 (yoy_comparison[f'Class of {primary_cohort}'] != 0) | 
                 (yoy_comparison[f'Class of {comparison_cohort}'] != 0)
             ]
             
-            # Track excluded metrics for display
             excluded_metrics = yoy_comparison[
                 (yoy_comparison[f'Class of {primary_cohort}'] == 0) & 
                 (yoy_comparison[f'Class of {comparison_cohort}'] == 0)
             ].index.tolist()
             
-            # Use filtered data for display
             yoy_comparison = metrics_with_data.copy()
             
             # Initialize session state for time series metrics filter
-            if 'comp_ts_metrics_reset' not in st.session_state:
-                st.session_state.comp_ts_metrics_reset = 0
+            reset_key = f'{key_prefix}_ts_metrics_reset'
+            if reset_key not in st.session_state:
+                st.session_state[reset_key] = 0
             
-            # Metric selector for time series - Custom popover dropdown
-            # Filter to only show metrics that have data for at least one cohort
+            # Metric selector for time series
             all_metrics = sorted(primary_data['metric_name'].unique())
             available_metrics = [m for m in all_metrics if m in yoy_comparison.index]
             
-            ts_reset_suffix = f"_{st.session_state.comp_ts_metrics_reset}"
-            ts_state_key = f'selected_ts_metrics{ts_reset_suffix}'
+            ts_reset_suffix = f"_{st.session_state[reset_key]}"
+            ts_state_key = f'{key_prefix}_selected_ts_metrics{ts_reset_suffix}'
             
             # Set default selection
             default_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 'anticipated_cohort_size']
@@ -251,15 +233,15 @@ def render():
             with st.popover(f"📊 {ts_summary_text}", use_container_width=True):
                 col_a, col_b = st.columns(2)
                 with col_a:
-                    if st.button("✓ All", key=f"ts_all{ts_reset_suffix}", use_container_width=True, type="primary"):
-                        st.session_state.comp_ts_metrics_reset += 1
-                        new_ts_key = f'selected_ts_metrics_{st.session_state.comp_ts_metrics_reset}'
+                    if st.button("✓ All", key=f"{key_prefix}_ts_all{ts_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state[reset_key] += 1
+                        new_ts_key = f'{key_prefix}_selected_ts_metrics_{st.session_state[reset_key]}'
                         st.session_state[new_ts_key] = available_metrics.copy()
                         st.rerun()
                 with col_b:
-                    if st.button("✗ Clear", key=f"ts_clear{ts_reset_suffix}", use_container_width=True, type="secondary"):
-                        st.session_state.comp_ts_metrics_reset += 1
-                        new_ts_key = f'selected_ts_metrics_{st.session_state.comp_ts_metrics_reset}'
+                    if st.button("✗ Clear", key=f"{key_prefix}_ts_clear{ts_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state[reset_key] += 1
+                        new_ts_key = f'{key_prefix}_selected_ts_metrics_{st.session_state[reset_key]}'
                         st.session_state[new_ts_key] = []
                         st.rerun()
                 
@@ -271,7 +253,7 @@ def render():
                     new_value = st.checkbox(
                         metric_display, 
                         value=is_checked, 
-                        key=f"ts_cb_{idx}{ts_reset_suffix}"
+                        key=f"{key_prefix}_ts_cb_{idx}{ts_reset_suffix}"
                     )
                     
                     if new_value != is_checked:
@@ -287,7 +269,7 @@ def render():
             
             if selected_ts_metrics:
                 for idx, metric in enumerate(selected_ts_metrics):
-                    # Properly aggregate data by date (sum across programs)
+                    # Properly aggregate data by date
                     primary_ts = primary_data[primary_data['metric_name'] == metric].groupby('report_date')['metric_value'].sum().reset_index().sort_values('report_date')
                     secondary_ts = secondary_data[secondary_data['metric_name'] == metric].groupby('report_date')['metric_value'].sum().reset_index().sort_values('report_date')
                     
@@ -332,24 +314,12 @@ def render():
                                     height=350,
                                     xaxis_title='Date',
                                     yaxis_title='Count',
-                                    xaxis=dict(
-                                        showgrid=True,
-                                        gridcolor='#e0e0e0',
-                                        showline=True,
-                                        linecolor='#500000',
-                                        linewidth=2
-                                    ),
-                                    yaxis=dict(
-                                        showgrid=True,
-                                        gridcolor='#e0e0e0',
-                                        showline=True,
-                                        linecolor='#500000',
-                                        linewidth=2
-                                    ),
+                                    xaxis=dict(showgrid=True, gridcolor='#e0e0e0', showline=True, linecolor='#500000', linewidth=2),
+                                    yaxis=dict(showgrid=True, gridcolor='#e0e0e0', showline=True, linecolor='#500000', linewidth=2),
                                     plot_bgcolor='#fafafa',
                                     margin=dict(t=40, b=60, l=60, r=40)
                                 )
-                                st.plotly_chart(fig_primary, use_container_width=True, key=f"comp_primary_{metric}_{idx}")
+                                st.plotly_chart(fig_primary, use_container_width=True, key=f"{key_prefix}_primary_{metric}_{idx}")
                             else:
                                 st.info("No data available")
                         
@@ -375,42 +345,28 @@ def render():
                                     height=350,
                                     xaxis_title='Date',
                                     yaxis_title='Count',
-                                    xaxis=dict(
-                                        showgrid=True,
-                                        gridcolor='#e0e0e0',
-                                        showline=True,
-                                        linecolor='#B00000',
-                                        linewidth=2
-                                    ),
-                                    yaxis=dict(
-                                        showgrid=True,
-                                        gridcolor='#e0e0e0',
-                                        showline=True,
-                                        linecolor='#B00000',
-                                        linewidth=2
-                                    ),
+                                    xaxis=dict(showgrid=True, gridcolor='#e0e0e0', showline=True, linecolor='#B00000', linewidth=2),
+                                    yaxis=dict(showgrid=True, gridcolor='#e0e0e0', showline=True, linecolor='#B00000', linewidth=2),
                                     plot_bgcolor='#fafafa',
                                     margin=dict(t=40, b=60, l=60, r=40)
                                 )
-                                st.plotly_chart(fig_secondary, use_container_width=True, key=f"comp_secondary_{metric}_{idx}")
+                                st.plotly_chart(fig_secondary, use_container_width=True, key=f"{key_prefix}_secondary_{metric}_{idx}")
                             else:
                                 st.info("No data available")
                         
-                        # Centered button for this metric (controls both tables)
+                        # Centered button for this metric
                         col_left, col_center, col_right = st.columns([2, 1, 2])
                         with col_center:
-                            # Initialize session state for this metric's table visibility
-                            table_key = f"comp_table_visible_{metric}_{idx}"
+                            table_key = f"{key_prefix}_table_visible_{metric}_{idx}"
                             if table_key not in st.session_state:
                                 st.session_state[table_key] = False
                             
-                            # Toggle button
                             button_label = "Hide Data Table" if st.session_state[table_key] else "📊 Show Data Table"
-                            if st.button(button_label, key=f"comp_btn_metric_{metric}_{idx}", use_container_width=True):
+                            if st.button(button_label, key=f"{key_prefix}_btn_metric_{metric}_{idx}", use_container_width=True):
                                 st.session_state[table_key] = not st.session_state[table_key]
                                 st.rerun()
                         
-                        # Data tables with expandable rows (only if button was clicked)
+                        # Data tables with expandable rows
                         if st.session_state.get(table_key, False):
                             col1, col2 = st.columns(2)
                             
@@ -421,8 +377,6 @@ def render():
                                         date_val = pd.to_datetime(row['report_date'])
                                         total_val = int(row['metric_value'])
                                         date_str = date_val.strftime('%b %d, %Y')
-                                        
-                                        # Get program breakdown for this date
                                         date_details = primary_detail[primary_detail['report_date'] == row['report_date']]
                                         
                                         with st.expander(f"📅 {date_str} - Total: {total_val:,}"):
@@ -431,10 +385,7 @@ def render():
                                                 breakdown.columns = ['Program', 'Value']
                                                 breakdown['Value'] = breakdown['Value'].astype(int)
                                                 st.dataframe(
-                                                    breakdown.style.set_properties(**{
-                                                        'text-align': 'center',
-                                                        'font-size': '13px'
-                                                    }).set_table_styles([
+                                                    breakdown.style.set_properties(**{'text-align': 'center', 'font-size': '13px'}).set_table_styles([
                                                         {'selector': 'th', 'props': [('text-align', 'center'), ('background-color', '#500000'), ('color', 'white'), ('font-weight', 'bold')]}
                                                     ]),
                                                     use_container_width=True,
@@ -450,8 +401,6 @@ def render():
                                         date_val = pd.to_datetime(row['report_date'])
                                         total_val = int(row['metric_value'])
                                         date_str = date_val.strftime('%b %d, %Y')
-                                        
-                                        # Get program breakdown for this date
                                         date_details = secondary_detail[secondary_detail['report_date'] == row['report_date']]
                                         
                                         with st.expander(f"📅 {date_str} - Total: {total_val:,}"):
@@ -460,10 +409,7 @@ def render():
                                                 breakdown.columns = ['Program', 'Value']
                                                 breakdown['Value'] = breakdown['Value'].astype(int)
                                                 st.dataframe(
-                                                    breakdown.style.set_properties(**{
-                                                        'text-align': 'center',
-                                                        'font-size': '13px'
-                                                    }).set_table_styles([
+                                                    breakdown.style.set_properties(**{'text-align': 'center', 'font-size': '13px'}).set_table_styles([
                                                         {'selector': 'th', 'props': [('text-align', 'center'), ('background-color', '#B00000'), ('color', 'white'), ('font-weight', 'bold')]}
                                                     ]),
                                                     use_container_width=True,
@@ -476,27 +422,20 @@ def render():
             
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
-            # Percentage Change Analysis (FULL WIDTH with styled header)
+            # Percentage Change Analysis
             st.markdown("""
-            <div style="text-align: center;
-                        padding: 15px;
-                        background: #e9ecef;
-                        border-radius: 8px;
-                        margin: 20px 0;">
+            <div style="text-align: center; padding: 15px; background: #e9ecef; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #500000; margin: 0; font-size: 20px;">Percentage Change Analysis</h3>
-                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
-                    Compare performance changes across all metrics
-                </p>
+                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">Compare performance changes across all metrics</p>
             </div>
             """, unsafe_allow_html=True)
             
             change_data = yoy_comparison['% Change'].dropna()
             colors = ['#28a745' if x > 0 else '#dc3545' if x < 0 else '#6c757d' for x in change_data.values]
             
-            # Calculate y-axis range with padding for text labels
             max_val = change_data.max()
             min_val = change_data.min()
-            y_range_padding = max(abs(max_val), abs(min_val)) * 0.2  # 20% padding
+            y_range_padding = max(abs(max_val), abs(min_val)) * 0.2
             
             fig = go.Figure(go.Bar(
                 x=change_data.index,
@@ -511,9 +450,7 @@ def render():
                 height=550,
                 xaxis_title='Metrics',
                 yaxis_title='% Change',
-                yaxis=dict(
-                    range=[min_val - y_range_padding, max_val + y_range_padding]
-                ),
+                yaxis=dict(range=[min_val - y_range_padding, max_val + y_range_padding]),
                 showlegend=False,
                 margin=dict(t=60, b=100, l=60, r=60)
             )
@@ -522,46 +459,31 @@ def render():
             
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
-            # Show note about excluded metrics if any
+            # Show note about excluded metrics
             if excluded_metrics:
                 excluded_list = ', '.join([m.replace('_', ' ').title() for m in excluded_metrics])
                 st.markdown(f"""
-                <div style="background: #fff3cd;
-                            border-left: 4px solid #ffc107;
-                            padding: 12px 15px;
-                            border-radius: 6px;
-                            margin: 15px 0;">
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 15px; border-radius: 6px; margin: 15px 0;">
                     <p style="margin: 0; color: #856404; font-size: 14px;">
                         ℹ️ <strong>Note:</strong> The following metrics were excluded from comparison as they have no data for either cohort: <strong>{excluded_list}</strong>
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Comprehensive Comparison Table with Export Buttons (styled header)
+            # Comprehensive Comparison Table
             st.markdown("""
-            <div style="text-align: center;
-                        padding: 15px;
-                        background: #e9ecef;
-                        border-radius: 8px;
-                        margin: 20px 0;">
+            <div style="text-align: center; padding: 15px; background: #e9ecef; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #500000; margin: 0; font-size: 20px;">Comprehensive Comparison Table with Variance Metrics</h3>
-                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
-                    Detailed comparison with statistical variance analysis
-                </p>
+                <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">Detailed comparison with statistical variance analysis</p>
             </div>
             """, unsafe_allow_html=True)
             
             enhanced_comparison = yoy_comparison.copy()
-            # Drop the Mean column (used only for calculation)
             if 'Mean' in enhanced_comparison.columns:
                 enhanced_comparison = enhanced_comparison.drop(columns=['Mean'])
             
-            # Round for display
             display_df = enhanced_comparison.copy().round(2)
             
-            # Create display dataframe with selected columns
-            
-            # Create styled dataframe with proper formatting
             styled_df = display_df.style.format({
                 f'Class of {primary_cohort}': '{:.0f}',
                 f'Class of {comparison_cohort}': '{:.0f}',
@@ -572,16 +494,11 @@ def render():
                 'Coefficient of Variation': '{:.1f}%'
             }).background_gradient(subset=['Coefficient of Variation'], cmap='YlOrRd')
             
-            st.dataframe(
-                styled_df,
-                use_container_width=True,
-                height=500
-            )
+            st.dataframe(styled_df, use_container_width=True, height=500)
             
-            # Add spacing before export buttons
             st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
             
-            # Export buttons directly below the table
+            # Export buttons
             col1, col2, col3 = st.columns(3)
             
             with col1:
@@ -619,42 +536,3 @@ def render():
             st.info("💡 Try selecting different cohorts or adjusting the program filter.")
     else:
         st.info("💡 Please select a comparison cohort to begin the analysis.")
-    
-    # Footer for Comparison Tool page
-    st.divider()
-    footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
-    with footer_col1:
-        st.markdown(f"""
-        <div class="footer-left footer-content" style="text-align: left;">
-            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with footer_col2:
-        st.components.v1.html("""
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
-            <button onclick="window.top.print()" 
-                    style="background-color: white;
-                           color: #500000;
-                           border: 2px solid #e0e0e0;
-                           border-radius: 8px;
-                           padding: 0.6rem 1.2rem;
-                           font-size: 0.95rem;
-                           font-weight: 600;
-                           cursor: pointer;
-                           transition: all 0.3s ease;
-                           width: 100%;
-                           min-height: 45px;
-                           font-family: 'Source Sans Pro', sans-serif;"
-                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
-                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
-                🖨️ Print Page
-            </button>
-        </div>
-        """, height=70)
-    with footer_col3:
-        st.markdown("""
-        <div class="footer-right footer-content" style="text-align: right;">
-            <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
-        </div>
-        """, unsafe_allow_html=True)
-

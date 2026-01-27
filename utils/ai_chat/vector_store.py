@@ -229,7 +229,7 @@ class VectorStore:
         schema_docs = [
             {
                 'id': 'admissions_metrics_table',
-                'text': 'Table: admissions_metrics. Contains core admissions funnel metrics including inquiries_received, total_applications, applications_received, admits, enrolled, deposits, confirmed for each program and cohort year. Columns: program (TEXT, e.g., MBA, MS ACCT), cohort_year (INTEGER, e.g., 2024, 2025), metric_name (TEXT, lowercase with underscores), metric_value (REAL, count), report_date (TEXT, YYYY-MM-DD format). Use for: enrollment data, application counts, conversion analysis. Sample values: metric_name can be inquiries_received, total_applications, enrolled.',
+                'text': 'Table: admissions_metrics. Contains core admissions funnel metrics including inquiries_received, total_applications, applications_received, admits, enrolled, deposits, confirmed for each program and cohort year. Columns: program (TEXT, full names like "Flex Online MBA", "Flex Online MS Accounting"), cohort_year (INTEGER, e.g., 2024, 2025), metric_name (TEXT, lowercase with underscores), metric_value (REAL, count), report_date (TEXT, YYYY-MM-DD format). Use for: enrollment data, application counts, conversion analysis. Sample values: metric_name can be inquiries_received, total_applications, enrolled. Programs use full names like "Flex Online MBA" not short codes.',
                 'metadata': {'type': 'table', 'name': 'admissions_metrics', 'primary_use': 'enrollment_data'}
             },
             {
@@ -239,7 +239,7 @@ class VectorStore:
             },
             {
                 'id': 'programs_table',
-                'text': 'Table: programs. Contains list of active programs. Columns: program_code (TEXT, e.g., MBA, MS ACCT), program_name (TEXT, full name), is_active (INTEGER, 1 or 0). Use for: program lookup, filtering active programs. Reference table for program codes.',
+                'text': 'Table: programs. Contains list of active programs. Columns: program_code (TEXT, short codes like MBA, MS ACCT), program_name (TEXT, full names like "Flex Online MBA", "Flex Online MS Accounting"), is_active (INTEGER, 1 or 0). Use for: program lookup, filtering active programs, mapping short codes to full names. Reference table for program codes. Users may use short codes but database uses full names.',
                 'metadata': {'type': 'table', 'name': 'programs', 'primary_use': 'reference'}
             },
             {
@@ -301,10 +301,10 @@ class VectorStore:
         platform_docs = [
             {
                 'id': 'page_home',
-                'text': 'Home Dashboard: High-level overview of all programs and key metrics. Best for quick snapshot, executive summary, overall trends. Filters: cohort year. Shows total inquiries, applications, admits, enrolled across all programs. Use when you need: overall performance, big picture view, all programs summary.',
+                'text': 'Executive Dashboard: High-level overview of all programs and key metrics. Best for quick snapshot, executive summary, overall trends. Filters: cohort year. Shows total inquiries, applications, admits, enrolled across all programs. Use when you need: overall performance, big picture view, all programs summary.',
                 'metadata': {
                     'type': 'page',
-                    'name': 'Home Dashboard',
+                    'name': 'Executive Dashboard',
                     'filters': 'cohort_year',
                     'metrics': 'inquiries, applications, admits, enrolled',
                     'use_cases': 'overview, summary, all programs'
@@ -312,10 +312,10 @@ class VectorStore:
             },
             {
                 'id': 'page_executive',
-                'text': 'Executive Deep Dive: Detailed program-specific analysis with trends. Best for deep analysis of single program, trend identification, time-series analysis. Filters: program, cohort year, date range. Shows program-specific funnel, conversion rates, time-series trends, detailed metrics. Use when you need: single program analysis, trends over time, detailed metrics.',
+                'text': "Director's Deep Dive: Detailed program-specific analysis with trends. Best for deep analysis of single program, trend identification, time-series analysis. Filters: program, cohort year, date range. Shows program-specific funnel, conversion rates, time-series trends, detailed metrics. Use when you need: single program analysis, trends over time, detailed metrics.",
                 'metadata': {
                     'type': 'page',
-                    'name': 'Executive Deep Dive',
+                    'name': "Director's Deep Dive",
                     'filters': 'program, cohort_year, date_range',
                     'metrics': 'funnel, conversion_rates, trends',
                     'use_cases': 'program_analysis, trends, deep_dive'
@@ -368,11 +368,11 @@ class VectorStore:
             # Workflow templates
             {
                 'id': 'workflow_program_report',
-                'text': 'Workflow: Create program performance report. Steps: 1) Go to Executive Deep Dive page, 2) Select your program from dropdown, 3) Choose cohort year, 4) Review funnel metrics and conversion rates, 5) Check time-series trends, 6) Export data if needed. Best for: comprehensive program analysis.',
+                'text': 'Workflow: Create program performance report. Steps: 1) Go to Director\'s Deep Dive page, 2) Select your program from dropdown, 3) Choose cohort year, 4) Review funnel metrics and conversion rates, 5) Check time-series trends, 6) Export data if needed. Best for: comprehensive program analysis.',
                 'metadata': {
                     'type': 'workflow',
                     'name': 'Program Performance Report',
-                    'pages': 'Executive Deep Dive, Data Explorer',
+                    'pages': "Director's Deep Dive, Data Explorer",
                     'keywords': 'report, program performance, analysis'
                 }
             },

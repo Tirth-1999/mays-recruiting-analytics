@@ -1,6 +1,6 @@
 """
-Executive Deep Dive Page Module
-Extracted from main_app.py as part of Phase 6 refactoring
+Director's Deep Dive Page Module
+Provides detailed program-specific analysis with trends and comparative insights
 """
 
 import streamlit as st
@@ -17,7 +17,7 @@ from utils.data_processing import generate_insights
 
 
 def render():
-    """Render the Executive Deep Dive page"""
+    """Render the Director's Deep Dive page"""
     
     # Section header for filters
     # Two-column filter layout
@@ -34,7 +34,7 @@ def render():
 
     with col_program:
         programs_df = load_programs()
-        program_options = ["All Programs"] + sorted(programs_df['program_code'].tolist())
+        program_options = ["All Programs"] + sorted(programs_df['program_name'].tolist())
         selected_program_filter = st.selectbox(
             "🎓 Program Focus",
             options=program_options,
@@ -322,7 +322,7 @@ def render():
         ).fillna(0).reset_index()
         
         # Tab content using native Streamlit tabs (Chrome-style)
-        tab1, tab2, tab3, tab4 = st.tabs(["Performance Analysis", "Trend Analysis", "Program Deep Dive", "Data Tables"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Performance Analysis", "Trend Analysis", "Program Deep Dive", "Data Tables", "Comparison Tool"])
         
         with tab1:
             # Complete conversion funnel with log scale toggle - FULL WIDTH
@@ -1036,8 +1036,13 @@ def render():
                     "text/csv",
                     use_container_width=True
                 )
+        
+        with tab5:
+            # Comparison Tool integrated as a tab
+            from modules.comparison_tool_content import render_comparison_tool
+            render_comparison_tool(key_prefix="exec_dive_comp")
     
-    # Footer for Executive Deep Dive page
+    # Footer for Director's Deep Dive page
     st.divider()
     footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
     with footer_col1:

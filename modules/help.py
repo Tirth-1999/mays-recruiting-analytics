@@ -731,7 +731,7 @@ def render():
         <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Weekly Check-In</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
-                <li>Open <strong>Home Dashboard</strong></li>
+                <li>Open <strong>Executive Dashboard</strong></li>
                 <li>Select current cohort</li>
                 <li>Review key metrics vs. goals</li>
                 <li>Check program comparison</li>
@@ -764,7 +764,7 @@ def render():
         <div style="background: #f0fff0; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Monthly Review</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
-                <li>Open <strong>Executive Dive</strong></li>
+                <li>Open <strong>Director's Deep Dive</strong></li>
                 <li>Select cohort and program</li>
                 <li>Review Performance Analysis</li>
                 <li>Check Trend Analysis</li>
@@ -972,7 +972,7 @@ def render():
         # Multi-select for pages
         pages_affected = st.multiselect(
             "Pages Affected (optional)",
-            ["Home Dashboard", "Executive Deep Dive", "Comparison Tool", "Marketing Analysis", 
+            ["Executive Dashboard", "Director's Deep Dive", "Comparison Tool", "Marketing Analysis", 
              "Data Explorer", "Predictive Analytics", "AI Chat Assistant", "Documentation", "All Pages", "Other"],
             help="Select the page(s) related to your feedback"
         )

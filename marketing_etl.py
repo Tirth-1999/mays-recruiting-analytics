@@ -10,6 +10,9 @@ from datetime import datetime
 import numpy as np
 import json
 import re
+import sys
+sys.path.append('.')
+from utils.program_mapping import get_program_display_name
 
 # Database connection
 DB_PATH = 'edulytix.db'
@@ -56,25 +59,17 @@ def create_marketing_tables():
     print("✅ Marketing tables created/verified")
 
 def standardize_program_name(program_name):
-    """Standardize program names: 'Flex' with capital F, rest lowercase"""
+    """
+    Standardize program names using central mapping utility.
+    Handles variations like 'Flex Online Mba', 'Flex Online MBA', etc.
+    """
     if not program_name or program_name == 'nan':
         return None
     
-    # Replace variations of FLEX/Flex/flex with 'Flex'
-    program_name = re.sub(r'FLEX|Flex|flex', 'Flex', program_name, flags=re.IGNORECASE)
+    # Use the central mapping utility
+    standardized = get_program_display_name(program_name)
     
-    # Capitalize first letter of each word except 'and'
-    words = program_name.split()
-    standardized = []
-    for word in words:
-        if word.lower() == 'and':
-            standardized.append('and')
-        elif word == 'Flex':
-            standardized.append('Flex')
-        else:
-            standardized.append(word.capitalize())
-    
-    return ' '.join(standardized)
+    return standardized
 
 def detect_fiscal_year_columns(df):
     """
