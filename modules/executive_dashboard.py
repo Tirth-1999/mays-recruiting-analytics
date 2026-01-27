@@ -91,18 +91,9 @@ def render():
         df = df[df['program'] == selected_program]
 
     if not df.empty:
-        # Filter out dates with no real data
-        dates_with_data = df.groupby('report_date')['metric_value'].sum()
-        dates_with_data = dates_with_data[dates_with_data > 0].index
-        
-        # Check if we have any data after filtering
-        if len(dates_with_data) > 0:
-            df = df[df['report_date'].isin(dates_with_data)]
-            latest_date = df['report_date'].max()
-            latest_data = df[df['report_date'] == latest_date]
-        else:
-            # No data available - show message
-            df = pd.DataFrame()  # Empty dataframe
+        # Get the latest date (don't filter out zero values - they're valid data)
+        latest_date = df['report_date'].max()
+        latest_data = df[df['report_date'] == latest_date]
     
     # Check if we have data to display
     if not df.empty:
