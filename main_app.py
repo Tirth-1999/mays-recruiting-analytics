@@ -109,14 +109,10 @@ st.markdown("""
         scroll-behavior: auto !important;
     }
     
-    /* Sidebar overlay - never shrink content */
+    /* Sidebar - push content instead of overlay */
     [data-testid="stSidebar"][aria-expanded="true"] {
-        position: fixed !important;
-        z-index: 999999 !important;
-        left: 0 !important;
-        top: 0 !important;
-        height: 100vh !important;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.3) !important;
+        /* Remove fixed positioning to allow sidebar to push content */
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
     }
     [data-testid="stSidebar"][aria-expanded="false"] {
         display: none !important;
