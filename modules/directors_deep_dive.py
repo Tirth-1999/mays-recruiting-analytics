@@ -81,8 +81,17 @@ def render():
                  (f" - {selected_program_filter}" if selected_program_filter != "All Programs" else ""))
         st.info("💡 Try selecting a different cohort/program or check the database")
     else:
-        # Get latest data for current cohort
-        latest_date = current_data['report_date'].max()
+        # Get latest data with non-zero values for current cohort
+        dates_with_data = current_data.groupby('report_date')['metric_value'].sum()
+        dates_with_nonzero = dates_with_data[dates_with_data > 0].index
+        
+        if len(dates_with_nonzero) > 0:
+            # Use the latest date with non-zero data
+            latest_date = dates_with_nonzero.max()
+        else:
+            # All dates have zero values - use the latest date anyway
+            latest_date = current_data['report_date'].max()
+        
         latest_data = current_data[current_data['report_date'] == latest_date]
 
         # Calculate comprehensive metrics
