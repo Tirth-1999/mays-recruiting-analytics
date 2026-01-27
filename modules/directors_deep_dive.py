@@ -6,14 +6,12 @@ Provides detailed program-specific analysis with trends and comparative insights
 import streamlit as st
 import streamlit.components.v1
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime
 
 # Import utility functions
 from utils.database import get_connection, load_programs, load_cohort_data, load_yoy_comparison_data
-from utils.data_processing import generate_insights
 
 
 def render():
