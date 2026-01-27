@@ -296,6 +296,211 @@ def render():
 
         st.markdown("---")
 
+        # Trend Analysis Section
+        st.markdown("""
+        <div style="text-align: center;
+                    padding: 15px;
+                    background: #e9ecef;
+                    border-radius: 8px;
+                    margin: 20px 0;">
+            <h3 style="color: #500000; margin: 0; font-size: 20px;">Trend Analysis</h3>
+            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                Filtered by: Class of {} • {}
+            </p>
+        </div>
+        """.format(selected_cohort, selected_program if selected_program != 'All Programs' else 'All Programs'), unsafe_allow_html=True)
+        
+        # Initialize session state for toggle buttons
+        if 'home_trend_show_apps' not in st.session_state:
+            st.session_state.home_trend_show_apps = True
+        if 'home_trend_show_inq' not in st.session_state:
+            st.session_state.home_trend_show_inq = True
+        if 'home_trend_show_inq_conv' not in st.session_state:
+            st.session_state.home_trend_show_inq_conv = True
+        if 'home_trend_show_app_conv' not in st.session_state:
+            st.session_state.home_trend_show_app_conv = True
+        
+        # Filter df to only include dates with non-zero data for trend analysis
+        df_for_trends = df.copy()
+        dates_with_data = df_for_trends.groupby('report_date')['metric_value'].sum()
+        dates_with_nonzero = dates_with_data[dates_with_data > 0].index
+        if len(dates_with_nonzero) > 0:
+            df_for_trends = df_for_trends[df_for_trends['report_date'].isin(dates_with_nonzero)]
+        
+        time_series = df_for_trends[df_for_trends['metric_name'].isin([
+            'inquiries_received', 'total_applications', 'admissions_offered'
+        ])].pivot_table(
+            index='report_date',
+            columns='metric_name',
+            values='metric_value',
+            aggfunc='sum'
+        ).fillna(0)
+        
+        if not time_series.empty:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("<h4 style='text-align: center; color: #500000;'>Application & Inquiry Trends</h4>", unsafe_allow_html=True)
+                
+                # Toggle buttons for line selection
+                st.markdown("**Select Lines to Display:**")
+                filter_col1, filter_col2 = st.columns(2)
+                
+                with filter_col1:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_apps else '○'} Applications",
+                        key="toggle_apps_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_apps else "secondary"
+                    ):
+                        st.session_state.home_trend_show_apps = not st.session_state.home_trend_show_apps
+                        st.rerun()
+                
+                with filter_col2:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_inq else '○'} Inquiries",
+                        key="toggle_inq_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_inq else "secondary"
+                    ):
+                        st.session_state.home_trend_show_inq = not st.session_state.home_trend_show_inq
+                        st.rerun()
+                
+                fig_trend1 = go.Figure()
+                
+                if 'total_applications' in time_series.columns and st.session_state.home_trend_show_apps:
+                    fig_trend1.add_trace(go.Scatter(
+                        x=time_series.index,
+                        y=time_series['total_applications'],
+                        mode='lines+markers',
+                        name='Applications',
+                        line=dict(color=get_color('applications'), width=3),
+                        marker=dict(size=8),
+                        hovertemplate='<b>Applications</b><br>' +
+                                     'Date: %{x}<br>' +
+                                     'Count: %{y:,.0f}<br>' +
+                                     '<extra></extra>'
+                    ))
+                
+                if 'inquiries_received' in time_series.columns and st.session_state.home_trend_show_inq:
+                    fig_trend1.add_trace(go.Scatter(
+                        x=time_series.index,
+                        y=time_series['inquiries_received'],
+                        mode='lines+markers',
+                        name='Inquiries',
+                        line=dict(color=get_color('inquiries'), width=3),
+                        marker=dict(size=8),
+                        hovertemplate='<b>Inquiries</b><br>' +
+                                     'Date: %{x}<br>' +
+                                     'Count: %{y:,.0f}<br>' +
+                                     '<extra></extra>'
+                    ))
+                
+                fig_trend1.update_layout(
+                    height=400,
+                    xaxis_title='Date',
+                    yaxis_title='Count',
+                    legend=dict(
+                        x=1, y=1,
+                        xanchor='right', yanchor='top',
+                        bgcolor='rgba(255,255,255,0.9)',
+                        bordercolor='rgba(0,0,0,0.2)',
+                        borderwidth=1
+                    )
+                )
+                st.plotly_chart(fig_trend1, use_container_width=True)
+            
+            with col2:
+                st.markdown("<h4 style='text-align: center; color: #500000;'>Conversion Rates Over Time</h4>", unsafe_allow_html=True)
+                
+                # Toggle buttons for conversion rates
+                st.markdown("**Select Conversion Metrics:**")
+                conv_filter_col1, conv_filter_col2 = st.columns(2)
+                
+                with conv_filter_col1:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_inq_conv else '○'} Inquiry → App",
+                        key="toggle_inq_conv_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_inq_conv else "secondary"
+                    ):
+                        st.session_state.home_trend_show_inq_conv = not st.session_state.home_trend_show_inq_conv
+                        st.rerun()
+                
+                with conv_filter_col2:
+                    if st.button(
+                        f"{'✓' if st.session_state.home_trend_show_app_conv else '○'} App → Offer",
+                        key="toggle_app_conv_trend_home",
+                        use_container_width=True,
+                        type="primary" if st.session_state.home_trend_show_app_conv else "secondary"
+                    ):
+                        st.session_state.home_trend_show_app_conv = not st.session_state.home_trend_show_app_conv
+                        st.rerun()
+                
+                conversion_data = []
+                for date in time_series.index:
+                    inquiries_ts = time_series.loc[date, 'inquiries_received'] if 'inquiries_received' in time_series.columns else 0
+                    applications_ts = time_series.loc[date, 'total_applications'] if 'total_applications' in time_series.columns else 0
+                    offers_ts = time_series.loc[date, 'admissions_offered'] if 'admissions_offered' in time_series.columns else 0
+                    
+                    inquiry_conv = (applications_ts / inquiries_ts * 100) if inquiries_ts > 0 else 0
+                    app_conv = (offers_ts / applications_ts * 100) if applications_ts > 0 else 0
+                    
+                    conversion_data.append({
+                        'date': date,
+                        'inquiry_conversion': inquiry_conv,
+                        'application_conversion': app_conv
+                    })
+                
+                conv_df = pd.DataFrame(conversion_data)
+                
+                if not conv_df.empty:
+                    fig_trend2 = go.Figure()
+                    
+                    if st.session_state.home_trend_show_inq_conv:
+                        fig_trend2.add_trace(go.Scatter(
+                            x=conv_df['date'],
+                            y=conv_df['inquiry_conversion'],
+                            mode='lines+markers',
+                            name='Inquiry → App (%)',
+                            line=dict(color=get_color('inquiries'), width=3),
+                            marker=dict(size=8),
+                            hovertemplate='<b>Inquiry to Application</b><br>' +
+                                         'Date: %{x}<br>' +
+                                         'Conversion Rate: %{y:.1f}%<br>' +
+                                         '<extra></extra>'
+                        ))
+                    
+                    if st.session_state.home_trend_show_app_conv:
+                        fig_trend2.add_trace(go.Scatter(
+                            x=conv_df['date'],
+                            y=conv_df['application_conversion'],
+                            mode='lines+markers',
+                            name='App → Offer (%)',
+                            line=dict(color=get_color('applications'), width=3),
+                            marker=dict(size=8),
+                            hovertemplate='<b>Application to Offer</b><br>' +
+                                         'Date: %{x}<br>' +
+                                         'Conversion Rate: %{y:.1f}%<br>' +
+                                         '<extra></extra>'
+                        ))
+                    
+                    fig_trend2.update_layout(
+                        height=400,
+                        xaxis_title='Date',
+                        yaxis_title='Conversion Rate (%)',
+                        legend=dict(
+                            x=1, y=1,
+                            xanchor='right', yanchor='top',
+                            bgcolor='rgba(255,255,255,0.9)',
+                            bordercolor='rgba(0,0,0,0.2)',
+                            borderwidth=1
+                        )
+                    )
+                    st.plotly_chart(fig_trend2, use_container_width=True)
+
+        st.markdown("---")
+
         # Program Comparison Section
         st.markdown("""
         <div style="text-align: center;
@@ -637,275 +842,6 @@ def render():
                     st.plotly_chart(fig_comparison, use_container_width=True)
         
         st.markdown("---")
-        
-        # Trend Analysis Section
-        st.markdown("""
-        <div style="text-align: center;
-                    padding: 15px;
-                    background: #e9ecef;
-                    border-radius: 8px;
-                    margin: 20px 0;">
-            <h3 style="color: #500000; margin: 0; font-size: 20px;">Trend Analysis</h3>
-            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
-                Filtered by: Class of {} • {}
-            </p>
-        </div>
-        """.format(selected_cohort, selected_program if selected_program != 'All Programs' else 'All Programs'), unsafe_allow_html=True)
-        
-        # Initialize session state for toggle buttons
-        if 'home_trend_show_apps' not in st.session_state:
-            st.session_state.home_trend_show_apps = True
-        if 'home_trend_show_inq' not in st.session_state:
-            st.session_state.home_trend_show_inq = True
-        if 'home_trend_show_inq_conv' not in st.session_state:
-            st.session_state.home_trend_show_inq_conv = True
-        if 'home_trend_show_app_conv' not in st.session_state:
-            st.session_state.home_trend_show_app_conv = True
-        
-        # Filter df to only include dates with non-zero data for trend analysis
-        df_for_trends = df.copy()
-        dates_with_data = df_for_trends.groupby('report_date')['metric_value'].sum()
-        dates_with_nonzero = dates_with_data[dates_with_data > 0].index
-        if len(dates_with_nonzero) > 0:
-            df_for_trends = df_for_trends[df_for_trends['report_date'].isin(dates_with_nonzero)]
-        
-        time_series = df_for_trends[df_for_trends['metric_name'].isin([
-            'inquiries_received', 'total_applications', 'admissions_offered'
-        ])].pivot_table(
-            index='report_date',
-            columns='metric_name',
-            values='metric_value',
-            aggfunc='sum'
-        ).fillna(0)
-        
-        if not time_series.empty:
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("<h4 style='text-align: center; color: #500000;'>Application & Inquiry Trends</h4>", unsafe_allow_html=True)
-                
-                # Toggle buttons for line selection
-                st.markdown("**Select Lines to Display:**")
-                filter_col1, filter_col2 = st.columns(2)
-                
-                with filter_col1:
-                    if st.button(
-                        f"{'✓' if st.session_state.home_trend_show_apps else '○'} Applications",
-                        key="toggle_apps_trend_home",
-                        use_container_width=True,
-                        type="primary" if st.session_state.home_trend_show_apps else "secondary"
-                    ):
-                        st.session_state.home_trend_show_apps = not st.session_state.home_trend_show_apps
-                        st.rerun()
-                
-                with filter_col2:
-                    if st.button(
-                        f"{'✓' if st.session_state.home_trend_show_inq else '○'} Inquiries",
-                        key="toggle_inq_trend_home",
-                        use_container_width=True,
-                        type="primary" if st.session_state.home_trend_show_inq else "secondary"
-                    ):
-                        st.session_state.home_trend_show_inq = not st.session_state.home_trend_show_inq
-                        st.rerun()
-                
-                fig_trend1 = go.Figure()
-                
-                if 'total_applications' in time_series.columns and st.session_state.home_trend_show_apps:
-                    fig_trend1.add_trace(go.Scatter(
-                        x=time_series.index,
-                        y=time_series['total_applications'],
-                        mode='lines+markers',
-                        name='Applications',
-                        line=dict(color=get_color('applications'), width=3),
-                        marker=dict(size=8),
-                        hovertemplate='<b>Applications</b><br>' +
-                                     'Date: %{x}<br>' +
-                                     'Count: %{y:,.0f}<br>' +
-                                     '<extra></extra>'
-                    ))
-                
-                if 'inquiries_received' in time_series.columns and st.session_state.home_trend_show_inq:
-                    fig_trend1.add_trace(go.Scatter(
-                        x=time_series.index,
-                        y=time_series['inquiries_received'],
-                        mode='lines+markers',
-                        name='Inquiries',
-                        line=dict(color=get_color('inquiries'), width=3),
-                        marker=dict(size=8),
-                        hovertemplate='<b>Inquiries</b><br>' +
-                                     'Date: %{x}<br>' +
-                                     'Count: %{y:,.0f}<br>' +
-                                     '<extra></extra>'
-                    ))
-                
-                fig_trend1.update_layout(
-                    height=400,
-                    xaxis_title='Date',
-                    yaxis_title='Count',
-                    legend=dict(
-                        x=1, y=1,
-                        xanchor='right', yanchor='top',
-                        bgcolor='rgba(255,255,255,0.9)',
-                        bordercolor='rgba(0,0,0,0.2)',
-                        borderwidth=1
-                    )
-                )
-                st.plotly_chart(fig_trend1, use_container_width=True)
-            
-            with col2:
-                st.markdown("<h4 style='text-align: center; color: #500000;'>Conversion Rates Over Time</h4>", unsafe_allow_html=True)
-                
-                # Toggle buttons for conversion rates
-                st.markdown("**Select Conversion Metrics:**")
-                conv_filter_col1, conv_filter_col2 = st.columns(2)
-                
-                with conv_filter_col1:
-                    if st.button(
-                        f"{'✓' if st.session_state.home_trend_show_inq_conv else '○'} Inquiry → App",
-                        key="toggle_inq_conv_trend_home",
-                        use_container_width=True,
-                        type="primary" if st.session_state.home_trend_show_inq_conv else "secondary"
-                    ):
-                        st.session_state.home_trend_show_inq_conv = not st.session_state.home_trend_show_inq_conv
-                        st.rerun()
-                
-                with conv_filter_col2:
-                    if st.button(
-                        f"{'✓' if st.session_state.home_trend_show_app_conv else '○'} App → Offer",
-                        key="toggle_app_conv_trend_home",
-                        use_container_width=True,
-                        type="primary" if st.session_state.home_trend_show_app_conv else "secondary"
-                    ):
-                        st.session_state.home_trend_show_app_conv = not st.session_state.home_trend_show_app_conv
-                        st.rerun()
-                
-                conversion_data = []
-                for date in time_series.index:
-                    inquiries_ts = time_series.loc[date, 'inquiries_received'] if 'inquiries_received' in time_series.columns else 0
-                    applications_ts = time_series.loc[date, 'total_applications'] if 'total_applications' in time_series.columns else 0
-                    offers_ts = time_series.loc[date, 'admissions_offered'] if 'admissions_offered' in time_series.columns else 0
-                    
-                    inquiry_conv = (applications_ts / inquiries_ts * 100) if inquiries_ts > 0 else 0
-                    app_conv = (offers_ts / applications_ts * 100) if applications_ts > 0 else 0
-                    
-                    conversion_data.append({
-                        'date': date,
-                        'inquiry_conversion': inquiry_conv,
-                        'application_conversion': app_conv
-                    })
-                
-                conv_df = pd.DataFrame(conversion_data)
-                
-                if not conv_df.empty:
-                    fig_trend2 = go.Figure()
-                    
-                    if st.session_state.home_trend_show_inq_conv:
-                        fig_trend2.add_trace(go.Scatter(
-                            x=conv_df['date'],
-                            y=conv_df['inquiry_conversion'],
-                            mode='lines+markers',
-                            name='Inquiry → App (%)',
-                            line=dict(color=get_color('inquiries'), width=3),
-                            marker=dict(size=8),
-                            hovertemplate='<b>Inquiry to Application</b><br>' +
-                                         'Date: %{x}<br>' +
-                                         'Conversion Rate: %{y:.1f}%<br>' +
-                                         '<extra></extra>'
-                        ))
-                    
-                    if st.session_state.home_trend_show_app_conv:
-                        fig_trend2.add_trace(go.Scatter(
-                            x=conv_df['date'],
-                            y=conv_df['application_conversion'],
-                            mode='lines+markers',
-                            name='App → Offer (%)',
-                            line=dict(color=get_color('applications'), width=3),
-                            marker=dict(size=8),
-                            hovertemplate='<b>Application to Offer</b><br>' +
-                                         'Date: %{x}<br>' +
-                                         'Conversion Rate: %{y:.1f}%<br>' +
-                                         '<extra></extra>'
-                        ))
-                    
-                    fig_trend2.update_layout(
-                        height=400,
-                        xaxis_title='Date',
-                        yaxis_title='Conversion Rate (%)',
-                        legend=dict(
-                            x=1, y=1,
-                            xanchor='right', yanchor='top',
-                            bgcolor='rgba(255,255,255,0.9)',
-                            bordercolor='rgba(0,0,0,0.2)',
-                            borderwidth=1
-                        )
-                    )
-                    st.plotly_chart(fig_trend2, use_container_width=True)
-
-    else:
-        # No data available - show helpful message
-        # Check if this is a valid program that exists but has no data
-        programs_query = 'SELECT program_name FROM programs WHERE is_active = 1'
-        all_programs = pd.read_sql(programs_query, conn)
-        
-        if selected_program != 'All Programs' and selected_program in all_programs['program_name'].values:
-            # Program exists but has no data for this cohort
-            st.markdown("""
-            <div style="text-align: center;
-                        padding: 40px;
-                        background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
-                        border-radius: 12px;
-                        border: 2px solid #ffc107;
-                        margin: 40px 0;">
-                <div style="font-size: 64px; margin-bottom: 20px;">🚀</div>
-                <h3 style="color: #500000; margin: 0 0 15px 0;">Program Tracked - No Enrollment Data Yet</h3>
-                <p style="color: #6c757d; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-                    <strong>{}</strong> is an active program in our system for <strong>Class of {}</strong>,
-                    but enrollment activity hasn't started yet.
-                    <br><br>
-                    This typically means:
-                </p>
-                <ul style="color: #6c757d; font-size: 14px; text-align: left; max-width: 500px; margin: 20px auto; line-height: 1.8;">
-                    <li>The program is newly launched and recruiting will begin soon</li>
-                    <li>Marketing campaigns are being planned or in early stages</li>
-                    <li>Data collection will start once inquiries are received</li>
-                </ul>
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px auto; max-width: 500px; border-left: 4px solid #ffc107;">
-                    <p style="color: #856404; font-size: 14px; margin: 0; text-align: left;">
-                        <strong>💡 Note:</strong> The program is configured and ready to track data. 
-                        Check back after marketing campaigns launch or try viewing other cohort years.
-                    </p>
-                </div>
-            </div>
-            """.format(selected_program, selected_cohort), unsafe_allow_html=True)
-        else:
-            # Generic no data message
-            st.markdown("""
-            <div style="text-align: center;
-                        padding: 40px;
-                        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-                        border-radius: 12px;
-                        border: 2px dashed #dee2e6;
-                        margin: 40px 0;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
-                <h3 style="color: #500000; margin: 0 0 15px 0;">No Data Available</h3>
-                <p style="color: #6c757d; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-                    There is currently no enrollment data for <strong>Class of {}</strong>{}.
-                    <br><br>
-                    This could mean:
-                </p>
-                <ul style="color: #6c757d; font-size: 14px; text-align: left; max-width: 500px; margin: 20px auto; line-height: 1.8;">
-                    <li>Programs haven't started recruiting for this cohort yet</li>
-                    <li>Data collection is in progress</li>
-                    <li>The cohort year may not be active</li>
-                </ul>
-                <p style="color: #6c757d; font-size: 14px; margin-top: 20px;">
-                    Try selecting a different cohort year or program from the sidebar.
-                </p>
-            </div>
-            """.format(
-                selected_cohort,
-                f" for <strong>{selected_program}</strong>" if selected_program != 'All Programs' else ""
-            ), unsafe_allow_html=True)
     
     # Marketing Insights Section (High-Level Overview)
     st.markdown("---")
