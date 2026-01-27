@@ -400,7 +400,7 @@ def render():
             elif len(current_program_selection) == 0:
                 prog_summary = "No programs selected"
             elif len(current_program_selection) == 1:
-                prog_summary = current_program_selection[0].replace('Flex Online ', '').replace('MS ', '')
+                prog_summary = current_program_selection[0]  # Show full name
             else:
                 prog_summary = f"{len(current_program_selection)} programs"
             
@@ -424,8 +424,8 @@ def render():
                 
                 for idx, prog in enumerate(programs_list):
                     is_checked = prog in st.session_state[program_state_key]
-                    prog_display = prog.replace('Flex Online ', '').replace('MS ', '')
-                    new_value = st.checkbox(prog_display, value=is_checked, key=f"prog_comp_prog_cb_{idx}{program_reset_suffix}")
+                    # Show full program name in checkbox
+                    new_value = st.checkbox(prog, value=is_checked, key=f"prog_comp_prog_cb_{idx}{program_reset_suffix}")
                     
                     if new_value != is_checked:
                         if new_value:
@@ -1031,7 +1031,7 @@ def render():
                 elif len(current_prog_selection) == 0:
                     prog_summary = "No programs selected"
                 elif len(current_prog_selection) == 1:
-                    prog_summary = current_prog_selection[0].replace('Flex Online ', '').replace('MS ', '')
+                    prog_summary = current_prog_selection[0]  # Show full name
                 else:
                     prog_summary = f"{len(current_prog_selection)} programs"
                 
@@ -1055,8 +1055,8 @@ def render():
                     
                     for idx, prog in enumerate(programs_list):
                         is_checked = prog in st.session_state[prog_state_key]
-                        prog_display = prog.replace('Flex Online ', '').replace('MS ', '')
-                        new_value = st.checkbox(prog_display, value=is_checked, key=f"mkt_prog_cb_{idx}{prog_reset_suffix}")
+                        # Show full program name in checkbox
+                        new_value = st.checkbox(prog, value=is_checked, key=f"mkt_prog_cb_{idx}{prog_reset_suffix}")
                         
                         if new_value != is_checked:
                             if new_value:
