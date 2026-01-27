@@ -646,8 +646,11 @@ def render():
                     border-radius: 8px;
                     margin: 20px 0;">
             <h3 style="color: #500000; margin: 0; font-size: 20px;">Trend Analysis</h3>
+            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
+                Filtered by: Class of {} • {}
+            </p>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(selected_cohort, selected_program if selected_program != 'All Programs' else 'All Programs'), unsafe_allow_html=True)
         
         # Initialize session state for toggle buttons
         if 'home_trend_show_apps' not in st.session_state:
@@ -659,7 +662,14 @@ def render():
         if 'home_trend_show_app_conv' not in st.session_state:
             st.session_state.home_trend_show_app_conv = True
         
-        time_series = df[df['metric_name'].isin([
+        # Filter df to only include dates with non-zero data for trend analysis
+        df_for_trends = df.copy()
+        dates_with_data = df_for_trends.groupby('report_date')['metric_value'].sum()
+        dates_with_nonzero = dates_with_data[dates_with_data > 0].index
+        if len(dates_with_nonzero) > 0:
+            df_for_trends = df_for_trends[df_for_trends['report_date'].isin(dates_with_nonzero)]
+        
+        time_series = df_for_trends[df_for_trends['metric_name'].isin([
             'inquiries_received', 'total_applications', 'admissions_offered'
         ])].pivot_table(
             index='report_date',
