@@ -315,111 +315,136 @@ def render():
         all_cohorts_df = pd.read_sql(all_cohorts_query, conn)
         all_cohorts_df['report_date'] = pd.to_datetime(all_cohorts_df['report_date'])
         
-        # Initialize session state for program comparison filters
-        if 'prog_comparison_cohort_selection' not in st.session_state:
-            st.session_state.prog_comparison_cohort_selection = sorted(all_cohorts_df['cohort_year'].unique().tolist())
-        if 'prog_comparison_program_selection' not in st.session_state:
-            st.session_state.prog_comparison_program_selection = sorted(all_cohorts_df['program'].unique().tolist())
+        # Initialize reset counters for Program Comparison filters
+        if 'prog_comp_cohort_reset' not in st.session_state:
+            st.session_state.prog_comp_cohort_reset = 0
+        if 'prog_comp_program_reset' not in st.session_state:
+            st.session_state.prog_comp_program_reset = 0
+        
+        # Create state keys with reset suffix
+        cohort_reset_suffix = f"_{st.session_state.prog_comp_cohort_reset}"
+        program_reset_suffix = f"_{st.session_state.prog_comp_program_reset}"
+        cohort_state_key = f'prog_comparison_cohort_selection{cohort_reset_suffix}'
+        program_state_key = f'prog_comparison_program_selection{program_reset_suffix}'
+        
+        # Initialize selections with reset keys
+        cohorts_list = sorted(all_cohorts_df['cohort_year'].unique().tolist())
+        if cohort_state_key not in st.session_state:
+            st.session_state[cohort_state_key] = cohorts_list.copy()
         
         col_cohort_filter, col_prog_filter = st.columns(2)
         
         # Cohort Filter
         with col_cohort_filter:
-            cohorts_list = sorted(all_cohorts_df['cohort_year'].unique().tolist())
+            current_cohort_selection = st.session_state[cohort_state_key]
             
-            if len(st.session_state.prog_comparison_cohort_selection) == len(cohorts_list):
+            if len(current_cohort_selection) == len(cohorts_list):
                 cohort_summary = "All cohorts"
-            elif len(st.session_state.prog_comparison_cohort_selection) == 0:
+            elif len(current_cohort_selection) == 0:
                 cohort_summary = "No cohorts selected"
-            elif len(st.session_state.prog_comparison_cohort_selection) == 1:
-                cohort_summary = f"Class of {st.session_state.prog_comparison_cohort_selection[0]}"
+            elif len(current_cohort_selection) == 1:
+                cohort_summary = f"Class of {current_cohort_selection[0]}"
             else:
-                cohort_summary = f"{len(st.session_state.prog_comparison_cohort_selection)} cohorts"
+                cohort_summary = f"{len(current_cohort_selection)} cohorts"
             
             st.markdown("**📅 Cohort Year**")
             with st.popover(cohort_summary, use_container_width=True):
                 col_a, col_b = st.columns(2)
                 with col_a:
-                    if st.button("✓ All", key="prog_comp_cohort_all", use_container_width=True, type="primary"):
-                        st.session_state.prog_comparison_cohort_selection = cohorts_list.copy()
+                    if st.button("✓ All", key=f"prog_comp_cohort_all{cohort_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state.prog_comp_cohort_reset += 1
+                        new_cohort_key = f'prog_comparison_cohort_selection_{st.session_state.prog_comp_cohort_reset}'
+                        st.session_state[new_cohort_key] = cohorts_list.copy()
                         st.rerun()
                 with col_b:
-                    if st.button("✗ Clear", key="prog_comp_cohort_clear", use_container_width=True, type="secondary"):
-                        st.session_state.prog_comparison_cohort_selection = []
+                    if st.button("✗ Clear", key=f"prog_comp_cohort_clear{cohort_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state.prog_comp_cohort_reset += 1
+                        new_cohort_key = f'prog_comparison_cohort_selection_{st.session_state.prog_comp_cohort_reset}'
+                        st.session_state[new_cohort_key] = []
                         st.rerun()
                 
                 st.divider()
                 
                 for idx, cohort in enumerate(cohorts_list):
-                    is_checked = cohort in st.session_state.prog_comparison_cohort_selection
-                    new_value = st.checkbox(f"Class of {cohort}", value=is_checked, key=f"prog_comp_cohort_cb_{idx}")
+                    is_checked = cohort in st.session_state[cohort_state_key]
+                    new_value = st.checkbox(f"Class of {cohort}", value=is_checked, key=f"prog_comp_cohort_cb_{idx}{cohort_reset_suffix}")
                     
                     if new_value != is_checked:
                         if new_value:
-                            if cohort not in st.session_state.prog_comparison_cohort_selection:
-                                st.session_state.prog_comparison_cohort_selection.append(cohort)
+                            if cohort not in st.session_state[cohort_state_key]:
+                                st.session_state[cohort_state_key].append(cohort)
                         else:
-                            if cohort in st.session_state.prog_comparison_cohort_selection:
-                                st.session_state.prog_comparison_cohort_selection.remove(cohort)
+                            if cohort in st.session_state[cohort_state_key]:
+                                st.session_state[cohort_state_key].remove(cohort)
                         st.rerun()
         
         # Program Filter
         with col_prog_filter:
             # Filter by cohort first
-            cohort_filtered_df = all_cohorts_df[all_cohorts_df['cohort_year'].isin(st.session_state.prog_comparison_cohort_selection)] if len(st.session_state.prog_comparison_cohort_selection) > 0 else all_cohorts_df.head(0)
+            cohort_filtered_df = all_cohorts_df[all_cohorts_df['cohort_year'].isin(st.session_state[cohort_state_key])] if len(st.session_state[cohort_state_key]) > 0 else all_cohorts_df.head(0)
             programs_list = sorted(cohort_filtered_df['program'].unique().tolist()) if not cohort_filtered_df.empty else []
             
-            # Update program selection to only include valid programs
-            valid_programs = [p for p in st.session_state.prog_comparison_program_selection if p in programs_list]
-            if set(valid_programs) != set(st.session_state.prog_comparison_program_selection):
-                st.session_state.prog_comparison_program_selection = valid_programs if valid_programs else programs_list.copy()
+            # Initialize program selection with reset key
+            if program_state_key not in st.session_state:
+                st.session_state[program_state_key] = programs_list.copy()
             
-            if len(st.session_state.prog_comparison_program_selection) == len(programs_list):
+            # Update program selection to only include valid programs
+            valid_programs = [p for p in st.session_state[program_state_key] if p in programs_list]
+            if set(valid_programs) != set(st.session_state[program_state_key]):
+                st.session_state[program_state_key] = valid_programs if valid_programs else programs_list.copy()
+            
+            current_program_selection = st.session_state[program_state_key]
+            
+            if len(current_program_selection) == len(programs_list):
                 prog_summary = "All programs"
-            elif len(st.session_state.prog_comparison_program_selection) == 0:
+            elif len(current_program_selection) == 0:
                 prog_summary = "No programs selected"
-            elif len(st.session_state.prog_comparison_program_selection) == 1:
-                prog_summary = st.session_state.prog_comparison_program_selection[0].replace('Flex Online ', '').replace('MS ', '')
+            elif len(current_program_selection) == 1:
+                prog_summary = current_program_selection[0].replace('Flex Online ', '').replace('MS ', '')
             else:
-                prog_summary = f"{len(st.session_state.prog_comparison_program_selection)} programs"
+                prog_summary = f"{len(current_program_selection)} programs"
             
             st.markdown("**🎓 Program**")
             with st.popover(prog_summary, use_container_width=True):
                 col_a, col_b = st.columns(2)
                 with col_a:
-                    if st.button("✓ All", key="prog_comp_prog_all", use_container_width=True, type="primary"):
-                        st.session_state.prog_comparison_program_selection = programs_list.copy()
+                    if st.button("✓ All", key=f"prog_comp_prog_all{program_reset_suffix}", use_container_width=True, type="primary"):
+                        st.session_state.prog_comp_program_reset += 1
+                        new_program_key = f'prog_comparison_program_selection_{st.session_state.prog_comp_program_reset}'
+                        st.session_state[new_program_key] = programs_list.copy()
                         st.rerun()
                 with col_b:
-                    if st.button("✗ Clear", key="prog_comp_prog_clear", use_container_width=True, type="secondary"):
-                        st.session_state.prog_comparison_program_selection = []
+                    if st.button("✗ Clear", key=f"prog_comp_prog_clear{program_reset_suffix}", use_container_width=True, type="secondary"):
+                        st.session_state.prog_comp_program_reset += 1
+                        new_program_key = f'prog_comparison_program_selection_{st.session_state.prog_comp_program_reset}'
+                        st.session_state[new_program_key] = []
                         st.rerun()
                 
                 st.divider()
                 
                 for idx, prog in enumerate(programs_list):
-                    is_checked = prog in st.session_state.prog_comparison_program_selection
+                    is_checked = prog in st.session_state[program_state_key]
                     prog_display = prog.replace('Flex Online ', '').replace('MS ', '')
-                    new_value = st.checkbox(prog_display, value=is_checked, key=f"prog_comp_prog_cb_{idx}")
+                    new_value = st.checkbox(prog_display, value=is_checked, key=f"prog_comp_prog_cb_{idx}{program_reset_suffix}")
                     
                     if new_value != is_checked:
                         if new_value:
-                            if prog not in st.session_state.prog_comparison_program_selection:
-                                st.session_state.prog_comparison_program_selection.append(prog)
+                            if prog not in st.session_state[program_state_key]:
+                                st.session_state[program_state_key].append(prog)
                         else:
-                            if prog in st.session_state.prog_comparison_program_selection:
-                                st.session_state.prog_comparison_program_selection.remove(prog)
+                            if prog in st.session_state[program_state_key]:
+                                st.session_state[program_state_key].remove(prog)
                         st.rerun()
         
         # Apply filters to get comparison data
         filtered_comparison_df = all_cohorts_df.copy()
-        if len(st.session_state.prog_comparison_cohort_selection) > 0:
-            filtered_comparison_df = filtered_comparison_df[filtered_comparison_df['cohort_year'].isin(st.session_state.prog_comparison_cohort_selection)]
+        if len(st.session_state[cohort_state_key]) > 0:
+            filtered_comparison_df = filtered_comparison_df[filtered_comparison_df['cohort_year'].isin(st.session_state[cohort_state_key])]
         else:
             filtered_comparison_df = filtered_comparison_df.head(0)
         
-        if len(st.session_state.prog_comparison_program_selection) > 0:
-            filtered_comparison_df = filtered_comparison_df[filtered_comparison_df['program'].isin(st.session_state.prog_comparison_program_selection)]
+        if len(st.session_state[program_state_key]) > 0:
+            filtered_comparison_df = filtered_comparison_df[filtered_comparison_df['program'].isin(st.session_state[program_state_key])]
         else:
             filtered_comparison_df = filtered_comparison_df.head(0)
         
@@ -906,111 +931,136 @@ def render():
             # Independent filters for Marketing Insights section
             st.markdown("**Filters for Marketing Insights**")
             
-            # Initialize session state for marketing filters
-            if 'marketing_insights_fy_selection' not in st.session_state:
-                st.session_state.marketing_insights_fy_selection = sorted(marketing_df['fiscal_year'].unique().tolist())
-            if 'marketing_insights_prog_selection' not in st.session_state:
-                st.session_state.marketing_insights_prog_selection = sorted(marketing_df['program'].unique().tolist())
+            # Initialize reset counters for Marketing Insights filters
+            if 'mkt_insights_fy_reset' not in st.session_state:
+                st.session_state.mkt_insights_fy_reset = 0
+            if 'mkt_insights_prog_reset' not in st.session_state:
+                st.session_state.mkt_insights_prog_reset = 0
+            
+            # Create state keys with reset suffix
+            fy_reset_suffix = f"_{st.session_state.mkt_insights_fy_reset}"
+            prog_reset_suffix = f"_{st.session_state.mkt_insights_prog_reset}"
+            fy_state_key = f'marketing_insights_fy_selection{fy_reset_suffix}'
+            prog_state_key = f'marketing_insights_prog_selection{prog_reset_suffix}'
+            
+            # Initialize selections with reset keys
+            fiscal_years_list = sorted(marketing_df['fiscal_year'].unique().tolist())
+            if fy_state_key not in st.session_state:
+                st.session_state[fy_state_key] = fiscal_years_list.copy()
             
             col_fy, col_prog = st.columns(2)
             
             # Fiscal Year Filter
             with col_fy:
-                fiscal_years_list = sorted(marketing_df['fiscal_year'].unique().tolist())
+                current_fy_selection = st.session_state[fy_state_key]
                 
-                if len(st.session_state.marketing_insights_fy_selection) == len(fiscal_years_list):
+                if len(current_fy_selection) == len(fiscal_years_list):
                     fy_summary = "All fiscal years"
-                elif len(st.session_state.marketing_insights_fy_selection) == 0:
+                elif len(current_fy_selection) == 0:
                     fy_summary = "No fiscal years selected"
-                elif len(st.session_state.marketing_insights_fy_selection) == 1:
-                    fy_summary = str(st.session_state.marketing_insights_fy_selection[0])
+                elif len(current_fy_selection) == 1:
+                    fy_summary = str(current_fy_selection[0])
                 else:
-                    fy_summary = f"{len(st.session_state.marketing_insights_fy_selection)} fiscal years"
+                    fy_summary = f"{len(current_fy_selection)} fiscal years"
                 
                 st.markdown("**📅 Fiscal Year**")
                 with st.popover(fy_summary, use_container_width=True):
                     col_a, col_b = st.columns(2)
                     with col_a:
-                        if st.button("✓ All", key="mkt_fy_all", use_container_width=True, type="primary"):
-                            st.session_state.marketing_insights_fy_selection = fiscal_years_list.copy()
+                        if st.button("✓ All", key=f"mkt_fy_all{fy_reset_suffix}", use_container_width=True, type="primary"):
+                            st.session_state.mkt_insights_fy_reset += 1
+                            new_fy_key = f'marketing_insights_fy_selection_{st.session_state.mkt_insights_fy_reset}'
+                            st.session_state[new_fy_key] = fiscal_years_list.copy()
                             st.rerun()
                     with col_b:
-                        if st.button("✗ Clear", key="mkt_fy_clear", use_container_width=True, type="secondary"):
-                            st.session_state.marketing_insights_fy_selection = []
+                        if st.button("✗ Clear", key=f"mkt_fy_clear{fy_reset_suffix}", use_container_width=True, type="secondary"):
+                            st.session_state.mkt_insights_fy_reset += 1
+                            new_fy_key = f'marketing_insights_fy_selection_{st.session_state.mkt_insights_fy_reset}'
+                            st.session_state[new_fy_key] = []
                             st.rerun()
                     
                     st.divider()
                     
                     for idx, fy in enumerate(fiscal_years_list):
-                        is_checked = fy in st.session_state.marketing_insights_fy_selection
-                        new_value = st.checkbox(str(fy), value=is_checked, key=f"mkt_fy_cb_{idx}")
+                        is_checked = fy in st.session_state[fy_state_key]
+                        new_value = st.checkbox(str(fy), value=is_checked, key=f"mkt_fy_cb_{idx}{fy_reset_suffix}")
                         
                         if new_value != is_checked:
                             if new_value:
-                                if fy not in st.session_state.marketing_insights_fy_selection:
-                                    st.session_state.marketing_insights_fy_selection.append(fy)
+                                if fy not in st.session_state[fy_state_key]:
+                                    st.session_state[fy_state_key].append(fy)
                             else:
-                                if fy in st.session_state.marketing_insights_fy_selection:
-                                    st.session_state.marketing_insights_fy_selection.remove(fy)
+                                if fy in st.session_state[fy_state_key]:
+                                    st.session_state[fy_state_key].remove(fy)
                             st.rerun()
             
             # Program Filter
             with col_prog:
                 # Filter by fiscal year first
-                fy_filtered_df = marketing_df[marketing_df['fiscal_year'].isin(st.session_state.marketing_insights_fy_selection)] if len(st.session_state.marketing_insights_fy_selection) > 0 else marketing_df.head(0)
+                fy_filtered_df = marketing_df[marketing_df['fiscal_year'].isin(st.session_state[fy_state_key])] if len(st.session_state[fy_state_key]) > 0 else marketing_df.head(0)
                 programs_list = sorted(fy_filtered_df['program'].unique().tolist()) if not fy_filtered_df.empty else []
                 
-                # Update program selection to only include valid programs
-                valid_programs = [p for p in st.session_state.marketing_insights_prog_selection if p in programs_list]
-                if set(valid_programs) != set(st.session_state.marketing_insights_prog_selection):
-                    st.session_state.marketing_insights_prog_selection = valid_programs if valid_programs else programs_list.copy()
+                # Initialize program selection with reset key
+                if prog_state_key not in st.session_state:
+                    st.session_state[prog_state_key] = programs_list.copy()
                 
-                if len(st.session_state.marketing_insights_prog_selection) == len(programs_list):
+                # Update program selection to only include valid programs
+                valid_programs = [p for p in st.session_state[prog_state_key] if p in programs_list]
+                if set(valid_programs) != set(st.session_state[prog_state_key]):
+                    st.session_state[prog_state_key] = valid_programs if valid_programs else programs_list.copy()
+                
+                current_prog_selection = st.session_state[prog_state_key]
+                
+                if len(current_prog_selection) == len(programs_list):
                     prog_summary = "All programs"
-                elif len(st.session_state.marketing_insights_prog_selection) == 0:
+                elif len(current_prog_selection) == 0:
                     prog_summary = "No programs selected"
-                elif len(st.session_state.marketing_insights_prog_selection) == 1:
-                    prog_summary = st.session_state.marketing_insights_prog_selection[0].replace('Flex Online ', '').replace('MS ', '')
+                elif len(current_prog_selection) == 1:
+                    prog_summary = current_prog_selection[0].replace('Flex Online ', '').replace('MS ', '')
                 else:
-                    prog_summary = f"{len(st.session_state.marketing_insights_prog_selection)} programs"
+                    prog_summary = f"{len(current_prog_selection)} programs"
                 
                 st.markdown("**🎓 Program**")
                 with st.popover(prog_summary, use_container_width=True):
                     col_a, col_b = st.columns(2)
                     with col_a:
-                        if st.button("✓ All", key="mkt_prog_all", use_container_width=True, type="primary"):
-                            st.session_state.marketing_insights_prog_selection = programs_list.copy()
+                        if st.button("✓ All", key=f"mkt_prog_all{prog_reset_suffix}", use_container_width=True, type="primary"):
+                            st.session_state.mkt_insights_prog_reset += 1
+                            new_prog_key = f'marketing_insights_prog_selection_{st.session_state.mkt_insights_prog_reset}'
+                            st.session_state[new_prog_key] = programs_list.copy()
                             st.rerun()
                     with col_b:
-                        if st.button("✗ Clear", key="mkt_prog_clear", use_container_width=True, type="secondary"):
-                            st.session_state.marketing_insights_prog_selection = []
+                        if st.button("✗ Clear", key=f"mkt_prog_clear{prog_reset_suffix}", use_container_width=True, type="secondary"):
+                            st.session_state.mkt_insights_prog_reset += 1
+                            new_prog_key = f'marketing_insights_prog_selection_{st.session_state.mkt_insights_prog_reset}'
+                            st.session_state[new_prog_key] = []
                             st.rerun()
                     
                     st.divider()
                     
                     for idx, prog in enumerate(programs_list):
-                        is_checked = prog in st.session_state.marketing_insights_prog_selection
+                        is_checked = prog in st.session_state[prog_state_key]
                         prog_display = prog.replace('Flex Online ', '').replace('MS ', '')
-                        new_value = st.checkbox(prog_display, value=is_checked, key=f"mkt_prog_cb_{idx}")
+                        new_value = st.checkbox(prog_display, value=is_checked, key=f"mkt_prog_cb_{idx}{prog_reset_suffix}")
                         
                         if new_value != is_checked:
                             if new_value:
-                                if prog not in st.session_state.marketing_insights_prog_selection:
-                                    st.session_state.marketing_insights_prog_selection.append(prog)
+                                if prog not in st.session_state[prog_state_key]:
+                                    st.session_state[prog_state_key].append(prog)
                             else:
-                                if prog in st.session_state.marketing_insights_prog_selection:
-                                    st.session_state.marketing_insights_prog_selection.remove(prog)
+                                if prog in st.session_state[prog_state_key]:
+                                    st.session_state[prog_state_key].remove(prog)
                             st.rerun()
             
             # Apply filters to marketing data
             filtered_marketing_df = marketing_df.copy()
-            if len(st.session_state.marketing_insights_fy_selection) > 0:
-                filtered_marketing_df = filtered_marketing_df[filtered_marketing_df['fiscal_year'].isin(st.session_state.marketing_insights_fy_selection)]
+            if len(st.session_state[fy_state_key]) > 0:
+                filtered_marketing_df = filtered_marketing_df[filtered_marketing_df['fiscal_year'].isin(st.session_state[fy_state_key])]
             else:
                 filtered_marketing_df = filtered_marketing_df.head(0)
             
-            if len(st.session_state.marketing_insights_prog_selection) > 0:
-                filtered_marketing_df = filtered_marketing_df[filtered_marketing_df['program'].isin(st.session_state.marketing_insights_prog_selection)]
+            if len(st.session_state[prog_state_key]) > 0:
+                filtered_marketing_df = filtered_marketing_df[filtered_marketing_df['program'].isin(st.session_state[prog_state_key])]
             else:
                 filtered_marketing_df = filtered_marketing_df.head(0)
             
