@@ -15,12 +15,10 @@ from utils.database import get_connection, load_programs
 # COHESIVE COLOR PALETTE - Every single color is completely unique
 # No shades, no similar colors, all easily distinguishable
 EXECUTIVE_COLORS = {
-    # Admissions Metrics - 6 completely different colors
+    # Admissions Metrics - 4 completely different colors
     'inquiries': '#2196F3',           # Blue
     'applications': '#FF9800',        # Orange
-    'admits': '#4CAF50',              # Green
     'accepted': '#F44336',            # Red
-    'enrolled': '#00BCD4',            # Cyan
     'cohort_size': '#500000',         # Texas A&M Maroon
     
     # Marketing Channels - 12 completely distinct colors
@@ -91,18 +89,47 @@ def render():
         df = df[df['program'] == selected_program]
 
     if not df.empty:
-        # Find the latest date that has non-zero data
-        dates_with_data = df.groupby('report_date')['metric_value'].sum()
-        dates_with_nonzero = dates_with_data[dates_with_data > 0].index
+        # Find the latest date with complete data
+        # For each date, check if we have inquiries_received for all programs
+        date_completeness = []
+        for date in df['report_date'].unique():
+            date_df = df[df['report_date'] == date]
+            # Check if we have inquiries_received metric for this date
+            inquiries_df = date_df[date_df['metric_name'] == 'inquiries_received']
+            total_value = date_df['metric_value'].sum()
+            num_programs_with_inquiries = len(inquiries_df)
+            
+            date_completeness.append({
+                'date': date,
+                'total_value': total_value,
+                'num_programs': num_programs_with_inquiries
+            })
         
-        if len(dates_with_nonzero) > 0:
-            # Use the latest date with non-zero data
-            latest_date = dates_with_nonzero.max()
+        completeness_df = pd.DataFrame(date_completeness)
+        
+        # Get the maximum number of programs with inquiries (baseline for complete data)
+        max_programs = completeness_df['num_programs'].max()
+        
+        # Find dates with non-zero data AND complete program coverage
+        complete_dates = completeness_df[
+            (completeness_df['total_value'] > 0) & 
+            (completeness_df['num_programs'] == max_programs)
+        ]['date']
+        
+        if len(complete_dates) > 0:
+            # Use the latest date with complete data
+            latest_date = complete_dates.max()
             latest_data = df[df['report_date'] == latest_date]
         else:
-            # All dates have zero values - use the latest date anyway
-            latest_date = df['report_date'].max()
-            latest_data = df[df['report_date'] == latest_date]
+            # Fallback: use latest date with non-zero data
+            nonzero_dates = completeness_df[completeness_df['total_value'] > 0]['date']
+            if len(nonzero_dates) > 0:
+                latest_date = nonzero_dates.max()
+                latest_data = df[df['report_date'] == latest_date]
+            else:
+                # All dates have zero values - use the latest date anyway
+                latest_date = df['report_date'].max()
+                latest_data = df[df['report_date'] == latest_date]
     
     # Check if we have data to display
     if not df.empty:
