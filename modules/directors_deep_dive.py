@@ -6,6 +6,7 @@ Provides detailed program-specific analysis with trends and comparative insights
 import streamlit as st
 import streamlit.components.v1
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime
