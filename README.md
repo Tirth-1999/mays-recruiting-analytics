@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 6.0** | **Last Updated: January 25, 2026**
+**Version 6.1** | **Last Updated: January 27, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, featuring natural language query interface, real-time insights, and secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-6.0-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.1-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,34 +17,27 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 6.0
+## What's New in Version 6.1
 
-**AI-Powered Analytics** - Released January 25, 2026
+**Sidebar Profile Enhancement** - Released January 27, 2026
 
-### 💬 AI Chat Assistant (Major Feature)
-- **Natural Language Queries**: Ask questions in plain English and get instant answers
+### 🎨 Enhanced User Interface
+- **Redesigned Profile Card**: Streamlined sidebar profile with circular avatar, user details, and inline logout
+- **Improved Spacing**: Optimized header and sidebar spacing for better visual hierarchy
+- **Native Components**: Replaced custom CSS with Streamlit native components for better reliability
+- **Responsive Design**: Profile card adapts seamlessly across different screen sizes
+
+### Previous Major Release: Version 6.0 (January 25, 2026)
+
+**AI-Powered Analytics**
+
+- **Natural Language Queries**: AI Chat Assistant with plain English query interface
 - **Conversation Memory**: Context-aware follow-up questions and reference resolution
 - **Smart Query Processing**: Understands business terms, abbreviations, and complex queries
 - **Rate Limiting**: 10 queries/minute per user with visual indicators
 - **Feedback System**: Thumbs up/down ratings with analytics dashboard
-
-### 🎯 Enhanced User Experience
-- **Suggested Queries**: Context-aware query suggestions after each response
-- **In-App Help**: Quick reference guide accessible from chat header
 - **Chat History**: Search, export, and manage all conversations
-- **Settings & Privacy**: GDPR-compliant data management with automatic cleanup
-
-### 📊 Analytics & Insights
-- **Feedback Analytics**: Track satisfaction rates by query type
-- **Usage Statistics**: Monitor conversations, messages, and token usage
-- **Query Pattern Recognition**: Cached templates for common queries
-- **Performance Tracking**: Real-time metrics and accuracy monitoring
-
-### 🔒 Security & Privacy
-- **OAuth Required**: Secure authentication for all chat features
-- **Data Retention**: Automatic cleanup after 90 days
-- **Export Capability**: Download chat history anytime
-- **GDPR Compliance**: Complete data deletion on request
+- **GDPR Compliance**: Complete data deletion and privacy controls
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -201,6 +194,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **6.1** | Jan 27, 2026 | Sidebar Profile Enhancement |
 | **6.0** | Jan 25, 2026 | AI Chat Assistant with Natural Language Queries |
 | **5.2** | Jan 25, 2026 | OAuth Button Refinement |
 | **5.1** | Jan 25, 2026 | OAuth Fix & Consent Screen |
@@ -237,6 +231,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 6.0 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 6.1 • Built for Texas A&M Mays Business School
 
 </div>
