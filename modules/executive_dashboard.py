@@ -1028,183 +1028,183 @@ def render():
                 
                 num_channels = filtered_marketing_df['channel'].nunique()
                 avg_spend_per_program = total_spend / num_programs if num_programs > 0 else 0
-            
-            # Display metrics in a grid
-            st.markdown("""
-            <style>
-            .marketing-metrics-grid {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 1rem;
-                margin: 20px 0;
-            }
-            .marketing-metric-box {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 12px;
-                border: 1px solid #e0e0e0;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                text-align: center;
-            }
-            .marketing-metric-number {
-                color: #500000;
-                font-size: 1.8rem;
-                font-weight: bold;
-                margin: 0;
-            }
-            .marketing-metric-label {
-                color: #6c757d;
-                font-size: 0.9rem;
-                margin: 0.5rem 0 0 0;
-            }
-            </style>
-            """, unsafe_allow_html=True)
-            
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                st.markdown(f"""
-                <div class="marketing-metric-box">
-                    <div class="marketing-metric-number">${total_spend:,.0f}</div>
-                    <div class="marketing-metric-label">Total Marketing Spend</div>
-                </div>
+                
+                # Display metrics in a grid
+                st.markdown("""
+                <style>
+                .marketing-metrics-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 1rem;
+                    margin: 20px 0;
+                }
+                .marketing-metric-box {
+                    background: white;
+                    padding: 1.5rem;
+                    border-radius: 12px;
+                    border: 1px solid #e0e0e0;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    text-align: center;
+                }
+                .marketing-metric-number {
+                    color: #500000;
+                    font-size: 1.8rem;
+                    font-weight: bold;
+                    margin: 0;
+                }
+                .marketing-metric-label {
+                    color: #6c757d;
+                    font-size: 0.9rem;
+                    margin: 0.5rem 0 0 0;
+                }
+                </style>
                 """, unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown(f"""
-                <div class="marketing-metric-box">
-                    <div class="marketing-metric-number">{num_programs}</div>
-                    <div class="marketing-metric-label">Programs Marketed</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                st.markdown(f"""
-                <div class="marketing-metric-box">
-                    <div class="marketing-metric-number">{num_channels}</div>
-                    <div class="marketing-metric-label">Marketing Channels</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col4:
-                st.markdown(f"""
-                <div class="marketing-metric-box">
-                    <div class="marketing-metric-number">${avg_spend_per_program:,.0f}</div>
-                    <div class="marketing-metric-label">Avg Spend/Program</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            # Two charts side by side with better spacing
-            col_chart1, col_chart2 = st.columns([1.2, 0.8])
-            
-            with col_chart1:
-                st.markdown("**Spend by Program & Channel**")
                 
-                # Create stacked bar chart showing channel breakdown per program
-                program_channel_spend = filtered_marketing_df.groupby(['program', 'channel'])['spend_amount'].sum().reset_index()
+                col1, col2, col3, col4 = st.columns(4)
                 
-                # Shorten program names for better display
-                program_channel_spend['program_short'] = program_channel_spend['program'].str.replace('Flex Online ', '').str.replace('MS ', '')
+                with col1:
+                    st.markdown(f"""
+                    <div class="marketing-metric-box">
+                        <div class="marketing-metric-number">${total_spend:,.0f}</div>
+                        <div class="marketing-metric-label">Total Marketing Spend</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
-                fig_prog = go.Figure()
+                with col2:
+                    st.markdown(f"""
+                    <div class="marketing-metric-box">
+                        <div class="marketing-metric-number">{num_programs}</div>
+                        <div class="marketing-metric-label">Programs Marketed</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
-                # Get unique channels and programs
-                channels = program_channel_spend['channel'].unique()
-                programs = program_channel_spend['program_short'].unique()
+                with col3:
+                    st.markdown(f"""
+                    <div class="marketing-metric-box">
+                        <div class="marketing-metric-number">{num_channels}</div>
+                        <div class="marketing-metric-label">Marketing Channels</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
-                # Calculate totals for each program (for top labels)
-                program_totals = program_channel_spend.groupby('program_short')['spend_amount'].sum()
+                with col4:
+                    st.markdown(f"""
+                    <div class="marketing-metric-box">
+                        <div class="marketing-metric-number">${avg_spend_per_program:,.0f}</div>
+                        <div class="marketing-metric-label">Avg Spend/Program</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
-                # Add a trace for each channel (stacked bars)
-                for idx, channel in enumerate(channels):
-                    channel_data = program_channel_spend[program_channel_spend['channel'] == channel]
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                # Two charts side by side with better spacing
+                col_chart1, col_chart2 = st.columns([1.2, 0.8])
+                
+                with col_chart1:
+                    st.markdown("**Spend by Program & Channel**")
                     
-                    # Create a full list with zeros for programs that don't have this channel
-                    y_values = []
-                    for prog in programs:
-                        prog_data = channel_data[channel_data['program_short'] == prog]
-                        if len(prog_data) > 0:
-                            y_values.append(prog_data['spend_amount'].values[0])
+                    # Create stacked bar chart showing channel breakdown per program
+                    program_channel_spend = filtered_marketing_df.groupby(['program', 'channel'])['spend_amount'].sum().reset_index()
+                    
+                    # Shorten program names for better display
+                    program_channel_spend['program_short'] = program_channel_spend['program'].str.replace('Flex Online ', '').str.replace('MS ', '')
+                    
+                    fig_prog = go.Figure()
+                    
+                    # Get unique channels and programs
+                    channels = program_channel_spend['channel'].unique()
+                    programs = program_channel_spend['program_short'].unique()
+                    
+                    # Calculate totals for each program (for top labels)
+                    program_totals = program_channel_spend.groupby('program_short')['spend_amount'].sum()
+                    
+                    # Add a trace for each channel (stacked bars)
+                    for idx, channel in enumerate(channels):
+                        channel_data = program_channel_spend[program_channel_spend['channel'] == channel]
+                        
+                        # Create a full list with zeros for programs that don't have this channel
+                        y_values = []
+                        for prog in programs:
+                            prog_data = channel_data[channel_data['program_short'] == prog]
+                            if len(prog_data) > 0:
+                                y_values.append(prog_data['spend_amount'].values[0])
+                            else:
+                                y_values.append(0)
+                        
+                        # Only show total on the last trace (top of stack)
+                        if idx == len(channels) - 1:
+                            text_values = [f'${program_totals[prog]:,.0f}' for prog in programs]
+                            textposition = 'outside'
                         else:
-                            y_values.append(0)
+                            text_values = ['' for _ in programs]
+                            textposition = 'none'
+                        
+                        fig_prog.add_trace(go.Bar(
+                            name=channel,
+                            x=programs,
+                            y=y_values,
+                            marker_color=get_color(channel),
+                            text=text_values,
+                            textposition=textposition,
+                            hovertemplate='<b>%{fullData.name}</b><br>Program: %{x}<br>Spend: $%{y:,.0f}<extra></extra>'
+                        ))
                     
-                    # Only show total on the last trace (top of stack)
-                    if idx == len(channels) - 1:
-                        text_values = [f'${program_totals[prog]:,.0f}' for prog in programs]
-                        textposition = 'outside'
-                    else:
-                        text_values = ['' for _ in programs]
-                        textposition = 'none'
+                    fig_prog.update_layout(
+                        barmode='stack',
+                        height=500,
+                        xaxis_title='',
+                        yaxis_title='Spend ($)',
+                        margin=dict(t=100, b=100, l=70, r=40),  # Increased top margin for labels
+                        xaxis={
+                            'tickangle': -45,
+                            'tickfont': {'size': 11}
+                        },
+                        yaxis={
+                            'tickformat': '$,.0f',
+                            'range': [0, program_totals.max() * 1.15]  # Add 15% space above for labels
+                        },
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        legend=dict(
+                            orientation="v",
+                            yanchor="top",
+                            y=1,
+                            xanchor="left",
+                            x=1.02,
+                            bgcolor='rgba(255,255,255,0.9)',
+                            bordercolor='rgba(0,0,0,0.2)',
+                            borderwidth=1
+                        )
+                    )
+                    st.plotly_chart(fig_prog, use_container_width=True)
+                
+                with col_chart2:
+                    st.markdown("**Spend by Channel**")
+                    channel_spend = filtered_marketing_df.groupby('channel')['spend_amount'].sum().sort_values(ascending=False)
                     
-                    fig_prog.add_trace(go.Bar(
-                        name=channel,
-                        x=programs,
-                        y=y_values,
-                        marker_color=get_color(channel),
-                        text=text_values,
-                        textposition=textposition,
-                        hovertemplate='<b>%{fullData.name}</b><br>Program: %{x}<br>Spend: $%{y:,.0f}<extra></extra>'
-                    ))
-                
-                fig_prog.update_layout(
-                    barmode='stack',
-                    height=500,
-                    xaxis_title='',
-                    yaxis_title='Spend ($)',
-                    margin=dict(t=100, b=100, l=70, r=40),  # Increased top margin for labels
-                    xaxis={
-                        'tickangle': -45,
-                        'tickfont': {'size': 11}
-                    },
-                    yaxis={
-                        'tickformat': '$,.0f',
-                        'range': [0, program_totals.max() * 1.15]  # Add 15% space above for labels
-                    },
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    legend=dict(
-                        orientation="v",
-                        yanchor="top",
-                        y=1,
-                        xanchor="left",
-                        x=1.02,
-                        bgcolor='rgba(255,255,255,0.9)',
-                        bordercolor='rgba(0,0,0,0.2)',
-                        borderwidth=1
+                    # Use the cohesive color palette
+                    colors_list = [get_color(ch) for ch in channel_spend.index]
+                    
+                    fig_chan = go.Figure(data=[
+                        go.Pie(
+                            labels=channel_spend.index, 
+                            values=channel_spend.values,
+                            marker=dict(colors=colors_list),
+                            textinfo='label+percent',
+                            textposition='auto',
+                            hovertemplate='<b>%{label}</b><br>Spend: $%{value:,.0f}<br>%{percent}<extra></extra>'
+                        )
+                    ])
+                    fig_chan.update_layout(
+                        height=500,
+                        margin=dict(t=40, b=40, l=20, r=20),
+                        showlegend=False
                     )
-                )
-                st.plotly_chart(fig_prog, use_container_width=True)
-            
-            with col_chart2:
-                st.markdown("**Spend by Channel**")
-                channel_spend = filtered_marketing_df.groupby('channel')['spend_amount'].sum().sort_values(ascending=False)
+                    st.plotly_chart(fig_chan, use_container_width=True)
                 
-                # Use the cohesive color palette
-                colors_list = [get_color(ch) for ch in channel_spend.index]
+                st.markdown("<br>", unsafe_allow_html=True)
                 
-                fig_chan = go.Figure(data=[
-                    go.Pie(
-                        labels=channel_spend.index, 
-                        values=channel_spend.values,
-                        marker=dict(colors=colors_list),
-                        textinfo='label+percent',
-                        textposition='auto',
-                        hovertemplate='<b>%{label}</b><br>Spend: $%{value:,.0f}<br>%{percent}<extra></extra>'
-                    )
-                ])
-                fig_chan.update_layout(
-                    height=500,
-                    margin=dict(t=40, b=40, l=20, r=20),
-                    showlegend=False
-                )
-                st.plotly_chart(fig_chan, use_container_width=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            # Link to full marketing analysis
-            st.info("💡 **Tip**: Visit the **Marketing Analysis** page for detailed ROI metrics, channel performance, and budget allocation insights.")
+                # Link to full marketing analysis
+                st.info("💡 **Tip**: Visit the **Marketing Analysis** page for detailed ROI metrics, channel performance, and budget allocation insights.")
         else:
             st.info("📊 Marketing data is being collected. Check back soon for insights.")
     else:
