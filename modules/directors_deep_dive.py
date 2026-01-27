@@ -80,18 +80,47 @@ def render():
                  (f" - {selected_program_filter}" if selected_program_filter != "All Programs" else ""))
         st.info("💡 Try selecting a different cohort/program or check the database")
     else:
-        # Get latest data with non-zero values for current cohort
-        dates_with_data = current_data.groupby('report_date')['metric_value'].sum()
-        dates_with_nonzero = dates_with_data[dates_with_data > 0].index
+        # Find the latest date with complete data
+        # For each date, check if we have inquiries_received for all programs
+        date_completeness = []
+        for date in current_data['report_date'].unique():
+            date_df = current_data[current_data['report_date'] == date]
+            # Check if we have inquiries_received metric for this date
+            inquiries_df = date_df[date_df['metric_name'] == 'inquiries_received']
+            total_value = date_df['metric_value'].sum()
+            num_programs_with_inquiries = len(inquiries_df)
+            
+            date_completeness.append({
+                'date': date,
+                'total_value': total_value,
+                'num_programs': num_programs_with_inquiries
+            })
         
-        if len(dates_with_nonzero) > 0:
-            # Use the latest date with non-zero data
-            latest_date = dates_with_nonzero.max()
+        completeness_df = pd.DataFrame(date_completeness)
+        
+        # Get the maximum number of programs with inquiries (baseline for complete data)
+        max_programs = completeness_df['num_programs'].max()
+        
+        # Find dates with non-zero data AND complete program coverage
+        complete_dates = completeness_df[
+            (completeness_df['total_value'] > 0) & 
+            (completeness_df['num_programs'] == max_programs)
+        ]['date']
+        
+        if len(complete_dates) > 0:
+            # Use the latest date with complete data
+            latest_date = complete_dates.max()
+            latest_data = current_data[current_data['report_date'] == latest_date]
         else:
-            # All dates have zero values - use the latest date anyway
-            latest_date = current_data['report_date'].max()
-        
-        latest_data = current_data[current_data['report_date'] == latest_date]
+            # Fallback: use latest date with non-zero data
+            nonzero_dates = completeness_df[completeness_df['total_value'] > 0]['date']
+            if len(nonzero_dates) > 0:
+                latest_date = nonzero_dates.max()
+                latest_data = current_data[current_data['report_date'] == latest_date]
+            else:
+                # All dates have zero values - use the latest date anyway
+                latest_date = current_data['report_date'].max()
+                latest_data = current_data[current_data['report_date'] == latest_date]
 
         # Calculate comprehensive metrics
         inquiries = latest_data[latest_data['metric_name'] == 'inquiries_received']['metric_value'].fillna(0).sum()
