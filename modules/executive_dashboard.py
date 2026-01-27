@@ -448,10 +448,25 @@ def render():
         else:
             filtered_comparison_df = filtered_comparison_df.head(0)
         
-        # Get latest data for each program-cohort combination, then aggregate
+        # Get latest data for each program-cohort combination with non-zero values
         if not filtered_comparison_df.empty:
-            # Get latest date for each program-cohort combination
-            latest_dates = filtered_comparison_df.groupby(['program', 'cohort_year'])['report_date'].max().reset_index()
+            # For each program-cohort, find the latest date with non-zero data
+            latest_dates_list = []
+            for (prog, cohort), group in filtered_comparison_df.groupby(['program', 'cohort_year']):
+                # Find dates with non-zero values for this program-cohort
+                dates_with_data = group.groupby('report_date')['metric_value'].sum()
+                dates_with_nonzero = dates_with_data[dates_with_data > 0].index
+                
+                if len(dates_with_nonzero) > 0:
+                    # Use latest date with non-zero data
+                    latest_date = dates_with_nonzero.max()
+                else:
+                    # All dates have zeros - use latest date anyway
+                    latest_date = group['report_date'].max()
+                
+                latest_dates_list.append({'program': prog, 'cohort_year': cohort, 'report_date': latest_date})
+            
+            latest_dates = pd.DataFrame(latest_dates_list)
             filtered_latest_data = filtered_comparison_df.merge(latest_dates, on=['program', 'cohort_year', 'report_date'])
         else:
             filtered_latest_data = pd.DataFrame()
