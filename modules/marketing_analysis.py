@@ -12,6 +12,26 @@ from datetime import datetime
 
 # Import utility functions
 from utils.database import get_connection, normalize_program_name
+from utils.program_mapping import get_program_code
+
+
+def get_short_program_name(full_name):
+    """
+    Get short program name for display in filters.
+    
+    Args:
+        full_name: Full program name (e.g., 'Flex Online MBA')
+        
+    Returns:
+        Short name for filters (e.g., 'MBA')
+    """
+    code = get_program_code(full_name)
+    # If it's a known code, return it; otherwise return the full name
+    # This handles "General Awareness" which doesn't have a code
+    if code == full_name and 'Flex Online' in full_name:
+        # Extract the short part after "Flex Online"
+        return full_name.replace('Flex Online ', '')
+    return code
 
 
 def render():
@@ -183,25 +203,46 @@ def render():
             # Use independent reset counter for programs
             prog_reset_suffix = f"_{st.session_state.prog_reset_count}"
             prog_state_key_global = f'selected_programs_global{prog_reset_suffix}'
+            prog_available_key = f'available_programs_global{prog_reset_suffix}'
             
             if prog_state_key_global not in st.session_state:
                 st.session_state[prog_state_key_global] = programs_list_global.copy()
             
-            # Auto-update: Remove programs that are no longer available due to fiscal year filter changes
+            # Track the previously available programs to detect when the list changes
+            previous_available_programs = st.session_state.get(prog_available_key, None)
             current_prog_selection_global = st.session_state[prog_state_key_global]
-            valid_programs = [prog for prog in current_prog_selection_global if prog in programs_list_global]
             
-            # If the available programs changed, update the selection to only valid ones
-            if set(valid_programs) != set(current_prog_selection_global):
-                st.session_state[prog_state_key_global] = valid_programs if valid_programs else programs_list_global.copy()
-                current_prog_selection_global = st.session_state[prog_state_key_global]
+            # Only auto-select if the AVAILABLE list changed (upstream filter changed)
+            # Don't auto-select if user manually cleared or changed selection
+            # If previous_available_programs is None, this is the first render with this key (after Clear/All button)
+            # In that case, don't auto-select - respect the user's explicit choice
+            if previous_available_programs is not None and set(programs_list_global) != set(previous_available_programs):
+                # Available programs changed due to upstream filter (FY) change
+                valid_programs = [prog for prog in current_prog_selection_global if prog in programs_list_global]
+                
+                # If none of the previously selected programs are valid, select all new programs
+                if len(valid_programs) == 0 and len(programs_list_global) > 0:
+                    st.session_state[prog_state_key_global] = programs_list_global.copy()
+                    current_prog_selection_global = st.session_state[prog_state_key_global]
+                # If some programs are still valid, keep those AND auto-select any NEW programs
+                elif len(valid_programs) > 0:
+                    # Find newly available programs (in current list but not in previous list)
+                    new_programs = [prog for prog in programs_list_global if prog not in previous_available_programs]
+                    # Combine valid existing selections with new programs
+                    updated_selection = list(set(valid_programs + new_programs))
+                    st.session_state[prog_state_key_global] = updated_selection
+                    current_prog_selection_global = st.session_state[prog_state_key_global]
+            
+            # Always update the tracked available list for next render
+            st.session_state[prog_available_key] = programs_list_global.copy()
             
             if len(current_prog_selection_global) == len(programs_list_global):
                 prog_summary_text_global = "All programs"
             elif len(current_prog_selection_global) == 0:
                 prog_summary_text_global = "No programs selected"
             elif len(current_prog_selection_global) == 1:
-                prog_summary_text_global = current_prog_selection_global[0]
+                # Use short name for single program display
+                prog_summary_text_global = get_short_program_name(current_prog_selection_global[0])
             else:
                 prog_summary_text_global = f"{len(current_prog_selection_global)} programs"
             
@@ -226,8 +267,10 @@ def render():
                 
                 for idx, program in enumerate(programs_list_global):
                     is_checked = program in st.session_state[prog_state_key_global]
+                    # Use short name for display
+                    short_name = get_short_program_name(program)
                     new_value = st.checkbox(
-                        program, 
+                        short_name, 
                         value=is_checked, 
                         key=f"prog_cb_{idx}_global{prog_reset_suffix}"
                     )
@@ -256,18 +299,38 @@ def render():
             # Use independent reset counter for channels
             chan_reset_suffix = f"_{st.session_state.chan_reset_count}"
             chan_state_key_global = f'selected_channels_global{chan_reset_suffix}'
+            chan_available_key = f'available_channels_global{chan_reset_suffix}'
             
             if chan_state_key_global not in st.session_state:
                 st.session_state[chan_state_key_global] = channels_list_global.copy()
             
-            # Auto-update: Remove channels that are no longer available due to upstream filter changes
+            # Track the previously available channels to detect when the list changes
+            previous_available_channels = st.session_state.get(chan_available_key, None)
             current_chan_selection_global = st.session_state[chan_state_key_global]
-            valid_channels = [ch for ch in current_chan_selection_global if ch in channels_list_global]
             
-            # If the available channels changed, update the selection to only valid ones
-            if set(valid_channels) != set(current_chan_selection_global):
-                st.session_state[chan_state_key_global] = valid_channels if valid_channels else channels_list_global.copy()
-                current_chan_selection_global = st.session_state[chan_state_key_global]
+            # Only auto-select if the AVAILABLE list changed (upstream filter changed)
+            # Don't auto-select if user manually cleared or changed selection
+            # If previous_available_channels is None, this is the first render with this key (after Clear/All button)
+            # In that case, don't auto-select - respect the user's explicit choice
+            if previous_available_channels is not None and set(channels_list_global) != set(previous_available_channels):
+                # Available channels changed due to upstream filter (Program) change
+                valid_channels = [ch for ch in current_chan_selection_global if ch in channels_list_global]
+                
+                # If none of the previously selected channels are valid, select all new channels
+                if len(valid_channels) == 0 and len(channels_list_global) > 0:
+                    st.session_state[chan_state_key_global] = channels_list_global.copy()
+                    current_chan_selection_global = st.session_state[chan_state_key_global]
+                # If some channels are still valid, keep those AND auto-select any NEW channels
+                elif len(valid_channels) > 0:
+                    # Find newly available channels (in current list but not in previous list)
+                    new_channels = [ch for ch in channels_list_global if ch not in previous_available_channels]
+                    # Combine valid existing selections with new channels
+                    updated_selection = list(set(valid_channels + new_channels))
+                    st.session_state[chan_state_key_global] = updated_selection
+                    current_chan_selection_global = st.session_state[chan_state_key_global]
+            
+            # Always update the tracked available list for next render
+            st.session_state[chan_available_key] = channels_list_global.copy()
             
             if len(current_chan_selection_global) == len(channels_list_global):
                 chan_summary_text_global = "All channels"
@@ -719,7 +782,9 @@ def render():
                                 
                                 is_selected = st.session_state[f"overview_prog_check_{program}"]
                                 button_type = "primary" if is_selected else "secondary"
-                                button_label = f"✓ {program}" if is_selected else program
+                                # Use short name for button label
+                                short_name = get_short_program_name(program)
+                                button_label = f"✓ {short_name}" if is_selected else short_name
                                 
                                 if st.button(button_label, key=f"overview_prog_btn_{program}", 
                                            use_container_width=True, type=button_type):
@@ -861,8 +926,8 @@ def render():
                         aggfunc='sum'
                     ).reset_index()
                     
-                    # Aggregate marketing spend by month and normalized program
-                    monthly_spend_norm = filtered_spend_adv.groupby(['month_date', 'program_normalized']).agg({
+                    # Aggregate marketing spend by month and normalized program (keep full program name)
+                    monthly_spend_norm = filtered_spend_adv.groupby(['month_date', 'program', 'program_normalized']).agg({
                         'spend_amount': 'sum'
                     }).reset_index()
                     
@@ -924,18 +989,18 @@ def render():
                         """, unsafe_allow_html=True)
                         st.markdown("*See which channels each program invests in*")
                         
-                        # Aggregate spend by program and channel
-                        program_channel_spend = filtered_spend_adv.groupby(['program_normalized', 'channel'])['spend_amount'].sum().reset_index()
+                        # Aggregate spend by program and channel (keep original program name for display)
+                        program_channel_spend = filtered_spend_adv.groupby(['program', 'channel'])['spend_amount'].sum().reset_index()
                         
                         if not program_channel_spend.empty:
                             # Create grouped bar chart
                             fig_grouped = px.bar(
                                 program_channel_spend,
-                                x='program_normalized',
+                                x='program',
                                 y='spend_amount',
                                 color='channel',
                                 title='Marketing Spend by Program and Channel',
-                                labels={'program_normalized': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
+                                labels={'program': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
                                 barmode='group',  # Use 'stack' for stacked bars
                                 color_discrete_sequence=px.colors.qualitative.Set3
                             )
@@ -963,11 +1028,11 @@ def render():
                             if st.session_state.barmode_stacked:
                                 fig_stacked = px.bar(
                                     program_channel_spend,
-                                    x='program_normalized',
+                                    x='program',
                                     y='spend_amount',
                                     color='channel',
                                     title='Marketing Spend by Program and Channel (Stacked)',
-                                    labels={'program_normalized': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
+                                    labels={'program': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
                                     barmode='stack',
                                     color_discrete_sequence=px.colors.qualitative.Set3
                                 )
@@ -990,8 +1055,8 @@ def render():
                         """, unsafe_allow_html=True)
                         st.markdown("*Discover which channels drive the most admissions for each program*")
                         
-                        # Aggregate spend and admissions by program and channel
-                        channel_program_data = filtered_spend_adv.groupby(['program_normalized', 'channel']).agg({
+                        # Aggregate spend and admissions by program and channel (keep both program and program_normalized)
+                        channel_program_data = filtered_spend_adv.groupby(['program', 'program_normalized', 'channel']).agg({
                             'spend_amount': 'sum'
                         }).reset_index()
                         
@@ -1011,23 +1076,23 @@ def render():
                         )
                         
                         # Calculate spend share per channel within each program
-                        program_totals = channel_program_merged.groupby('program_normalized')['spend_amount'].sum().reset_index()
-                        program_totals.columns = ['program_normalized', 'program_total_spend']
+                        program_totals = channel_program_merged.groupby(['program', 'program_normalized'])['spend_amount'].sum().reset_index()
+                        program_totals.columns = ['program', 'program_normalized', 'program_total_spend']
                         
                         channel_program_merged = pd.merge(
                             channel_program_merged,
                             program_totals,
-                            on='program_normalized'
+                            on=['program', 'program_normalized']
                         )
                         
                         channel_program_merged['spend_share'] = (
                             channel_program_merged['spend_amount'] / channel_program_merged['program_total_spend'] * 100
                         )
                         
-                        # Create pivot table for heatmap
+                        # Create pivot table for heatmap (use full program name for display)
                         heatmap_data = channel_program_merged.pivot_table(
                             index='channel',
-                            columns='program_normalized',
+                            columns='program',
                             values='spend_share',
                             fill_value=0
                         )
@@ -1048,14 +1113,14 @@ def render():
                                 st.plotly_chart(fig_heatmap, use_container_width=True, key="channel_program_heatmap")
                             
                             with col2:
-                                # Show top channel per program
+                                # Show top channel per program (use full program name for display)
                                 top_channels = channel_program_merged.loc[
-                                    channel_program_merged.groupby('program_normalized')['spend_amount'].idxmax()
-                                ][['program_normalized', 'channel', 'spend_amount', 'spend_share']]
+                                    channel_program_merged.groupby('program')['spend_amount'].idxmax()
+                                ][['program', 'channel', 'spend_amount', 'spend_share']]
                                 
                                 st.markdown("**Top Channel per Program:**")
                                 for _, row in top_channels.iterrows():
-                                    st.markdown(f"**{row['program_normalized']}**: {row['channel']} ({row['spend_share']:.1f}% of program spend)")
+                                    st.markdown(f"**{row['program']}**: {row['channel']} ({row['spend_share']:.1f}% of program spend)")
                         
                         st.divider()
                         
@@ -1133,8 +1198,8 @@ def render():
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # Calculate program_roi for the table
-                        program_roi = roi_df.groupby('program_normalized').agg({
+                        # Calculate program_roi for the table (use full program name for display)
+                        program_roi = roi_df.groupby('program').agg({
                             'spend_amount': 'sum',
                             'inquiries_received': 'sum',
                             'applications_received': 'sum',

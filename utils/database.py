@@ -29,21 +29,25 @@ def normalize_program_name(program_name):
     name_upper = str(program_name).upper()
     
     # Mapping dictionary for common program abbreviations
+    # Order matters - check more specific patterns first
     program_map = {
-        'MBA': 'MBA',
+        'MANAGEMENT INFORMATION SYSTEMS': 'MISY',
+        'INFORMATION SYSTEMS': 'MISY',
+        'MIS': 'MISY',
+        'MISY': 'MISY',
+        'AI IN BUSINESS': 'SPBA',
+        'AI AND BUSINESS': 'SPBA',
+        'ARTIFICIAL INTELLIGENCE': 'SPBA',
+        'SPBA': 'SPBA',
+        'ENTREPRENEURIAL LEADERSHIP': 'ENLD',
+        'ENLD': 'ENLD',
+        'HUMAN RESOURCE': 'HRM',
+        'HRM': 'HRM',
         'ACCOUNTING': 'ACCT',
         'ACCT': 'ACCT',
         'MARKETING': 'MKTG',
         'MKTG': 'MKTG',
-        'MIS': 'MISY',
-        'MISY': 'MISY',
-        'HRM': 'HRM',
-        'HUMAN RESOURCE': 'HRM',
-        'ENTREPRENEURIAL LEADERSHIP': 'ENLD',
-        'ENLD': 'ENLD',
-        'AI AND BUSINESS': 'SPBA',
-        'SPBA': 'SPBA',
-        'ARTIFICIAL INTELLIGENCE': 'SPBA'
+        'MBA': 'MBA',
     }
     
     # Check each key in the mapping
