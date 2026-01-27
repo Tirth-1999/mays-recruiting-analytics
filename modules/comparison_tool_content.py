@@ -95,11 +95,23 @@ def render_comparison_tool(key_prefix="comp_tool"):
             secondary_data = secondary_data[secondary_data['program'] == program_filter_comp]
         
         if not primary_data.empty and not secondary_data.empty:
-            # Get latest data for both cohorts
-            primary_latest_date = primary_data['report_date'].max()
+            # Get latest data with non-zero values for both cohorts
+            # Primary cohort
+            primary_dates_with_data = primary_data.groupby('report_date')['metric_value'].sum()
+            primary_dates_with_nonzero = primary_dates_with_data[primary_dates_with_data > 0].index
+            if len(primary_dates_with_nonzero) > 0:
+                primary_latest_date = primary_dates_with_nonzero.max()
+            else:
+                primary_latest_date = primary_data['report_date'].max()
             primary_latest = primary_data[primary_data['report_date'] == primary_latest_date]
             
-            secondary_latest_date = secondary_data['report_date'].max()
+            # Secondary cohort
+            secondary_dates_with_data = secondary_data.groupby('report_date')['metric_value'].sum()
+            secondary_dates_with_nonzero = secondary_dates_with_data[secondary_dates_with_data > 0].index
+            if len(secondary_dates_with_nonzero) > 0:
+                secondary_latest_date = secondary_dates_with_nonzero.max()
+            else:
+                secondary_latest_date = secondary_data['report_date'].max()
             secondary_latest = secondary_data[secondary_data['report_date'] == secondary_latest_date]
             
             program_scope = f" - {program_filter_comp}" if program_filter_comp != "All Programs" else ""
