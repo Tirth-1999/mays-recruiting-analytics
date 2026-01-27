@@ -112,6 +112,9 @@ st.markdown("""
     /* Sidebar - push content instead of overlay */
     [data-testid="stSidebar"][aria-expanded="true"] {
         /* Remove fixed positioning to allow sidebar to push content */
+        width: 220px !important;  /* Reduced from default ~336px */
+        min-width: 220px !important;
+        max-width: 220px !important;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
     }
     [data-testid="stSidebar"][aria-expanded="false"] {
@@ -122,6 +125,7 @@ st.markdown("""
     [data-testid="stSidebar"] > div:first-child {
         padding-top: 0px !important;
         padding-bottom: 0px !important;
+        width: 220px !important;
     }
     
     [data-testid="stSidebarContent"] {
@@ -199,14 +203,14 @@ st.markdown("""
     [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         text-align: left !important;
-        padding: 6px 12px !important;
+        padding: 6px 10px !important;  /* Reduced horizontal padding */
         margin: 0px 0 !important;
         border-radius: 6px !important;
         border: none !important;
         background: white !important;
         color: #495057 !important;
         font-weight: 500 !important;
-        font-size: 13px !important;
+        font-size: 12px !important;  /* Slightly smaller font */
         transition: all 0.2s ease !important;
     }
     [data-testid="stSidebar"] .stButton > button:hover {
@@ -225,22 +229,22 @@ st.markdown("""
     @media (min-height: 900px) {
         .sidebar-brand { padding: 12px 10px 12px 10px; margin-bottom: 0px; }
         .sidebar-logo { width: 40px !important; height: 40px !important; }
-        .sidebar-brand-title { font-size: 15px !important; margin: 6px 0 2px 0 !important; }
-        .sidebar-brand-subtitle { font-size: 11px !important; }
-        [data-testid="stSidebar"] .stButton > button { padding: 8px 15px !important; margin: 0px 0 !important; font-size: 14px !important; }
+        .sidebar-brand-title { font-size: 14px !important; margin: 6px 0 2px 0 !important; }
+        .sidebar-brand-subtitle { font-size: 10px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 7px 12px !important; margin: 0px 0 !important; font-size: 13px !important; }
         .sidebar-divider { margin: 12px 0 !important; }
-        .sidebar-footer { padding: 12px 10px !important; margin-top: 12px !important; font-size: 10px !important; }
+        .sidebar-footer { padding: 12px 10px !important; margin-top: 12px !important; font-size: 9px !important; }
     }
     
     /* Responsive spacing - Laptop (700-900px height) */
     @media (min-height: 700px) and (max-height: 899px) {
         .sidebar-brand { padding: 8px 10px 6px 10px; margin-bottom: 0px; }
         .sidebar-logo { width: 34px !important; height: 34px !important; }
-        .sidebar-brand-title { font-size: 13px !important; margin: 4px 0 2px 0 !important; }
-        .sidebar-brand-subtitle { font-size: 10px !important; }
-        [data-testid="stSidebar"] .stButton > button { padding: 6px 12px !important; margin: 0px 0 !important; font-size: 13px !important; }
+        .sidebar-brand-title { font-size: 12px !important; margin: 4px 0 2px 0 !important; }
+        .sidebar-brand-subtitle { font-size: 9px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 6px 10px !important; margin: 0px 0 !important; font-size: 12px !important; }
         .sidebar-divider { margin: 10px 0 !important; }
-        .sidebar-footer { padding: 10px 10px !important; margin-top: 10px !important; font-size: 9px !important; }
+        .sidebar-footer { padding: 10px 10px !important; margin-top: 10px !important; font-size: 8px !important; }
     }
     
     /* Responsive spacing - Tablet (<700px height) */
@@ -248,10 +252,10 @@ st.markdown("""
         .sidebar-brand { padding: 6px 10px 6px 10px; margin-bottom: 0px; }
         .sidebar-logo { width: 28px !important; height: 28px !important; }
         .sidebar-brand-title { font-size: 11px !important; margin: 3px 0 1px 0 !important; }
-        .sidebar-brand-subtitle { font-size: 9px !important; }
-        [data-testid="stSidebar"] .stButton > button { padding: 5px 10px !important; margin: 0px 0 !important; font-size: 12px !important; }
+        .sidebar-brand-subtitle { font-size: 8px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 5px 8px !important; margin: 0px 0 !important; font-size: 11px !important; }
         .sidebar-divider { margin: 8px 0 !important; }
-        .sidebar-footer { padding: 8px 5px !important; margin-top: 8px !important; font-size: 8px !important; }
+        .sidebar-footer { padding: 8px 5px !important; margin-top: 8px !important; font-size: 7px !important; }
     }
 
     /* Navigation and content styling */
