@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 6.1** | **Last Updated: January 27, 2026**
+**Version 6.5** | **Last Updated: January 27, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, featuring natural language query interface, real-time insights, and secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-6.1-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.5-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,15 +17,27 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 6.1
+## What's New in Version 6.5
 
-**Sidebar Profile Enhancement** - Released January 27, 2026
+**UI/UX Polish & Mobile Optimization** - Released January 27, 2026
 
-### 🎨 Enhanced User Interface
-- **Redesigned Profile Card**: Streamlined sidebar profile with circular avatar, user details, and inline logout
-- **Improved Spacing**: Optimized header and sidebar spacing for better visual hierarchy
-- **Native Components**: Replaced custom CSS with Streamlit native components for better reliability
-- **Responsive Design**: Profile card adapts seamlessly across different screen sizes
+### 🎨 Enhanced Visualizations
+- **Responsive Metrics**: Dynamic font sizing with CSS clamp() for all key metrics
+- **Mobile-Optimized Charts**: Vertical labels (0°) on mobile, angled (-45°) on desktop
+- **Enhanced Tooltips**: Added helpful tooltips to all major charts with filter guidance
+- **Value Labels**: Numbers displayed on bar charts with proper Y-axis spacing
+- **Centered Titles**: All chart titles and legends properly centered
+
+### 📊 Layout Improvements
+- **Performance Radar**: Responsive breakpoint at 1400px - explanation boxes move to bottom on smaller screens
+- **Channel Performance**: Full-width heatmap with color-coded top channels below
+- **Spend Trends**: Shadow effects under line graphs, legend moved to top center
+- **Program Comparison**: Mobile-friendly with dynamic legend positioning
+
+### 🧹 Interface Cleanup
+- **Removed Dividers**: Cleaner sections without excessive visual separators
+- **Removed Print Buttons**: Streamlit's native print functionality used instead
+- **Removed Dead Code**: Cleaned up ~150 lines of unused print CSS
 
 ### Previous Major Release: Version 6.0 (January 25, 2026)
 
@@ -194,7 +206,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **6.1** | Jan 27, 2026 | Sidebar Profile Enhancement |
+| **6.5** | Jan 27, 2026 | UI/UX Polish & Mobile Optimization |
 | **6.0** | Jan 25, 2026 | AI Chat Assistant with Natural Language Queries |
 | **5.2** | Jan 25, 2026 | OAuth Button Refinement |
 | **5.1** | Jan 25, 2026 | OAuth Fix & Consent Screen |
@@ -231,6 +243,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 6.1 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 6.5 • Built for Texas A&M Mays Business School
 
 </div>

@@ -4,6 +4,60 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 6.5
+
+**UI/UX Polish & Mobile Optimization** - Released January 27, 2026
+
+### 🎨 Responsive Design Enhancements
+- **Dynamic Font Sizing**: All key metrics use CSS clamp() for responsive text that adapts to viewport width
+- **Sidebar-Aware Breakpoints**: Responsive layouts account for sidebar width (1400px, 1200px, 900px, 768px)
+- **Mobile-Optimized Labels**: Chart labels display vertically (0°) on mobile, angled (-45°) on desktop
+- **Centered Content**: All metrics, titles, and text properly centered with equal padding
+
+### 📊 Chart Improvements
+- **Enhanced Tooltips**: Added helpful tooltips to major charts explaining filter usage
+- **Value Labels on Bars**: Numbers displayed on bar charts with extended Y-axis to prevent clipping
+- **Shadow Effects**: Line graphs feature subtle shadow fills for better visual depth
+- **Legend Positioning**: Legends moved to top center on mobile for better space utilization
+- **Performance Radar**: Responsive at 1400px - explanation boxes move below chart on smaller screens
+
+### 🎯 Marketing Analysis Updates
+- **Channel Performance by Program**: 
+  - Full-width heatmap with centered title
+  - Top channels displayed in responsive card grid below heatmap
+  - Color-coded spend amounts and percentages
+  - Removed subtitle clutter for cleaner look
+- **Spend vs Outcomes Trend**:
+  - Shadow effects under line graphs
+  - Proper fiscal year filtering (FY25 format support)
+  - Centered subplot titles
+- **Channel Analytics**:
+  - Tooltips on all charts
+  - Centered titles throughout
+  - Values displayed on bar charts
+  - Legend moved to top center with proper spacing
+
+### 🧹 Interface Cleanup
+- **Removed Dividers**: Cleaned up excessive dividers in Director's Deep Dive, Marketing Analysis, and Predictive Analytics
+- **Removed Print Buttons**: Streamlit's native print functionality used instead of custom buttons
+- **Removed Dead Code**: Cleaned up ~150 lines of unused print CSS from database.py
+
+### 📱 Mobile Optimization
+- **Program Comparison Chart**: Labels perfectly vertical on mobile (≤768px)
+- **Spend by Program & Channel**: Legend moves to bottom on mobile with increased chart height
+- **Responsive Metrics**: All 6 metrics in Director's Deep Dive adapt dynamically like Marketing Analysis
+
+### 🔧 Technical Implementation
+- CSS clamp() for fluid typography: `clamp(min, preferred, max)`
+- Media queries for responsive breakpoints
+- JavaScript for dynamic layout adjustments
+- Aggressive !important flags to override Streamlit's global CSS
+- Flexbox for proper centering without wrapping issues
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 6.0
 
 **AI-Powered Analytics** - Released January 25, 2026
@@ -246,8 +300,8 @@ MIT License information.
 
 ## Platform Overview
 
-**Current Version:** 5.2  
-**Last Updated:** January 25, 2026
+**Current Version:** 6.5  
+**Last Updated:** January 27, 2026
 
 ### Analytics Pages
 - Home Dashboard
@@ -377,4 +431,4 @@ See the [Technical Guide](TECHNICAL_GUIDE.md) for common issues and solutions.
 
 ---
 
-**Mays Analytics Documentation** | Version 4.0 | Last Updated: January 23, 2026
+**Mays Analytics Documentation** | Version 6.5 | Last Updated: January 27, 2026

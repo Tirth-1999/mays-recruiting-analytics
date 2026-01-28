@@ -45,6 +45,8 @@ Jan 2026  ███████████████████████�
 Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v6.1 - Sidebar Profile Enhancement
           │
 Jan 2026  ████████████████████████████  v6.2 - Professor Feedback Implementation
+          │
+Jan 2026  ████████████████████████████  v6.5 - UI/UX Polish & Mobile Optimization
 ```
 
 ---
@@ -53,6 +55,7 @@ Jan 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **6.5** | Major | UI/UX Polish & Mobile Optimization | 3 | +850 |
 | **6.2** | Major | Professor Feedback Implementation | 20 | +4,095 |
 | 6.1 | UI Enhancement | Restored profile card with scrollable sidebar | 2 | ~50 |
 | **6.0** | Major | AI Chat Assistant with NLP | 25+ | +3,500 |
@@ -71,6 +74,102 @@ Jan 2026  ███████████████████████�
 | **2.1** | Minor | Global Filters | 4 | +289 |
 | **2.0** | Major | Marketing Integration | 6 | +1,234 |
 | **1.0** | Major | Initial Release | - | +3,500 |
+
+---
+
+## [6.5.0] - 2026-01-27
+
+### 🎨 Major Release - UI/UX Polish & Mobile Optimization
+
+#### Responsive Design Enhancements
+- **Dynamic Font Sizing**: Implemented CSS `clamp()` for all key metrics
+  - Marketing Analysis: 6 metrics with responsive text (numbers, labels, small text)
+  - Director's Deep Dive: 6 metrics with same responsive styling
+  - Font sizes adapt smoothly to viewport width
+  - Breakpoints: 1400px (3 cols), 900px (2 cols), 768px (1 col)
+- **Sidebar-Aware Layouts**: All responsive breakpoints account for sidebar width
+- **Centered Content**: Fixed centering issues with 15px left padding on metric numbers
+- **Production CSS**: Added `!important` flags to override Streamlit's global CSS
+
+#### Chart Improvements
+- **Enhanced Tooltips**: Added helpful tooltips to major charts
+  - "Use the buttons above to filter channels • Click legend items to toggle data"
+  - Positioned above filters for better UX
+- **Value Labels on Bars**: 
+  - Spend Distribution by Channel: Dollar values on bars with `texttemplate='$%{text:,.0f}'`
+  - Extended Y-axis by 35% (linear) and 0.8 log units (log scale) to prevent clipping
+  - Increased margins: top 80px, bottom 70px
+- **Centered Titles**: All chart titles properly centered across platform
+- **Shadow Effects**: Line graphs feature subtle shadow fills (`fill='tozeroy'` with 10% opacity)
+
+#### Marketing Analysis Updates
+- **Channel Performance by Program**:
+  - Restructured from 2-column to full-width heatmap (500px height)
+  - Moved "Top Channel per Program" below heatmap
+  - Created responsive card grid (min 300px per card)
+  - Color coding: spend amount (relative), percentage (absolute thresholds)
+  - Removed left borders, emoticons, and subtitle clutter
+  - Fixed HTML rendering by building string without indentation
+- **Spend vs Outcomes Trend**:
+  - Fixed fiscal year filtering (parses 'FY25' format correctly)
+  - Added shadow effects under line graphs
+  - Removed peak zones and annotations for cleaner look
+  - Centered subplot titles
+  - Height: 650px with proper legend positioning
+- **Channel Analytics**:
+  - Added tooltips to Spend Distribution and Channel Spend Trends
+  - Centered all chart titles
+  - Channel Spend Trends: Legend moved from right to top center (horizontal)
+  - Increased height to 500px with 120px top margin
+  - Legend font size: 10px for better readability
+
+#### Mobile Optimization
+- **Program Comparison Chart (Executive Dashboard)**:
+  - Desktop: -45° angle for x-axis labels
+  - Mobile (≤768px): 0° angle (perfectly vertical)
+  - JavaScript dynamically adjusts based on screen width
+  - Increased bottom margin to 150px for labels
+- **Spend by Program & Channel**:
+  - Desktop: Legend on right side (vertical)
+  - Mobile (≤768px): Legend moves to bottom (horizontal), height increases to 600px
+  - JavaScript adjusts layout dynamically
+  - Bottom margin increases to 150px on mobile
+- **Performance Radar (Director's Deep Dive)**:
+  - Responsive breakpoint at 1400px
+  - Explanation boxes move from right side to bottom on smaller screens
+  - Vertical spacing (120px) only applies on screens >1400px
+  - CSS media queries force columns to stack
+
+#### Interface Cleanup
+- **Removed Dividers**:
+  - Director's Deep Dive: Before/after "How to Use This Section", 2 from Comparison Tool
+  - Marketing Analysis: Before/after "How to Use This Analysis"
+  - Predictive Analytics: After "How to Use This Page"
+  - Cleaner interface with less visual clutter
+- **Removed Print Buttons**:
+  - Removed custom Print buttons from footers (directors_deep_dive, marketing_analysis, executive_dashboard)
+  - Replaced with empty center column in footer
+  - Users now use Streamlit's built-in print functionality
+- **Removed Dead Code**:
+  - Removed ~150 lines of unused print CSS from database.py
+  - Cleaned up duplicate code blocks
+
+#### Technical Implementation
+- **Files Modified**: 3 (modules/directors_deep_dive.py, modules/marketing_analysis.py, modules/executive_dashboard.py)
+- **CSS Techniques**: 
+  - `clamp(min, preferred, max)` for fluid typography
+  - Media queries for responsive breakpoints
+  - Flexbox for centering without wrapping
+  - `!important` flags for production CSS
+- **JavaScript**: Dynamic layout adjustments based on screen width
+- **Performance**: No impact on load times, all changes are CSS/JS only
+
+#### User Experience Impact
+- Metrics properly centered and responsive across all devices
+- Charts display values without clipping
+- Mobile users get optimized layouts (vertical labels, repositioned legends)
+- Cleaner interface with less visual noise
+- Professional appearance with consistent styling
 
 ---
 
@@ -830,6 +929,17 @@ Jan 2026  ███████████████████████�
 
 | Version | Release Date | Type | Key Features |
 |---------|-------------|------|--------------|
+| **6.5.0** | 2026-01-27 | Major | UI/UX Polish & Mobile Optimization |
+| **6.2.0** | 2026-01-27 | Major | Professor Feedback Implementation |
+| **6.1.0** | 2026-01-26 | Minor | Sidebar Profile Enhancement |
+| **6.0.0** | 2026-01-25 | Major | AI Chat Assistant with NLP |
+| **5.2.0** | 2026-01-25 | Minor | OAuth Button Refinement |
+| **5.1.0** | 2026-01-25 | Minor | OAuth Fix & Consent Screen |
+| **5.0.0** | 2026-01-24 | Major | Authentication & UI Optimization |
+| **4.4.0** | 2026-01-24 | Minor | Navigation & UX (Final) |
+| **4.3.0** | 2026-01-24 | Minor | Navigation & UX (Initial) |
+| **4.2.0** | 2026-01-24 | Minor | Contact & Feedback Integration |
+| **4.1.0** | 2026-01-24 | Minor | UI/UX & Responsive Design |
 | **4.0.0** | 2026-01-23 | Major | Predictive Analytics & ML Integration |
 | **3.0.0** | 2026-01-23 | Major | Complete Modular Architecture |
 | **2.4.0** | 2026-01-23 | Minor | UI/UX Refinements |
@@ -875,6 +985,17 @@ Jan 2026  ███████████████████████�
 
 ---
 
+[6.5.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v6.5
+[6.2.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v6.2
+[6.1.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v6.1
+[6.0.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v6.0
+[5.2.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v5.2
+[5.1.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v5.1
+[5.0.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v5.0
+[4.4.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v4.4
+[4.3.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v4.3
+[4.2.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v4.2
+[4.1.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v4.1
 [4.0.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v4.0.0
 [3.0.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v3.0.0
 [2.4.0]: https://github.com/Tirth-1999/mays-recruiting-analytics/releases/tag/v2.4.0
