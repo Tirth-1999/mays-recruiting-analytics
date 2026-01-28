@@ -30,7 +30,7 @@ except ImportError:
         # Secrets not configured - set defaults for development
         GOOGLE_CLIENT_ID = ""
         GOOGLE_CLIENT_SECRET = ""
-        GOOGLE_REDIRECT_URI = "http://localhost:8501"
+        GOOGLE_REDIRECT_URI = "http://localhost:8502"  # Default to 8502
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 

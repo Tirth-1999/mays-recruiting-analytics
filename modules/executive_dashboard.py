@@ -719,14 +719,7 @@ def render():
         if 'prog_home_log_scale' not in st.session_state:
             st.session_state.prog_home_log_scale = False
         
-        # Filter controls with custom styling
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin: 15px 0;">
-        """, unsafe_allow_html=True)
-        
+        # Filter controls
         filter_col1, filter_col2, filter_col3, filter_col4, filter_col5 = st.columns(5)
         
         with filter_col1:
@@ -778,8 +771,6 @@ def render():
             ):
                 st.session_state.prog_home_log_scale = not st.session_state.prog_home_log_scale
                 st.rerun()
-        
-        st.markdown("</div>", unsafe_allow_html=True)
         
         # Check if we have data after filtering
         if filtered_latest_data.empty:
@@ -843,34 +834,89 @@ def render():
                     
                     if max_values:
                         max_y = max(max_values)
-                        # Add 20% padding to prevent clipping
-                        y_range = [0, max_y * 1.20]
+                        # Add 120% padding to prevent clipping of text labels (doubled from 80%)
+                        y_range = [0, max_y * 2.20]
                     else:
                         y_range = None
                 else:
-                    y_range = None
+                    # For log scale, also add significant padding
+                    max_values = []
+                    for metric, (label, show_flag, color) in metrics_to_plot.items():
+                        if metric in program_comparison.columns and show_flag:
+                            max_values.append(program_comparison[metric].max())
+                    
+                    if max_values:
+                        max_y = max(max_values)
+                        # Add 120% padding for log scale too
+                        y_range = [None, max_y * 2.20]
+                    else:
+                        y_range = None
                 
                 fig_comparison.update_layout(
                     barmode='group',
-                    height=500,
+                    height=600,  # Increased height from 550 to 600
                     xaxis_title='Program',
                     yaxis_title='Count',
                     yaxis_type='log' if st.session_state.prog_home_log_scale else 'linear',
                     yaxis_range=y_range,
-                    margin=dict(t=120, b=80, l=60, r=60),  # Increased margins for better spacing
+                    margin=dict(t=120, b=150, l=60, r=60),  # Increased bottom margin for angled labels
                     legend=dict(
-                        x=1, y=1,
-                        xanchor='right', yanchor='top',
+                        orientation='h',
+                        x=0.5, y=1.15,  # Moved to top center with negative padding
+                        xanchor='center', yanchor='bottom',
                         bgcolor='rgba(255,255,255,0.9)',
                         bordercolor='rgba(0,0,0,0.2)',
                         borderwidth=1
+                    ),
+                    xaxis=dict(
+                        tickangle=-45  # Default angle for desktop
                     )
                 )
+                
+                # Use Plotly's responsive config
+                config = {
+                    'responsive': True,
+                    'displayModeBar': True,
+                    'displaylogo': False
+                }
+                
+                # Add custom CSS for mobile responsiveness
+                st.markdown("""
+                <style>
+                @media (max-width: 768px) {
+                    /* Make chart take full width on mobile */
+                    .js-plotly-plot {
+                        width: 100% !important;
+                    }
+                }
+                </style>
+                """, unsafe_allow_html=True)
+                
+                # Adjust tick angle based on screen size using JavaScript
+                st.markdown("""
+                <script>
+                function adjustChartForMobile() {
+                    if (window.innerWidth <= 768) {
+                        // Perfectly vertical labels on mobile (0 degrees)
+                        Plotly.relayout(document.querySelector('.js-plotly-plot'), {
+                            'xaxis.tickangle': 0
+                        });
+                    } else {
+                        // Angled labels on desktop
+                        Plotly.relayout(document.querySelector('.js-plotly-plot'), {
+                            'xaxis.tickangle': -45
+                        });
+                    }
+                }
+                window.addEventListener('resize', adjustChartForMobile);
+                adjustChartForMobile();
+                </script>
+                """, unsafe_allow_html=True)
                 
                 # Center the chart
                 col_spacer1, col_chart, col_spacer2 = st.columns([0.2, 3.6, 0.2])
                 with col_chart:
-                    st.plotly_chart(fig_comparison, use_container_width=True)
+                    st.plotly_chart(fig_comparison, use_container_width=True, config=config)
         
         st.markdown("---")
     
@@ -1195,7 +1241,13 @@ def render():
                         height=500,
                         xaxis_title='',
                         yaxis_title='Spend ($)',
-                        margin=dict(t=100, b=100, l=70, r=40),  # Increased top margin for labels
+                        title={
+                            'text': 'Spend by Program & Channel',
+                            'x': 0.5,
+                            'xanchor': 'center',
+                            'font': {'size': 16}
+                        },
+                        margin=dict(t=120, b=100, l=70, r=40),  # Increased top margin for title and labels
                         xaxis={
                             'tickangle': -45,
                             'tickfont': {'size': 11}
@@ -1217,6 +1269,47 @@ def render():
                             borderwidth=1
                         )
                     )
+                    
+                    # Add responsive behavior for mobile
+                    st.markdown("""
+                    <style>
+                    @media (max-width: 768px) {
+                        /* Make chart take more space on mobile */
+                        .js-plotly-plot {
+                            width: 100% !important;
+                            height: 600px !important;
+                        }
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    
+                    # Add JavaScript to adjust layout on mobile
+                    st.markdown("""
+                    <script>
+                    function adjustMarketingChart() {
+                        if (window.innerWidth <= 768) {
+                            var plots = document.querySelectorAll('.js-plotly-plot');
+                            plots.forEach(function(plot, index) {
+                                if (plot && plot.layout && index === 0) {
+                                    Plotly.relayout(plot, {
+                                        'legend.orientation': 'h',
+                                        'legend.x': 0.5,
+                                        'legend.y': -0.2,
+                                        'legend.xanchor': 'center',
+                                        'legend.yanchor': 'top',
+                                        'margin.t': 80,
+                                        'margin.b': 150,
+                                        'height': 600
+                                    });
+                                }
+                            });
+                        }
+                    }
+                    window.addEventListener('resize', adjustMarketingChart);
+                    setTimeout(adjustMarketingChart, 100);
+                    </script>
+                    """, unsafe_allow_html=True)
+                    
                     st.plotly_chart(fig_prog, use_container_width=True)
                 
                 with col_chart2:
@@ -1262,27 +1355,11 @@ def render():
         </div>
         """, unsafe_allow_html=True)
     with footer_col2:
-        st.components.v1.html("""
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
-            <button onclick="window.top.print()" 
-                    style="background-color: white;
-                           color: #500000;
-                           border: 2px solid #e0e0e0;
-                           border-radius: 8px;
-                           padding: 0.6rem 1.2rem;
-                           font-size: 0.95rem;
-                           font-weight: 600;
-                           cursor: pointer;
-                           transition: all 0.3s ease;
-                           width: 100%;
-                           min-height: 45px;
-                           font-family: 'Source Sans Pro', sans-serif;"
-                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
-                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
-                🖨️ Print Page
-            </button>
+        st.markdown("""
+        <div class="footer-center footer-content" style="text-align: center;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;"></p>
         </div>
-        """, height=70)
+        """, unsafe_allow_html=True)
     with footer_col3:
         st.markdown("""
         <div class="footer-right footer-content" style="text-align: right;">

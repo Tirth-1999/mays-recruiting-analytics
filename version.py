@@ -4,7 +4,7 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "6.2"
+VERSION = "6.5"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
@@ -14,8 +14,8 @@ VERSION_SHORT = f"v{VERSION}"
 LAST_UPDATED = "January 27, 2026"
 
 # Version metadata
-VERSION_NAME = "Professor Feedback Implementation"
-VERSION_STATUS = "Production Ready - Enhanced Filters & Data Standardization"
+VERSION_NAME = "UI/UX Polish & Mobile Optimization"
+VERSION_STATUS = "Production Ready - Enhanced Visualizations & Responsive Design"
 
 # Feature flags
 ENABLE_AI_CHAT = True

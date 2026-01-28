@@ -147,6 +147,142 @@ def render():
     </div>
     """, unsafe_allow_html=True)
     
+    # Flex Online Programs Section
+    st.markdown("""
+    <style>
+    .program-link-button {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        text-decoration: none !important;
+        display: block;
+        text-align: center;
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+    }
+    
+    .program-link-button:hover {
+        border-color: #500000;
+        box-shadow: 0 4px 12px rgba(80, 0, 0, 0.15);
+        transform: translateY(-2px);
+        text-decoration: none !important;
+    }
+    
+    .program-link-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .program-link-title {
+        color: #500000;
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0;
+        line-height: 1.3;
+        display: block;
+        text-decoration: none !important;
+    }
+    
+    .program-link-button:hover .program-link-title {
+        color: #700000;
+        text-decoration: none !important;
+    }
+    
+    .program-link-code {
+        color: #999;
+        font-size: 11px;
+        margin-top: 5px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+    
+    /* Remove underline from links */
+    a.program-link-button, a.program-link-button:hover, a.program-link-button:visited, a.program-link-button:active {
+        text-decoration: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<h3 style='text-align: center; color: #500000; margin-top: 30px; margin-bottom: 10px;'>Flex Online Programs</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #666; font-size: 14px; margin-bottom: 25px;'>Explore our graduate programs designed for working professionals</p>", unsafe_allow_html=True)
+    
+    programs = [
+        {
+            "icon": "🎓",
+            "title": "Flex Online MBA",
+            "code": "MBA",
+            "url": "https://mays.tamu.edu/graduate/mba/flex-online-mba/"
+        },
+        {
+            "icon": "📊",
+            "title": "Flex Online MS in Accounting",
+            "code": "MS ACCT",
+            "url": "https://mays.tamu.edu/graduate/flex-online/ms-accounting/"
+        },
+        {
+            "icon": "🚀",
+            "title": "Flex Online MS in Entrepreneurial Leadership",
+            "code": "MS ENLD",
+            "url": "https://mays.tamu.edu/graduate/flex-online/ms-entrepreneurial-leadership/"
+        },
+        {
+            "icon": "👥",
+            "title": "Flex Online MS in Human Resource Management",
+            "code": "MS HRM",
+            "url": "https://mays.tamu.edu/graduate/flex-online/human-resource-management/"
+        },
+        {
+            "icon": "💻",
+            "title": "Flex Online MS in Management Information Systems",
+            "code": "MS MISY",
+            "url": "https://mays.tamu.edu/graduate/flex-online/management-information-systems-online/"
+        },
+        {
+            "icon": "📈",
+            "title": "Flex Online MS in Marketing",
+            "code": "MS MKTG",
+            "url": "https://mays.tamu.edu/graduate/flex-online/ms-marketing/"
+        },
+        {
+            "icon": "🤖",
+            "title": "Flex Online AI & Business Certificate",
+            "code": "CERTIFICATE",
+            "url": "https://mays.tamu.edu/ai/artificial-intelligence-ai-and-business-certificate/"
+        }
+    ]
+    
+    # First 6 programs in 3 columns (2 rows)
+    col1, col2, col3 = st.columns(3)
+    
+    for idx in range(6):
+        col = [col1, col2, col3][idx % 3]
+        program = programs[idx]
+        with col:
+            st.markdown(f"""
+            <a href="{program['url']}" target="_blank" class="program-link-button">
+                <span class="program-link-icon">{program['icon']}</span>
+                <span class="program-link-title">{program['title']}</span>
+                <span class="program-link-code">{program['code']}</span>
+            </a>
+            """, unsafe_allow_html=True)
+    
+    # Last program centered
+    col_left, col_center, col_right = st.columns([1, 1, 1])
+    with col_center:
+        program = programs[6]
+        st.markdown(f"""
+        <a href="{program['url']}" target="_blank" class="program-link-button">
+            <span class="program-link-icon">{program['icon']}</span>
+            <span class="program-link-title">{program['title']}</span>
+            <span class="program-link-code">{program['code']}</span>
+        </a>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Key Questions This Platform Answers - centered header with responsive grid
     st.markdown("<h3 style='text-align: center; color: #500000;'>Key Questions This Platform Answers</h3>", unsafe_allow_html=True)
     
@@ -271,74 +407,82 @@ def render():
     # Page-by-Page Guide with Chrome-style tabs
     st.markdown("<h3 style='text-align: center; color: #500000;'>Page-by-Page Guide</h3>", unsafe_allow_html=True)
     
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-        "🏠 Home",
-        "📊 Executive",
-        "🔄 Compare",
-        "📈 Marketing",
-        "🔮 Forecasting",
-        "💾 Database",
-        "💬 AI Chat"
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "🏠 Executive Dashboard",
+        "📊 Director's Deep Dive",
+        "📈 Marketing Analysis",
+        "🔮 Predictive Analytics",
+        "💾 Data Explorer",
+        "💬 AI Chat Assistant"
     ])
     
     with tab1:
         st.markdown("""
-        **Purpose**: Quick overview of current cohort performance and goal tracking
+        **Purpose**: High-level overview of program performance with goal tracking and marketing insights
         
         **Best For**:
-        - Daily/weekly check-ins
-        - Quick status updates
+        - Executive briefings and leadership updates
+        - Quick status checks across all programs
         - Identifying programs needing attention
-        - Sharing high-level metrics with leadership
+        - Tracking progress toward enrollment goals
+        
+        **Two Main Sections**:
+        
+        **1. Program Comparison**
+        - Compare enrollment metrics across programs
+        - Filter by cohort and specific programs
+        - View inquiries, applications, admissions, and enrollments
+        - Toggle between linear and log scale for better visualization
+        - Interactive bar charts with detailed tooltips
+        
+        **2. Marketing Insights**
+        - Overview of marketing spend and effectiveness
+        - Filter by fiscal year, program, and channel
+        - Key metrics: Total spend, CPI, CPA, conversion rates
+        - Spend distribution by program and channel
+        - ROI analysis and trend visualization
         
         **How to Use**:
-        1. **Select Cohort**: Choose the cohort you want to analyze (e.g., Class of 2028)
-        2. **Review Key Metrics**: See total inquiries, applications, admissions, and anticipated cohort size
-        3. **Check Goal Progress**: Visual indicators show if you're on track (green), at risk (yellow), or behind (red)
-        4. **Compare Programs**: Bar chart shows performance across all programs
-        5. **Analyze Trends**: Line chart displays monthly progression
-        6. **Export Data**: Download charts and tables for presentations
+        1. **Select Filters**: Choose cohort, programs, fiscal year, and channels
+        2. **Review Metrics**: See key performance indicators at a glance
+        3. **Compare Programs**: Identify top and underperforming programs
+        4. **Analyze Marketing**: Understand spend efficiency and ROI
+        5. **Export Data**: Download charts for presentations
         
-        **Key Features**:
-        - **Goal Tracking**: Set and monitor cohort size goals
-        - **Program Comparison**: See which programs are over/under-performing
-        - **Trend Visualization**: Understand monthly patterns
-        - **Quick Insights**: AI-generated insights highlight important trends
-        
-        **Pro Tip**: Use this page for your weekly team meetings to quickly show progress!
+        **Pro Tip**: Use this page for executive briefings to show both enrollment and marketing performance in one view!
         """)
     
     with tab2:
         st.markdown("""
-        **Purpose**: Deep-dive analysis into specific programs and cohorts with advanced metrics
+        **Purpose**: Detailed program-level analysis with conversion funnels and trend tracking
         
         **Best For**:
-        - Monthly reviews
-        - Program-specific analysis
-        - Understanding conversion rates
-        - Identifying bottlenecks in the funnel
+        - Monthly program reviews
+        - Deep-dive into specific program performance
+        - Understanding conversion rates and bottlenecks
+        - Identifying areas for improvement
         
         **Four Analysis Tabs**:
         
-        **1. Performance Analysis Tab**
+        **1. Performance Analysis**
         - Funnel visualization (Inquiries → Applications → Admissions → Enrolled)
         - Conversion rates at each stage
         - Performance benchmarks (Inquiry Conversion Rate, Yield Rate, Application Completion Rate)
         - Goal tracking with visual indicators
         
-        **2. Trend Analysis Tab**
+        **2. Trend Analysis**
         - Monthly trends for all metrics
         - Interactive line charts
         - Identify seasonal patterns
         - Spot anomalies or changes
         
-        **3. Program Deep Dive Tab**
+        **3. Program Deep Dive**
         - Detailed data table with all metrics
         - Month-by-month breakdown
         - Sortable columns
         - Export capability
         
-        **4. Comparative Insights Tab**
+        **4. Comparative Insights**
         - Compare selected program against all programs
         - Benchmark performance
         - Identify best practices
@@ -348,47 +492,13 @@ def render():
         1. **Select Cohort**: Choose your cohort (e.g., Class of 2028)
         2. **Select Program**: Focus on specific program or view "All Programs"
         3. **Navigate Tabs**: Explore different analysis views
-        4. **Interpret Metrics**: Use the conversion rates to identify improvement areas
+        4. **Interpret Metrics**: Use conversion rates to identify improvement areas
         5. **Export Data**: Download tables for detailed analysis
         
         **Pro Tip**: Use the Performance Analysis tab to identify where you're losing applicants in the funnel!
         """)
     
     with tab3:
-        st.markdown("""
-        **Purpose**: Year-over-year comparison to track growth and identify trends
-        
-        **Best For**:
-        - Annual planning
-        - Board presentations
-        - Identifying growth opportunities
-        - Benchmarking performance
-        
-        **How to Use**:
-        1. **Select Primary Cohort**: Choose your main cohort (e.g., Class of 2028)
-        2. **Select Comparison Cohort**: Choose the cohort to compare against (e.g., Class of 2027)
-        3. **Filter by Program**: Focus on specific program or view all
-        4. **Review Comparison Table**: See all metrics side-by-side with % change
-        5. **Explore Time Series**: Click metric selectors to see trends over time
-        6. **Export Data**: Download comparison tables for presentations
-        
-        **Understanding the Statistics**:
-        - **Absolute Change**: Simple difference between cohorts (Primary - Comparison)
-        - **% Change**: Percentage growth or decline
-        - **Variance**: Measure of spread between the two values
-        - **Standard Deviation**: How much the values differ from their average
-        - **Coefficient of Variation**: Relative variability (useful for comparing different metrics)
-        - **Performance Indicator**: Growth, Decline, or Stable
-        
-        **Smart Features**:
-        - Automatically excludes metrics where both cohorts have zero values
-        - Shows "N/A" for % change when comparison cohort has no data
-        - Descriptive messages for edge cases (e.g., "New Metric - Strong Growth")
-        
-        **Pro Tip**: Use this for annual reviews to show leadership how programs are trending!
-        """)
-    
-    with tab4:
         st.markdown("""
         **Purpose**: Analyze marketing spend effectiveness and channel performance
         
@@ -405,26 +515,26 @@ def render():
         
         **Four Analysis Tabs**:
         
-        **1. Overview Tab**
+        **1. Overview**
         - Total spend and key ROI metrics
         - Cost per Inquiry (CPI) and Cost per Application (CPA)
         - Spend by program (bar chart with log scale)
         - Spend by channel (pie and bar charts)
         - Quick snapshot of marketing performance
         
-        **2. Advanced Analytics Tab**
+        **2. Advanced Analytics**
         - Detailed ROI metrics: CPI, CPA, Cost per Admission, Conversion Rate
         - Spend vs Outcomes Trend: Correlate spend with inquiries, applications, admissions
         - Program-by-program ROI comparison table
         - Deep-dive analysis connecting spend to outcomes
         
-        **3. Channel Analytics Tab**
+        **3. Channel Analytics**
         - Channel-focused performance analysis
         - Spend distribution across channels
         - Monthly trend lines for each channel
         - Performance summary table
         
-        **4. Incremental Notes Tab**
+        **4. Incremental Notes**
         - Document campaign changes and special events
         - Track performance anomalies
         - Searchable notes database
@@ -439,7 +549,7 @@ def render():
         **Pro Tip**: Use the Advanced Analytics tab to justify marketing budget increases with ROI data!
         """)
     
-    with tab5:
+    with tab4:
         st.markdown("""
         **Purpose**: AI-powered forecasting and optimization for enrollment planning and marketing strategy
         
@@ -452,85 +562,45 @@ def render():
         
         **Five Analysis Tabs**:
         
-        **1. Forecasting Tab**
-        - **Time Series Predictions**: Forecast inquiries, applications, and enrollments
-        - **Confidence Intervals**: 95% confidence ranges for all predictions
-        - **Model Selection**: Automatic selection of best model (Prophet, ARIMA, Linear Regression)
-        - **Forecast Horizons**: 3, 6, 9, 12, 18, or 24 months ahead
-        - **Interactive Charts**: Visualize historical data and future predictions
+        **1. Forecasting**
+        - Time Series Predictions: Forecast inquiries, applications, and enrollments
+        - Confidence Intervals: 95% confidence ranges for all predictions
+        - Model Selection: Automatic selection of best model (Prophet, ARIMA, Linear Regression)
+        - Forecast Horizons: 3, 6, 9, 12, 18, or 24 months ahead
+        - Interactive Charts: Visualize historical data and future predictions
         
-        **2. Channel Optimization Tab**
-        - **ROI Analysis**: Identify most effective marketing channels
-        - **Effectiveness Scores**: Composite metrics combining ROI, conversion rate, consistency
-        - **Performance History**: Track channel performance over time
-        - **Recommendations**: Top channels ranked by effectiveness
-        - **Data-Driven Decisions**: Allocate budget to highest-performing channels
+        **2. Channel Optimization**
+        - ROI Analysis: Identify most effective marketing channels
+        - Effectiveness Scores: Composite metrics combining ROI, conversion rate, consistency
+        - Performance History: Track channel performance over time
+        - Recommendations: Top channels ranked by effectiveness
+        - Data-Driven Decisions: Allocate budget to highest-performing channels
         
-        **3. Timing Analysis Tab**
-        - **Seasonal Patterns**: Identify optimal months for marketing investments
-        - **Conversion Heatmap**: Visualize patterns across years and months
-        - **Timing Recommendations**: Ranked months by effectiveness
-        - **Consistency Scores**: Reliability of seasonal patterns
-        - **Campaign Planning**: Schedule marketing in high-conversion months
+        **3. Timing Analysis**
+        - Seasonal Patterns: Identify optimal months for marketing investments
+        - Conversion Heatmap: Visualize patterns across years and months
+        - Timing Recommendations: Ranked months by effectiveness
+        - Consistency Scores: Reliability of seasonal patterns
+        - Campaign Planning: Schedule marketing in high-conversion months
         
-        **4. Budget Allocation Tab**
-        - **Optimization**: Data-driven budget distribution across programs
-        - **Expected Outcomes**: Predicted inquiries, applications, enrollments
-        - **Sensitivity Analysis**: Impact of budget changes on outcomes
-        - **Constraint Management**: Set minimum/maximum allocations per program
-        - **What-If Scenarios**: Test different budget distributions
+        **4. Budget Allocation**
+        - Optimization: Data-driven budget distribution across programs
+        - Expected Outcomes: Predicted inquiries, applications, enrollments
+        - Sensitivity Analysis: Impact of budget changes on outcomes
+        - Constraint Management: Set minimum/maximum allocations per program
+        - What-If Scenarios: Test different budget distributions
         
-        **5. Model Performance Tab**
-        - **Accuracy Tracking**: Monitor prediction accuracy over time
-        - **Model Health**: Status indicators (Healthy, Warning, Needs Retraining)
-        - **Trend Analysis**: Identify performance degradation
-        - **Multiple Models**: Compare Prophet, ARIMA, and Linear Regression
-        - **Metrics**: MAPE (Mean Absolute Percentage Error), RMSE, MAE
+        **5. Model Performance**
+        - Accuracy Tracking: Monitor prediction accuracy over time
+        - Model Health: Status indicators (Healthy, Warning, Needs Retraining)
+        - Trend Analysis: Identify performance degradation
+        - Multiple Models: Compare Prophet, ARIMA, and Linear Regression
+        - Metrics: MAPE (Mean Absolute Percentage Error), RMSE, MAE
         
-        **How to Use**:
-        
-        **For Forecasting**:
-        1. Select Program to forecast
-        2. Select Cohort year (optional)
-        3. Select Metric (inquiries, applications, or enrollments)
-        4. Select Forecast Horizon (3-24 months)
-        5. Click "Generate Forecast"
-        6. Review predictions with confidence intervals
-        
-        **For Channel Optimization**:
-        1. Select Program to analyze
-        2. Review top performing channels
-        3. Check ROI and effectiveness scores
-        4. Apply insights to budget allocation
-        
-        **For Budget Planning**:
-        1. Enter Total Budget available
-        2. Select Programs to include
-        3. Set Constraints (optional min/max per program)
-        4. Generate recommended allocation
-        5. Review expected outcomes
-        6. Test sensitivity with different budgets
-        
-        **ML Models Explained**:
-        - **Prophet**: Best for 24+ months of data, handles seasonality automatically
-        - **ARIMA**: Best for 12-24 months of data, statistical forecasting
-        - **Linear Regression**: Best for <12 months of data, trend-based forecasting
-        - **Automatic Selection**: System chooses best model based on data availability
-        
-        **Accuracy Thresholds**:
-        - **MAPE < 10%**: Excellent accuracy
-        - **MAPE 10-15%**: Good accuracy
-        - **MAPE > 15%**: Needs attention, consider retraining
-        
-        **Pro Tips**:
-        - Use at least 12 months of historical data for reliable forecasts
-        - Review model performance regularly (monthly)
-        - Combine channel and timing insights for optimal marketing strategy
-        - Test multiple budget scenarios before finalizing allocation
-        - Monitor accuracy metrics and retrain models when MAPE > 15%
+        **Pro Tip**: Use at least 12 months of historical data for reliable forecasts and review model performance monthly!
         """)
     
-    with tab6:
+    with tab5:
         st.markdown("""
         **Purpose**: Access and export raw data for custom analysis
         
@@ -560,7 +630,7 @@ def render():
         **Pro Tip**: Export data to Excel for custom pivot tables and charts!
         """)
     
-    with tab7:
+    with tab6:
         st.markdown("""
         **Purpose**: Natural language interface to query and explore your analytics data using AI
         
@@ -588,7 +658,7 @@ def render():
         - "What's the cost per inquiry for each program?"
         
         **Navigation Questions**:
-        - "Where can I see year-over-year comparisons?"
+        - "Where can I see program comparisons?"
         - "How do I analyze marketing ROI?"
         - "Which page shows forecasts?"
         - "Where can I export data?"
@@ -599,127 +669,18 @@ def render():
         - "What's the difference between admissions offered and accepted?"
         - "How is anticipated cohort size calculated?"
         
-        **Three Tabs**:
-        
-        **1. Current Conversation**
-        - Active chat interface
-        - Message history
-        - Rate limit indicator (10 queries/minute)
-        - Help button for quick tips
-        - Clear chat button
-        
-        **2. Chat History**
-        - View all past conversations
-        - Search across messages
-        - Load previous conversations
-        - Export chat history to JSON
-        - Delete conversations
-        
-        **3. Settings & Privacy**
-        - Data retention settings
-        - Privacy controls
-        - Usage statistics
-        - Feedback analytics
-        - GDPR-compliant data deletion
-        
         **Key Features**:
+        - **Conversation Memory**: Remembers context from previous messages
+        - **Smart Query Processing**: Understands business terms and abbreviations
+        - **Rate Limiting**: 10 queries per minute per user
+        - **Feedback System**: Rate responses to improve accuracy
+        - **Chat History**: View and search past conversations
+        - **Privacy Controls**: GDPR-compliant data management
         
-        **Conversation Memory**:
-        - Remembers context from previous messages
-        - Can reference "it", "that", "same" from earlier
-        - Maintains conversation flow naturally
-        
-        **Smart Query Processing**:
-        - Understands business terms (enrollments, apps, etc.)
-        - Handles abbreviations (MBA, MS ACCT)
-        - Supports complex queries with joins and aggregations
-        - Validates SQL for security
-        
-        **Rate Limiting**:
-        - 10 queries per minute per user
-        - Visual indicator shows remaining queries
-        - Countdown timer for reset
-        - Prevents API quota exhaustion
-        
-        **Feedback System**:
-        - Rate responses with thumbs up/down
-        - Track satisfaction rates by query type
-        - Identify areas for improvement
-        - View feedback analytics
-        
-        **Tips for Best Results**:
-        - Be specific about programs (MBA, MS ACCT, etc.)
-        - Include time periods (2026, last year, etc.)
-        - Ask one question at a time
-        - Use follow-up questions to refine results
-        - Try suggested queries after responses
-        
-        **Example Conversations**:
-        
-        **Simple Query**:
-        - You: "How many MBA applications in 2026?"
-        - AI: "There are 234 MBA applications for the Class of 2026."
-        
-        **Follow-Up**:
-        - You: "What about MS ACCT?"
-        - AI: "MS ACCT has 156 applications for the Class of 2026."
-        
-        **Complex Query**:
-        - You: "Compare MBA vs MS MKTG enrollments"
-        - AI: "MBA: 45 enrolled, MS MKTG: 28 enrolled (61% difference)"
-        
-        **Navigation**:
-        - You: "Where can I see year-over-year comparisons?"
-        - AI: "Use the Comparison Tool page. Select two cohorts to compare..."
-        
-        **Privacy & Data**:
-        - All conversations are saved to your account
-        - Automatic cleanup after 90 days
-        - Export your data anytime
-        - GDPR-compliant deletion available
-        - Only you can see your chat history
-        
-        **Rate Limits**:
-        - 10 queries per minute per user
-        - 100 queries per minute globally
-        - Resets automatically every 60 seconds
-        - Check header for remaining queries
-        
-        **Troubleshooting**:
-        
-        **"I'm getting rate limited"**:
-        - Wait for the countdown timer to reset
-        - You have 10 queries per minute
-        - Try asking more specific questions
-        
-        **"The answer seems wrong"**:
-        - Rate it with 👎 to help improve
-        - Try rephrasing your question
-        - Be more specific about programs/dates
-        - Check the SQL query in the expander
-        
-        **"Chat won't load"**:
-        - Ensure you're signed in with Google
-        - Check your Gemini API key is configured
-        - Refresh the page
-        - Contact support if issue persists
-        
-        **Pro Tips**:
-        - Use the Help button (❓) for quick reference
-        - Try example queries when starting
-        - Click suggested queries after responses
-        - Export chat history for record keeping
-        - Rate responses to improve accuracy
-        - Use conversation memory for follow-ups
-        
-        **Technical Details**:
-        - Powered by Google Gemini AI
-        - Uses ChromaDB for semantic search
-        - Generates secure SQL queries
-        - Validates all queries before execution
-        - Caches results for 5 minutes
-        - Tracks metrics for monitoring
+        **Pro Tip**: Be specific about programs and time periods for best results!
         """)
+    
+
     
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -753,7 +714,7 @@ def render():
         <div style="background: #f8f0ff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Enrollment Forecasting</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
-                <li>Open <strong>Forecasting</strong></li>
+                <li>Open <strong>Predictive Analytics</strong></li>
                 <li>Select program and metric</li>
                 <li>Choose forecast horizon</li>
                 <li>Generate predictions</li>
@@ -775,18 +736,18 @@ def render():
         <div style="background: #fff0f8; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Annual Planning</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
-                <li>Open <strong>Comparison Tool</strong></li>
-                <li>Compare current vs. previous year</li>
-                <li>Review % change for metrics</li>
+                <li>Open <strong>Director's Deep Dive</strong></li>
+                <li>Compare current vs. previous cohort</li>
+                <li>Review conversion rate trends</li>
                 <li>Identify growth opportunities</li>
                 <li>Set goals based on trends</li>
-                <li>Export comparison table</li>
+                <li>Export comparison data</li>
             </ol>
         </div>
         <div style="background: #fffaf0; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
             <h4 style="color: #500000; margin: 0 0 15px 0;">Marketing Optimization</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
-                <li>Open <strong>Forecasting</strong></li>
+                <li>Open <strong>Predictive Analytics</strong></li>
                 <li>Go to Channel Optimization</li>
                 <li>Review effectiveness scores</li>
                 <li>Check Timing Analysis</li>
@@ -918,8 +879,8 @@ def render():
                     <span style="color: #666;">A: Look for the "Download CSV" button below each data table.</span>
                 </p>
                 <p style="margin-bottom: 15px;">
-                    <strong>Q: Can I compare more than two cohorts?</strong><br>
-                    <span style="color: #666;">A: Currently, the Comparison Tool supports two cohorts at a time.</span>
+                    <strong>Q: Can I compare programs across cohorts?</strong><br>
+                    <span style="color: #666;">A: Yes, use the Director's Deep Dive page to compare programs and analyze trends across different cohorts.</span>
                 </p>
                 <p style="margin-bottom: 0;">
                     <strong>Q: Why are forecasts showing errors?</strong><br>
@@ -972,7 +933,7 @@ def render():
         # Multi-select for pages
         pages_affected = st.multiselect(
             "Pages Affected (optional)",
-            ["Executive Dashboard", "Director's Deep Dive", "Comparison Tool", "Marketing Analysis", 
+            ["Executive Dashboard", "Director's Deep Dive", "Marketing Analysis", 
              "Data Explorer", "Predictive Analytics", "AI Chat Assistant", "Documentation", "All Pages", "Other"],
             help="Select the page(s) related to your feedback"
         )

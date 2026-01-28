@@ -39,8 +39,8 @@ if 'code' in st.query_params and not st.session_state.get('auth_processed', Fals
         from utils.auth import GOOGLE_REDIRECT_URI
         full_url = f"{GOOGLE_REDIRECT_URI}?code={code}&state={state}"
     except:
-        # Fallback to localhost for development
-        full_url = f"http://localhost:8501/?code={code}&state={state}"
+        # Fallback to localhost for development (port 8502)
+        full_url = f"http://localhost:8502/?code={code}&state={state}"
     
     try:
         user_info = auth.handle_oauth_callback(full_url)
@@ -112,9 +112,9 @@ st.markdown("""
     /* Sidebar - push content instead of overlay */
     [data-testid="stSidebar"][aria-expanded="true"] {
         /* Remove fixed positioning to allow sidebar to push content */
-        width: 220px !important;  /* Reduced from default ~336px */
-        min-width: 220px !important;
-        max-width: 220px !important;
+        width: 200px !important;  /* Increased from 180px to fit "Predictive Analytics" */
+        min-width: 200px !important;
+        max-width: 200px !important;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
     }
     [data-testid="stSidebar"][aria-expanded="false"] {
@@ -125,7 +125,7 @@ st.markdown("""
     [data-testid="stSidebar"] > div:first-child {
         padding-top: 0px !important;
         padding-bottom: 0px !important;
-        width: 220px !important;
+        width: 200px !important;  /* Increased from 180px */
     }
     
     [data-testid="stSidebarContent"] {
@@ -175,6 +175,42 @@ st.markdown("""
         padding-bottom: 0px !important;
     }
     
+    /* Google sign-in button - gradient border with rounded corners */
+    [data-testid="stSidebar"] .stLinkButton > a[href*="accounts.google.com"] {
+        position: relative !important;
+        background: white !important;
+        color: #495057 !important;
+        font-weight: 600 !important;
+        border: none !important;
+        padding: 5px 8px !important;  /* Reduced from 6px 10px */
+        border-radius: 6px !important;
+        text-align: center !important;
+        font-size: 11px !important;  /* Reduced from 12px */
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        z-index: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    /* Gradient border using ::before pseudo-element */
+    [data-testid="stSidebar"] .stLinkButton > a[href*="accounts.google.com"]::before {
+        content: '' !important;
+        position: absolute !important;
+        inset: 0 !important;
+        border-radius: 6px !important;
+        padding: 2px !important;
+        background: linear-gradient(90deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%) !important;
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+        -webkit-mask-composite: xor !important;
+        mask-composite: exclude !important;
+        z-index: -1 !important;
+    }
+    [data-testid="stSidebar"] .stLinkButton > a[href*="accounts.google.com"]:hover {
+        box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    
     /* Sidebar brand/header */
     .sidebar-brand {
         text-align: center;
@@ -203,15 +239,18 @@ st.markdown("""
     [data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         text-align: left !important;
-        padding: 6px 10px !important;  /* Reduced horizontal padding */
+        padding: 5px 8px !important;  /* Reduced from 6px 10px */
         margin: 0px 0 !important;
         border-radius: 6px !important;
         border: none !important;
         background: white !important;
         color: #495057 !important;
         font-weight: 500 !important;
-        font-size: 12px !important;  /* Slightly smaller font */
+        font-size: 11px !important;  /* Reduced from 12px */
         transition: all 0.2s ease !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
     [data-testid="stSidebar"] .stButton > button:hover {
         background: #f0f2f6 !important;
@@ -227,24 +266,24 @@ st.markdown("""
     
     /* Responsive spacing - Desktop (>900px height) */
     @media (min-height: 900px) {
-        .sidebar-brand { padding: 12px 10px 12px 10px; margin-bottom: 0px; }
-        .sidebar-logo { width: 40px !important; height: 40px !important; }
-        .sidebar-brand-title { font-size: 14px !important; margin: 6px 0 2px 0 !important; }
-        .sidebar-brand-subtitle { font-size: 10px !important; }
-        [data-testid="stSidebar"] .stButton > button { padding: 7px 12px !important; margin: 0px 0 !important; font-size: 13px !important; }
+        .sidebar-brand { padding: 12px 8px 12px 8px; margin-bottom: 0px; }
+        .sidebar-logo { width: 36px !important; height: 36px !important; }
+        .sidebar-brand-title { font-size: 13px !important; margin: 6px 0 2px 0 !important; }
+        .sidebar-brand-subtitle { font-size: 9px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 6px 8px !important; margin: 0px 0 !important; font-size: 11px !important; }
         .sidebar-divider { margin: 12px 0 !important; }
-        .sidebar-footer { padding: 12px 10px !important; margin-top: 12px !important; font-size: 9px !important; }
+        .sidebar-footer { padding: 12px 8px !important; margin-top: 12px !important; font-size: 8px !important; }
     }
     
     /* Responsive spacing - Laptop (700-900px height) */
     @media (min-height: 700px) and (max-height: 899px) {
-        .sidebar-brand { padding: 8px 10px 6px 10px; margin-bottom: 0px; }
-        .sidebar-logo { width: 34px !important; height: 34px !important; }
+        .sidebar-brand { padding: 8px 8px 6px 8px; margin-bottom: 0px; }
+        .sidebar-logo { width: 32px !important; height: 32px !important; }
         .sidebar-brand-title { font-size: 12px !important; margin: 4px 0 2px 0 !important; }
         .sidebar-brand-subtitle { font-size: 9px !important; }
-        [data-testid="stSidebar"] .stButton > button { padding: 6px 10px !important; margin: 0px 0 !important; font-size: 12px !important; }
+        [data-testid="stSidebar"] .stButton > button { padding: 5px 8px !important; margin: 0px 0 !important; font-size: 11px !important; }
         .sidebar-divider { margin: 10px 0 !important; }
-        .sidebar-footer { padding: 10px 10px !important; margin-top: 10px !important; font-size: 8px !important; }
+        .sidebar-footer { padding: 10px 8px !important; margin-top: 10px !important; font-size: 8px !important; }
     }
     
     /* Responsive spacing - Tablet (<700px height) */
@@ -357,7 +396,7 @@ with st.sidebar:
         # Simple OAuth button - opens in new tab
         try:
             auth_url = auth.get_authorization_url()
-            st.link_button("🔐 Sign in with Google", auth_url, use_container_width=True)
+            st.link_button("Google", auth_url, use_container_width=True)
             
         except Exception as e:
             st.error(f"❌ Error generating login URL: {str(e)}")
@@ -402,7 +441,7 @@ with st.sidebar:
             st.session_state.current_page = 'AI_Chat'
             st.rerun()
     
-    if st.button("Documentation & Help", key="nav_help", use_container_width=True,
+    if st.button("Documentation", key="nav_help", use_container_width=True,
                 type="primary" if st.session_state.current_page == 'Help' else "secondary"):
         st.session_state.current_page = 'Help'
         st.rerun()
@@ -420,7 +459,7 @@ current_page_info = {
     'Database': {'title': 'Data Explorer'},
     'Predictive_Analytics': {'title': 'Predictive Analytics'},
     'AI_Chat': {'title': 'AI Chat Assistant'},
-    'Help': {'title': 'Documentation & Help'}
+    'Help': {'title': 'Documentation'}
 }
 
 current_info = current_page_info[st.session_state.current_page]
@@ -459,20 +498,6 @@ elif st.session_state.current_page == 'AI_Chat':
 elif st.session_state.current_page == 'Help':
     from modules import help as help_page
     help_page.render()
-
-# Footer
-st.markdown("<hr style='margin-top: 3rem; margin-bottom: 1rem; border: none; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
-st.markdown(f"""
-<div style='text-align: center; padding: 1rem; color: #666; font-size: 0.9rem;'>
-    <p style='margin: 0.5rem 0;'>
-        <strong>Mays Business School</strong> | Texas A&M University<br>
-        Flex Online Programs Analytics Platform
-    </p>
-    <p style='margin: 0.5rem 0; font-size: 0.8rem; color: #999;'>
-        {VERSION_FULL} | © 2026 Texas A&M University
-    </p>
-</div>
-""", unsafe_allow_html=True)
 
 # Back to Top Button with smooth scroll
 st.markdown("""

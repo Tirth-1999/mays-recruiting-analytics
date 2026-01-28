@@ -397,8 +397,6 @@ def render():
         else:
             filtered_spend_global = filtered_spend_global.head(0)
         
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        
         # How to Use This Analysis - Collapsible
         with st.expander("💡 How to Use This Analysis", expanded=False):
             st.markdown("""
@@ -423,8 +421,6 @@ def render():
                 </div>
             </div>
             """, unsafe_allow_html=True)
-        
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         
         # Chrome-style CSS for tabs with always-visible scrollbar when needed
         st.markdown("""
@@ -627,7 +623,7 @@ def render():
                 """, unsafe_allow_html=True)
                 
                 if has_roi_data:
-                    # Add metric card styling
+                    # Add metric card styling with dynamic font sizing that accounts for sidebar
                     st.markdown("""
                     <style>
                     .metrics-container-marketing {
@@ -637,50 +633,112 @@ def render():
                         margin: 20px 0;
                     }
                     .metric-box-marketing {
-                        background: white;
-                        padding: 1.5rem 1rem;
-                        border-radius: 12px;
-                        border: 1px solid #e0e0e0;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        background: white !important;
+                        padding: 1.5rem 1rem !important;
+                        border-radius: 12px !important;
+                        border: 1px solid #e0e0e0 !important;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
                         text-align: center !important;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: center;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        min-height: 120px !important;
                     }
                     .metric-box-marketing * {
                         text-align: center !important;
+                        margin-left: auto !important;
+                        margin-right: auto !important;
                     }
                     .metric-number-marketing {
-                        color: #500000;
-                        margin: 0 auto !important;
-                        padding: 0 0 0 20px !important;
-                        font-size: 1.8rem;
-                        font-weight: bold;
-                        line-height: 1.2;
+                        color: #500000 !important;
+                        margin: 0 !important;
+                        padding: 0 0 0 15px !important;
+                        font-size: clamp(1rem, 1.8vw + 0.5rem, 1.8rem) !important;
+                        font-weight: bold !important;
+                        line-height: 1.1 !important;
                         text-align: center !important;
-                        width: 100%;
-                        display: block;
+                        width: 100% !important;
+                        display: block !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                        box-sizing: border-box !important;
+                        text-indent: 0 !important;
+                        letter-spacing: 0 !important;
+                    }
+                    /* Override Streamlit's default h2 styles */
+                    .metric-box-marketing h2 {
+                        text-align: center !important;
+                        margin: 0 !important;
+                        padding: 0 0 0 15px !important;
+                        text-indent: 0 !important;
                     }
                     .metric-label-marketing {
-                        margin: 10px auto 5px auto !important;
-                        padding: 0 !important;
-                        color: #495057;
-                        font-weight: 600;
-                        font-size: 1rem;
-                        line-height: 1.3;
+                        margin: 8px auto 0 auto !important;
+                        padding: 0 5px !important;
+                        color: #495057 !important;
+                        font-weight: 600 !important;
+                        font-size: clamp(0.75rem, 1.2vw + 0.3rem, 0.95rem) !important;
+                        line-height: 1.2 !important;
                         text-align: center !important;
-                        width: 100%;
-                        display: block;
+                        width: 100% !important;
+                        display: block !important;
+                        word-wrap: break-word !important;
+                        hyphens: auto !important;
                     }
-                    @media (max-width: 1200px) {
+                    
+                    /* Adjust for narrower screens (sidebar open on laptop) */
+                    @media (max-width: 1400px) {
                         .metrics-container-marketing {
-                            grid-template-columns: repeat(2, 1fr);
+                            grid-template-columns: repeat(4, 1fr) !important;
+                            gap: 0.8rem !important;
+                        }
+                        .metric-number-marketing {
+                            font-size: clamp(0.9rem, 1.5vw + 0.4rem, 1.5rem) !important;
+                        }
+                        .metric-label-marketing {
+                            font-size: clamp(0.7rem, 1vw + 0.25rem, 0.85rem) !important;
                         }
                     }
+                    
+                    /* Switch to 2 columns when space is tight (sidebar open on smaller laptop) */
+                    @media (max-width: 1200px) {
+                        .metrics-container-marketing {
+                            grid-template-columns: repeat(2, 1fr) !important;
+                            gap: 1rem !important;
+                        }
+                        .metric-number-marketing {
+                            font-size: clamp(1.2rem, 2vw + 0.5rem, 1.8rem) !important;
+                        }
+                        .metric-label-marketing {
+                            font-size: clamp(0.8rem, 1.3vw + 0.3rem, 0.95rem) !important;
+                        }
+                    }
+                    
+                    /* Tablet portrait */
+                    @media (max-width: 900px) {
+                        .metrics-container-marketing {
+                            grid-template-columns: repeat(2, 1fr) !important;
+                        }
+                        .metric-number-marketing {
+                            font-size: clamp(1.3rem, 2.5vw + 0.5rem, 1.9rem) !important;
+                        }
+                        .metric-label-marketing {
+                            font-size: clamp(0.85rem, 1.5vw + 0.3rem, 1rem) !important;
+                        }
+                    }
+                    
+                    /* Mobile */
                     @media (max-width: 768px) {
                         .metrics-container-marketing {
-                            grid-template-columns: 1fr;
+                            grid-template-columns: 1fr !important;
+                        }
+                        .metric-number-marketing {
+                            font-size: clamp(1.5rem, 3vw + 0.5rem, 2rem) !important;
+                        }
+                        .metric-label-marketing {
+                            font-size: clamp(0.9rem, 2vw + 0.3rem, 1.1rem) !important;
                         }
                     }
                     </style>
@@ -698,15 +756,15 @@ def render():
                             <p class="metric-label-marketing">Total Spend</p>
                         </div>
                         <div class="metric-box-marketing">
-                            <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpi) if pd.notna(avg_cpi) and avg_cpi > 0 else "N/A"}</h2>
+                            <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpi).strip() if pd.notna(avg_cpi) and avg_cpi > 0 else "N/A"}</h2>
                             <p class="metric-label-marketing">Avg Cost per Inquiry</p>
                         </div>
                         <div class="metric-box-marketing">
-                            <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpa) if pd.notna(avg_cpa) and avg_cpa > 0 else "N/A"}</h2>
+                            <h2 class="metric-number-marketing">{"${:,.2f}".format(avg_cpa).strip() if pd.notna(avg_cpa) and avg_cpa > 0 else "N/A"}</h2>
                             <p class="metric-label-marketing">Avg Cost per Application</p>
                         </div>
                         <div class="metric-box-marketing">
-                            <h2 class="metric-number-marketing">{"{:.1f}%".format(avg_conv) if pd.notna(avg_conv) and avg_conv > 0 else "N/A"}</h2>
+                            <h2 class="metric-number-marketing">{"{:.1f}%".format(avg_conv).strip() if pd.notna(avg_conv) and avg_conv > 0 else "N/A"}</h2>
                             <p class="metric-label-marketing">Avg Conversion Rate</p>
                         </div>
                     </div>
@@ -794,6 +852,15 @@ def render():
                                 if st.session_state[f"overview_prog_check_{program}"]:
                                     overview_prog_selected.append(program)
                 
+                # Add tooltip after filters
+                st.markdown("""
+                <div style="text-align: center; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #495057;">
+                        💡 <strong>Tip:</strong> Click program buttons above to show/hide data on the chart
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 # Filter and display chart
                 if overview_prog_selected:
                     chart1_data = filtered_spend[filtered_spend['program'].isin(overview_prog_selected)]
@@ -802,8 +869,33 @@ def render():
                     fig = px.bar(x=program_spend.index, y=program_spend.values,
                                labels={'x': 'Program', 'y': 'Total Spend ($)'},
                                color=program_spend.values, color_continuous_scale='RdYlGn_r',
-                               log_y=st.session_state.overview_prog_log_scale)
-                    fig.update_layout(height=400, showlegend=False)
+                               log_y=st.session_state.overview_prog_log_scale,
+                               text=program_spend.values)
+                    
+                    # Format text on bars and increase Y-axis range
+                    fig.update_traces(
+                        texttemplate='$%{text:,.0f}',
+                        textposition='outside',
+                        textfont=dict(size=11, color='#333')
+                    )
+                    
+                    # Ensure Y-axis extends to next tick mark above max value
+                    max_val = program_spend.values.max()
+                    if st.session_state.overview_prog_log_scale:
+                        # For log scale, add significant extra space
+                        import numpy as np
+                        log_max = np.log10(max_val)
+                        fig.update_yaxes(type="log", range=[0, log_max + 0.8])
+                    else:
+                        # For linear scale, extend by 35% to ensure text is fully visible
+                        fig.update_yaxes(range=[0, max_val * 1.35])
+                    
+                    fig.update_layout(
+                        height=400, 
+                        showlegend=False,
+                        margin=dict(t=80, b=70, l=50, r=50)
+                    )
+                    
                     st.plotly_chart(fig, use_container_width=True, key="overview_prog_chart")
                 else:
                     st.info("No programs selected. Click '✓ All' to select all programs.")
@@ -837,9 +929,11 @@ def render():
                     with btn_col3:
                         if 'overview_chan_chart_type' not in st.session_state:
                             st.session_state.overview_chan_chart_type = "Pie"
-                        if st.button("📊 " + st.session_state.overview_chan_chart_type, 
+                        # Show what chart type it will switch TO, not what it currently is
+                        next_chart_type = "Bar" if st.session_state.overview_chan_chart_type == "Pie" else "Pie"
+                        if st.button("📊 " + next_chart_type, 
                                    key="overview_chan_type_toggle", use_container_width=True):
-                            st.session_state.overview_chan_chart_type = "Bar" if st.session_state.overview_chan_chart_type == "Pie" else "Pie"
+                            st.session_state.overview_chan_chart_type = next_chart_type
                             st.rerun()
                     
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -875,21 +969,47 @@ def render():
                                 if st.session_state[f"overview_chan_check_{channel}"]:
                                     overview_chan_selected.append(channel)
                 
+                # Add tooltip after filters
+                st.markdown("""
+                <div style="text-align: center; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #495057;">
+                        💡 <strong>Tip:</strong> Click channel buttons above to show/hide data on the chart
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 # Filter and display chart
                 if overview_chan_selected:
                     chart2_data = filtered_spend[filtered_spend['channel'].isin(overview_chan_selected)]
                     channel_spend = chart2_data.groupby('channel')['spend_amount'].sum().sort_values(ascending=False)
                     
                     if st.session_state.overview_chan_chart_type == "Pie":
-                        fig = px.pie(values=channel_spend.values, names=channel_spend.index,
-                                   title='Spend Distribution by Channel')
+                        fig = px.pie(values=channel_spend.values, names=channel_spend.index)
                         fig.update_traces(textposition='inside', textinfo='percent+label')
+                        fig.update_layout(height=400)
                     else:
                         fig = px.bar(x=channel_spend.index, y=channel_spend.values,
                                    labels={'x': 'Channel', 'y': 'Total Spend ($)'},
-                                   color=channel_spend.values, color_continuous_scale='RdYlGn_r')
-                        fig.update_layout(showlegend=False)
-                    fig.update_layout(height=400)
+                                   color=channel_spend.values, color_continuous_scale='RdYlGn_r',
+                                   text=channel_spend.values)
+                        
+                        # Format text on bars and increase Y-axis range
+                        fig.update_traces(
+                            texttemplate='$%{text:,.0f}',
+                            textposition='outside',
+                            textfont=dict(size=11, color='#333')
+                        )
+                        
+                        # Ensure Y-axis extends to next tick mark above max value
+                        max_val = channel_spend.values.max()
+                        fig.update_yaxes(range=[0, max_val * 1.35])
+                        
+                        fig.update_layout(
+                            height=400,
+                            showlegend=False,
+                            margin=dict(t=80, b=70, l=50, r=50)
+                        )
+                    
                     st.plotly_chart(fig, use_container_width=True, key="overview_chan_chart")
                 else:
                     st.info("No channels selected. Click '✓ All' to select all channels.")
@@ -902,16 +1022,41 @@ def render():
                 st.warning("⚠️ No data matches the selected filters")
             else:
                 try:
-                    # Load admissions data
-                    admissions_df = pd.read_sql("""
-                        SELECT 
-                            report_date,
-                            program,
-                            metric_name,
-                            metric_value
-                        FROM admissions_metrics
-                        WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
-                    """, conn)
+                    # Load admissions data - filter by selected fiscal years
+                    # Convert fiscal years to date ranges
+                    fiscal_year_dates = []
+                    for fy in selected_fy_global:
+                        # Extract year from 'FY25' format -> 2025
+                        if isinstance(fy, str) and fy.startswith('FY'):
+                            fy_num = int(fy[2:])  # Get '25' from 'FY25'
+                            fy_int = 2000 + fy_num  # Convert to 2025
+                        else:
+                            fy_int = int(fy)
+                        
+                        start_date = f"{fy_int-1}-09-01"  # Sept 1 of previous year
+                        end_date = f"{fy_int}-08-31"      # Aug 31 of fiscal year
+                        fiscal_year_dates.append((start_date, end_date))
+                    
+                    # Build date filter for SQL query
+                    if len(fiscal_year_dates) > 0:
+                        date_conditions = " OR ".join([
+                            f"(report_date >= '{start}' AND report_date <= '{end}')"
+                            for start, end in fiscal_year_dates
+                        ])
+                        
+                        admissions_df = pd.read_sql(f"""
+                            SELECT 
+                                report_date,
+                                program,
+                                metric_name,
+                                metric_value
+                            FROM admissions_metrics
+                            WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                            AND ({date_conditions})
+                        """, conn)
+                    else:
+                        # No fiscal years selected, return empty dataframe
+                        admissions_df = pd.DataFrame(columns=['report_date', 'program', 'metric_name', 'metric_value'])
                     
                     # Normalize admissions program names
                     admissions_df['program_normalized'] = admissions_df['program'].apply(normalize_program_name)
@@ -987,7 +1132,6 @@ def render():
                             <h3>Program Spend by Channel</h3>
                         </div>
                         """, unsafe_allow_html=True)
-                        st.markdown("*See which channels each program invests in*")
                         
                         # Aggregate spend by program and channel (keep original program name for display)
                         program_channel_spend = filtered_spend_adv.groupby(['program', 'channel'])['spend_amount'].sum().reset_index()
@@ -999,17 +1143,34 @@ def render():
                                 x='program',
                                 y='spend_amount',
                                 color='channel',
-                                title='Marketing Spend by Program and Channel',
                                 labels={'program': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
-                                barmode='group',  # Use 'stack' for stacked bars
+                                barmode='group',
                                 color_discrete_sequence=px.colors.qualitative.Set3
                             )
+                            
                             fig_grouped.update_layout(
-                                height=450,
+                                height=500,
                                 xaxis_title="Program",
                                 yaxis_title="Spend ($)",
                                 legend_title="Channel",
-                                hovermode='x unified'
+                                hovermode='x unified',
+                                title={
+                                    'text': 'Marketing Spend by Program and Channel',
+                                    'x': 0.5,
+                                    'xanchor': 'center',
+                                    'font': {'size': 16}
+                                },
+                                legend=dict(
+                                    orientation="h",
+                                    yanchor="bottom",
+                                    y=1.02,
+                                    xanchor="center",
+                                    x=0.5,
+                                    font=dict(size=10)
+                                ),
+                                margin=dict(t=120, b=70, l=50, r=50),
+                                bargap=0.15,  # Reduce gap between bars in same group
+                                bargroupgap=0.05  # Reduce gap between groups
                             )
                             st.plotly_chart(fig_grouped, use_container_width=True, key="program_channel_grouped")
                             
@@ -1031,17 +1192,33 @@ def render():
                                     x='program',
                                     y='spend_amount',
                                     color='channel',
-                                    title='Marketing Spend by Program and Channel (Stacked)',
                                     labels={'program': 'Program', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
                                     barmode='stack',
                                     color_discrete_sequence=px.colors.qualitative.Set3
                                 )
+                                
                                 fig_stacked.update_layout(
-                                    height=450,
+                                    height=500,
                                     xaxis_title="Program",
                                     yaxis_title="Spend ($)",
                                     legend_title="Channel",
-                                    hovermode='x unified'
+                                    hovermode='x unified',
+                                    title={
+                                        'text': 'Marketing Spend by Program and Channel (Stacked)',
+                                        'x': 0.5,
+                                        'xanchor': 'center',
+                                        'font': {'size': 16}
+                                    },
+                                    legend=dict(
+                                        orientation="h",
+                                        yanchor="bottom",
+                                        y=1.02,
+                                        xanchor="center",
+                                        x=0.5,
+                                        font=dict(size=10)
+                                    ),
+                                    margin=dict(t=120, b=70, l=50, r=50),
+                                    bargap=0.15  # Reduce gap between bars
                                 )
                                 st.plotly_chart(fig_stacked, use_container_width=True, key="program_channel_stacked")
                         
@@ -1053,7 +1230,6 @@ def render():
                             <h3>Channel Performance by Program</h3>
                         </div>
                         """, unsafe_allow_html=True)
-                        st.markdown("*Discover which channels drive the most admissions for each program*")
                         
                         # Aggregate spend and admissions by program and channel (keep both program and program_normalized)
                         channel_program_data = filtered_spend_adv.groupby(['program', 'program_normalized', 'channel']).agg({
@@ -1098,29 +1274,122 @@ def render():
                         )
                         
                         if not heatmap_data.empty:
-                            col1, col2 = st.columns(2)
+                            # Full-width heatmap showing spend share
+                            fig_heatmap = px.imshow(
+                                heatmap_data,
+                                labels=dict(x="Program", y="Channel", color="Spend Share (%)"),
+                                color_continuous_scale='RdYlGn',
+                                aspect='auto'
+                            )
+                            fig_heatmap.update_layout(
+                                height=500,
+                                title={
+                                    'text': 'Channel Spend Share by Program',
+                                    'x': 0.5,
+                                    'xanchor': 'center',
+                                    'font': {'size': 16}
+                                },
+                                margin=dict(t=80, b=70, l=100, r=50)
+                            )
+                            st.plotly_chart(fig_heatmap, use_container_width=True, key="channel_program_heatmap")
                             
-                            with col1:
-                                # Heatmap showing spend share
-                                fig_heatmap = px.imshow(
-                                    heatmap_data,
-                                    labels=dict(x="Program", y="Channel", color="Spend Share (%)"),
-                                    title="Channel Spend Share by Program",
-                                    color_continuous_scale='RdYlGn',
-                                    aspect='auto'
-                                )
-                                fig_heatmap.update_layout(height=400)
-                                st.plotly_chart(fig_heatmap, use_container_width=True, key="channel_program_heatmap")
+                            # Top channel per program - below the heatmap in a clean card layout
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            st.markdown("<h4 style='text-align: center; color: #500000;'>Top Channel per Program</h4>", unsafe_allow_html=True)
                             
-                            with col2:
-                                # Show top channel per program (use full program name for display)
-                                top_channels = channel_program_merged.loc[
-                                    channel_program_merged.groupby('program')['spend_amount'].idxmax()
-                                ][['program', 'channel', 'spend_amount', 'spend_share']]
+                            # Get top channels
+                            top_channels = channel_program_merged.loc[
+                                channel_program_merged.groupby('program')['spend_amount'].idxmax()
+                            ][['program', 'channel', 'spend_amount', 'spend_share']].sort_values('spend_amount', ascending=False)
+                            
+                            # Display in a grid layout
+                            st.markdown("""
+                            <style>
+                            .top-channel-grid {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                                gap: 1rem;
+                                margin: 20px 0;
+                            }
+                            .top-channel-card {
+                                background: white;
+                                padding: 1rem;
+                                border-radius: 8px;
+                                border: 1px solid #e0e0e0;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            }
+                            .top-channel-program {
+                                font-size: 14px;
+                                font-weight: 600;
+                                color: #500000;
+                                margin-bottom: 5px;
+                            }
+                            .top-channel-name {
+                                font-size: 16px;
+                                font-weight: 700;
+                                color: #333;
+                                margin-bottom: 5px;
+                            }
+                            .top-channel-stats {
+                                font-size: 13px;
+                                color: #6c757d;
+                            }
+                            .spend-amount-high {
+                                color: #28a745;
+                                font-weight: 600;
+                            }
+                            .spend-amount-medium {
+                                color: #ffc107;
+                                font-weight: 600;
+                            }
+                            .spend-amount-low {
+                                color: #dc3545;
+                                font-weight: 600;
+                            }
+                            .spend-percentage-high {
+                                color: #28a745;
+                                font-weight: 600;
+                            }
+                            .spend-percentage-medium {
+                                color: #ffc107;
+                                font-weight: 600;
+                            }
+                            .spend-percentage-low {
+                                color: #dc3545;
+                                font-weight: 600;
+                            }
+                            </style>
+                            """, unsafe_allow_html=True)
+                            
+                            # Calculate thresholds for color coding
+                            max_spend = top_channels['spend_amount'].max()
+                            min_spend = top_channels['spend_amount'].min()
+                            spend_range = max_spend - min_spend
+                            
+                            # Build HTML for cards - NO INDENTATION to prevent raw HTML display
+                            cards_html = '<div class="top-channel-grid">'
+                            for _, row in top_channels.iterrows():
+                                # Color code based on spend amount (relative to max)
+                                spend_pct_of_max = (row['spend_amount'] - min_spend) / spend_range if spend_range > 0 else 0.5
+                                if spend_pct_of_max > 0.66:
+                                    amount_class = 'spend-amount-high'
+                                elif spend_pct_of_max > 0.33:
+                                    amount_class = 'spend-amount-medium'
+                                else:
+                                    amount_class = 'spend-amount-low'
                                 
-                                st.markdown("**Top Channel per Program:**")
-                                for _, row in top_channels.iterrows():
-                                    st.markdown(f"**{row['program']}**: {row['channel']} ({row['spend_share']:.1f}% of program spend)")
+                                # Color code based on spend share percentage
+                                if row['spend_share'] > 40:
+                                    pct_class = 'spend-percentage-high'
+                                elif row['spend_share'] > 30:
+                                    pct_class = 'spend-percentage-medium'
+                                else:
+                                    pct_class = 'spend-percentage-low'
+                                
+                                cards_html += f'<div class="top-channel-card"><div class="top-channel-program">{row["program"]}</div><div class="top-channel-name">{row["channel"]}</div><div class="top-channel-stats"><span class="{amount_class}">${row["spend_amount"]:,.0f}</span> • <span class="{pct_class}">{row["spend_share"]:.1f}%</span> of program spend</div></div>'
+                            cards_html += '</div>'
+                            
+                            st.markdown(cards_html, unsafe_allow_html=True)
                         
                         st.divider()
                         
@@ -1159,19 +1428,22 @@ def render():
                             fig.add_trace(
                                 go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['inquiries_received'],
                                           name='Inquiries', mode='lines+markers',
-                                          line=dict(color='blue', width=3), marker=dict(size=10)),
+                                          line=dict(color='#1f77b4', width=3), marker=dict(size=8),
+                                          fill='tozeroy', fillcolor='rgba(31, 119, 180, 0.1)'),
                                 row=2, col=1
                             )
                             fig.add_trace(
                                 go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['applications_received'],
                                           name='Applications', mode='lines+markers',
-                                          line=dict(color='green', width=3), marker=dict(size=10)),
+                                          line=dict(color='#2ca02c', width=3), marker=dict(size=8),
+                                          fill='tozeroy', fillcolor='rgba(44, 160, 44, 0.1)'),
                                 row=2, col=1
                             )
                             fig.add_trace(
                                 go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['admissions_accepted'],
                                           name='Admissions', mode='lines+markers',
-                                          line=dict(color='purple', width=3), marker=dict(size=10)),
+                                          line=dict(color='#9467bd', width=3), marker=dict(size=8),
+                                          fill='tozeroy', fillcolor='rgba(148, 103, 189, 0.1)'),
                                 row=2, col=1
                             )
                             
@@ -1183,9 +1455,20 @@ def render():
                                 height=650,
                                 hovermode='x unified',
                                 showlegend=True,
-                                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
-                                margin=dict(b=100)  # Add bottom margin for legend
+                                legend=dict(
+                                    orientation="h", 
+                                    yanchor="bottom", 
+                                    y=-0.15, 
+                                    xanchor="center", 
+                                    x=0.5
+                                ),
+                                margin=dict(t=80, b=100, l=60, r=60)
                             )
+                            
+                            # Center subplot titles
+                            for annotation in fig['layout']['annotations']:
+                                annotation['x'] = 0.5
+                                annotation['xanchor'] = 'center'
                             
                             st.plotly_chart(fig, use_container_width=True, key="adv_trend_chart")
                         
@@ -1341,6 +1624,15 @@ def render():
                                 if st.session_state[f"chart1_check_{channel}"]:
                                     chart1_selected.append(channel)
                 
+                # Add tooltip
+                st.markdown("""
+                <div style="text-align: center; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #495057;">
+                        💡 <strong>Tip:</strong> Use the buttons above to filter channels • Click legend items to toggle data
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 # Filter and display chart
                 if chart1_selected:
                     chart1_data = filtered_spend_chan[filtered_spend_chan['channel'].isin(chart1_selected)]
@@ -1350,21 +1642,56 @@ def render():
                         channel_totals = chart1_data.groupby('channel')['spend_amount'].sum().sort_values(ascending=False)
                         fig = px.bar(x=channel_totals.index, y=channel_totals.values,
                                    labels={'x': 'Channel', 'y': 'Total Spend ($)'},
-                                   title='Total Spend by Channel',
                                    color=channel_totals.values,
                                    color_continuous_scale='RdYlGn_r',
-                                   log_y=st.session_state.chart1_log_scale)
-                        fig.update_layout(height=400, showlegend=False)
+                                   log_y=st.session_state.chart1_log_scale,
+                                   text=channel_totals.values)
+                        
+                        # Format text on bars
+                        fig.update_traces(
+                            texttemplate='$%{text:,.0f}',
+                            textposition='outside',
+                            textfont=dict(size=11, color='#333')
+                        )
+                        
+                        # Extend Y-axis range
+                        max_val = channel_totals.values.max()
+                        if st.session_state.chart1_log_scale:
+                            import numpy as np
+                            log_max = np.log10(max_val)
+                            fig.update_yaxes(type="log", range=[0, log_max + 0.8])
+                        else:
+                            fig.update_yaxes(range=[0, max_val * 1.35])
+                        
+                        fig.update_layout(
+                            height=400, 
+                            showlegend=False,
+                            title={
+                                'text': 'Total Spend by Channel',
+                                'x': 0.5,
+                                'xanchor': 'center',
+                                'font': {'size': 16}
+                            },
+                            margin=dict(t=80, b=70, l=50, r=50)
+                        )
                         st.plotly_chart(fig, use_container_width=True, key="channel_bar_chart")
                     
                     with col2:
-                        fig = px.pie(values=channel_totals.values, names=channel_totals.index,
-                                   title='Channel Spend Share')
+                        fig = px.pie(values=channel_totals.values, names=channel_totals.index)
                         fig.update_traces(textposition='inside', textinfo='percent+label')
-                        fig.update_layout(height=400)
+                        fig.update_layout(
+                            height=400,
+                            title={
+                                'text': 'Channel Spend Share',
+                                'x': 0.5,
+                                'xanchor': 'center',
+                                'font': {'size': 16}
+                            },
+                            margin=dict(t=80, b=50, l=50, r=50)
+                        )
                         st.plotly_chart(fig, use_container_width=True, key="channel_pie_chart")
                 else:
-                    st.info("No channels selected. Click '✓ Select All' to select all channels.")
+                    st.info("No channels selected. Click '✓ All' to select all channels.")
                 
                 st.divider()
                 
@@ -1432,6 +1759,15 @@ def render():
                                 if st.session_state[f"chart2_check_{channel}"]:
                                     chart2_selected.append(channel)
                 
+                # Add tooltip
+                st.markdown("""
+                <div style="text-align: center; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #495057;">
+                        💡 <strong>Tip:</strong> Use the buttons above to filter channels • Click legend items to toggle data
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 # Filter and display chart
                 if chart2_selected:
                     chart2_data = filtered_spend_chan[filtered_spend_chan['channel'].isin(chart2_selected)]
@@ -1439,14 +1775,31 @@ def render():
                     
                     if not monthly_channel.empty:
                         fig = px.line(monthly_channel, x='month_date', y='spend_amount', color='channel',
-                                    title='Monthly Spend by Channel',
                                     labels={'month_date': 'Month', 'spend_amount': 'Spend ($)', 'channel': 'Channel'},
                                     markers=True,
                                     log_y=st.session_state.chart2_log_scale)
-                        fig.update_layout(height=450, hovermode='x unified')
+                        fig.update_layout(
+                            height=500, 
+                            hovermode='x unified',
+                            title={
+                                'text': 'Monthly Spend by Channel',
+                                'x': 0.5,
+                                'xanchor': 'center',
+                                'font': {'size': 16}
+                            },
+                            legend=dict(
+                                orientation="h",
+                                yanchor="bottom",
+                                y=1.02,
+                                xanchor="center",
+                                x=0.5,
+                                font=dict(size=10)
+                            ),
+                            margin=dict(t=120, b=70, l=50, r=50)
+                        )
                         st.plotly_chart(fig, use_container_width=True, key="channel_trend_chart")
                 else:
-                    st.info("No channels selected. Click '✓ Select All' to select all channels.")
+                    st.info("No channels selected. Click '✓ All' to select all channels.")
                 
                 st.divider()
                 
@@ -1534,27 +1887,11 @@ def render():
         </div>
         """, unsafe_allow_html=True)
     with footer_col2:
-        st.components.v1.html("""
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
-            <button onclick="window.top.print()" 
-                    style="background-color: white;
-                           color: #500000;
-                           border: 2px solid #e0e0e0;
-                           border-radius: 8px;
-                           padding: 0.6rem 1.2rem;
-                           font-size: 0.95rem;
-                           font-weight: 600;
-                           cursor: pointer;
-                           transition: all 0.3s ease;
-                           width: 100%;
-                           min-height: 45px;
-                           font-family: 'Source Sans Pro', sans-serif;"
-                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
-                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
-                🖨️ Print Page
-            </button>
+        st.markdown("""
+        <div class="footer-center footer-content" style="text-align: center;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;"></p>
         </div>
-        """, height=70)
+        """, unsafe_allow_html=True)
     with footer_col3:
         st.markdown("""
         <div class="footer-right footer-content" style="text-align: right;">

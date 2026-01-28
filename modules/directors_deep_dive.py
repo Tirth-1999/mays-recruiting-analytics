@@ -39,8 +39,6 @@ def render():
             options=program_options,
             help="Filter by specific program"
         )
-
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     
     # How to Use This Section - Collapsible
     with st.expander("💡 How to Use This Section", expanded=False):
@@ -65,8 +63,6 @@ def render():
             </div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     # Load data based on selection
     current_data = load_cohort_data(selected_cohort)
@@ -74,7 +70,6 @@ def render():
     # Apply program filter if selected
     if selected_program_filter != "All Programs":
         current_data = current_data[current_data['program'] == selected_program_filter]
-
     if current_data.empty:
         st.error(f"❌ No data available for Class of {selected_cohort}" + 
                  (f" - {selected_program_filter}" if selected_program_filter != "All Programs" else ""))
@@ -151,7 +146,7 @@ def render():
         </div>
         """.format(selected_cohort), unsafe_allow_html=True)
         
-        # Comprehensive KPI Grid using CSS Grid
+        # Comprehensive KPI Grid using CSS Grid with responsive font sizing
         st.markdown("""
         <style>
         .full-metrics-container {
@@ -166,25 +161,97 @@ def render():
             border-radius: 12px;
             border: 1px solid #e0e0e0;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
+            text-align: center !important;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            min-height: 120px;
         }
-        @media (max-width: 1200px) {
+        .full-metric-box * {
+            text-align: center !important;
+        }
+        .full-metric-number {
+            color: #500000 !important;
+            margin: 0 !important;
+            padding: 0 0 0 15px !important;
+            font-size: clamp(1rem, 1.8vw + 0.5rem, 1.8rem) !important;
+            font-weight: bold !important;
+            line-height: 1.1 !important;
+            text-align: center !important;
+            width: 100% !important;
+            display: block !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            box-sizing: border-box !important;
+            text-indent: 0 !important;
+            letter-spacing: 0 !important;
+        }
+        .full-metric-label {
+            margin: 8px auto 3px auto !important;
+            padding: 0 5px !important;
+            color: #495057 !important;
+            font-weight: 500 !important;
+            font-size: clamp(0.75rem, 1.2vw + 0.3rem, 0.9rem) !important;
+            line-height: 1.2 !important;
+            text-align: center !important;
+            width: 100% !important;
+            display: block !important;
+        }
+        .full-metric-small {
+            color: #6c757d !important;
+            font-size: clamp(0.65rem, 1vw + 0.25rem, 0.8rem) !important;
+            text-align: center !important;
+            margin: 0 !important;
+        }
+        
+        /* Adjust for narrower screens (sidebar open on laptop) */
+        @media (max-width: 1400px) {
             .full-metrics-container {
                 grid-template-columns: repeat(3, 1fr);
+                gap: 0.8rem;
+            }
+            .full-metric-number {
+                font-size: clamp(0.9rem, 1.5vw + 0.4rem, 1.5rem) !important;
+            }
+            .full-metric-label {
+                font-size: clamp(0.7rem, 1vw + 0.25rem, 0.85rem) !important;
+            }
+            .full-metric-small {
+                font-size: clamp(0.6rem, 0.9vw + 0.2rem, 0.75rem) !important;
             }
         }
-        @media (max-width: 768px) {
+        
+        /* Tablet portrait */
+        @media (max-width: 900px) {
             .full-metrics-container {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .full-metric-number {
+                font-size: clamp(1.2rem, 2vw + 0.5rem, 1.8rem) !important;
+            }
+            .full-metric-label {
+                font-size: clamp(0.8rem, 1.3vw + 0.3rem, 0.95rem) !important;
+            }
+            .full-metric-small {
+                font-size: clamp(0.7rem, 1.1vw + 0.25rem, 0.8rem) !important;
+            }
         }
-        @media (max-width: 480px) {
+        
+        /* Mobile */
+        @media (max-width: 768px) {
             .full-metrics-container {
                 grid-template-columns: 1fr;
+            }
+            .full-metric-number {
+                font-size: clamp(1.5rem, 3vw + 0.5rem, 2rem) !important;
+            }
+            .full-metric-label {
+                font-size: clamp(0.9rem, 2vw + 0.3rem, 1.1rem) !important;
+            }
+            .full-metric-small {
+                font-size: clamp(0.8rem, 1.5vw + 0.3rem, 0.9rem) !important;
             }
         }
         </style>
@@ -193,34 +260,34 @@ def render():
         st.markdown(f"""
         <div class="full-metrics-container">
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(inquiries)}</h2>
-                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Inquiries</p>
-                <small style="color: #6c757d; font-size: 0.8rem;">Total received</small>
+                <h2 class="full-metric-number">{int(inquiries)}</h2>
+                <p class="full-metric-label">Inquiries</p>
+                <small class="full-metric-small">Total received</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(applications)}</h2>
-                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Applications</p>
-                <small style="color: {'#28a745' if conversion_1 > 30 else '#ffc107' if conversion_1 > 20 else '#dc3545'}; font-size: 0.8rem;">{conversion_1:.1f}% conv.</small>
+                <h2 class="full-metric-number">{int(applications)}</h2>
+                <p class="full-metric-label">Applications</p>
+                <small class="full-metric-small" style="color: {'#28a745' if conversion_1 > 30 else '#ffc107' if conversion_1 > 20 else '#dc3545'} !important;">{conversion_1:.1f}% conv.</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(in_progress)}</h2>
-                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">In Progress</p>
-                <small style="color: #6c757d; font-size: 0.8rem;">Applications</small>
+                <h2 class="full-metric-number">{int(in_progress)}</h2>
+                <p class="full-metric-label">In Progress</p>
+                <small class="full-metric-small">Applications</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(complete)}</h2>
-                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Complete</p>
-                <small style="color: #6c757d; font-size: 0.8rem;">Applications</small>
+                <h2 class="full-metric-number">{int(complete)}</h2>
+                <p class="full-metric-label">Complete</p>
+                <small class="full-metric-small">Applications</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(offers)}</h2>
-                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Offers</p>
-                <small style="color: #6c757d; font-size: 0.8rem;">{conversion_2:.1f}% rate</small>
+                <h2 class="full-metric-number">{int(offers)}</h2>
+                <p class="full-metric-label">Offers</p>
+                <small class="full-metric-small">{conversion_2:.1f}% rate</small>
             </div>
             <div class="full-metric-box">
-                <h2 style="color: #500000; margin: 0; font-size: 1.8rem; padding-left: 20px;">{int(enrolled)}</h2>
-                <p style="margin: 8px 0 3px 0; color: #495057; font-weight: 500; font-size: 0.9rem;">Enrolled</p>
-                <small style="color: {'#28a745' if yield_rate > 70 else '#ffc107' if yield_rate > 50 else '#dc3545'}; font-size: 0.8rem;">{yield_rate:.1f}% yield</small>
+                <h2 class="full-metric-number">{int(enrolled)}</h2>
+                <p class="full-metric-label">Enrolled</p>
+                <small class="full-metric-small" style="color: {'#28a745' if yield_rate > 70 else '#ffc107' if yield_rate > 50 else '#dc3545'} !important;">{yield_rate:.1f}% yield</small>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -421,37 +488,208 @@ def render():
             # Divider between charts
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
-            # Performance metrics radar chart - FULL WIDTH
+            # Performance metrics radar chart - WITH PROFESSIONAL DROPDOWN EXPLANATION
             st.markdown("<h4 style='text-align: center; color: #500000;'>Performance Radar</h4>", unsafe_allow_html=True)
             
-            metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
-            values = [
-                conversion_1,
-                (complete / applications * 100) if applications > 0 else 0,
-                conversion_2,
-                yield_rate,
-                overall_conversion
-            ]
+            # Calculate current values for display
+            app_completion_rate = (complete / applications * 100) if applications > 0 else 0
             
-            fig = go.Figure()
-            fig.add_trace(go.Scatterpolar(
-                r=values,
-                theta=metrics,
-                fill='toself',
-                name='Performance',
-                line_color='#500000',
-                fillcolor='rgba(80, 0, 0, 0.3)'
-            ))
-            fig.update_layout(
-                polar=dict(
-                    radialaxis=dict(
-                        visible=True,
-                        range=[0, 100]
-                    )),
-                height=500,
-                margin=dict(t=50, b=50, l=80, r=80)
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            # Add JavaScript to detect screen width and store in session state
+            st.markdown("""
+            <script>
+            const width = window.innerWidth;
+            window.parent.postMessage({type: 'streamlit:setComponentValue', value: width}, '*');
+            </script>
+            """, unsafe_allow_html=True)
+            
+            # Use a single column layout that will naturally stack on smaller screens
+            # Streamlit automatically handles responsive behavior
+            st.markdown("""
+            <style>
+            /* Force columns to stack at 1400px breakpoint */
+            @media (max-width: 1400px) {
+                [data-testid="column"] {
+                    width: 100% !important;
+                    flex: 100% !important;
+                    max-width: 100% !important;
+                }
+            }
+            
+            /* Remove gaps between expanders to make them look like a single widget */
+            div[data-testid="stExpander"] {
+                margin-bottom: 0px !important;
+                border-bottom: none !important;
+            }
+            div[data-testid="stExpander"]:first-of-type {
+                border-top-left-radius: 8px !important;
+                border-top-right-radius: 8px !important;
+            }
+            div[data-testid="stExpander"]:last-of-type {
+                border-bottom-left-radius: 8px !important;
+                border-bottom-right-radius: 8px !important;
+                border-bottom: 1px solid #e0e0e0 !important;
+            }
+            
+            /* Responsive spacing - only add top margin on larger screens */
+            @media (min-width: 1401px) {
+                .radar-explanation-spacer {
+                    height: 120px;
+                }
+            }
+            @media (max-width: 1400px) {
+                .radar-explanation-spacer {
+                    height: 20px;
+                }
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Create two columns: radar chart on left, explanation on right
+            radar_col, explanation_col = st.columns([1.3, 1], gap="large")
+            
+            with radar_col:
+                metrics = ['Inquiry Conversion', 'Application Completion', 'Selectivity', 'Yield Rate', 'Overall Efficiency']
+                values = [
+                    conversion_1,
+                    app_completion_rate,
+                    conversion_2,
+                    yield_rate,
+                    overall_conversion
+                ]
+                
+                fig = go.Figure()
+                fig.add_trace(go.Scatterpolar(
+                    r=values,
+                    theta=metrics,
+                    fill='toself',
+                    name='Performance',
+                    line_color='#500000',
+                    fillcolor='rgba(80, 0, 0, 0.3)'
+                ))
+                fig.update_layout(
+                    polar=dict(
+                        radialaxis=dict(
+                            visible=True,
+                            range=[0, 100]
+                        )),
+                    height=600,
+                    margin=dict(t=50, b=50, l=80, r=120)
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            with explanation_col:
+                # Add vertical spacing to center the widget (responsive)
+                st.markdown("<div class='radar-explanation-spacer'></div>", unsafe_allow_html=True)
+                
+                # Metric 1: Inquiry Conversion
+                with st.expander("**Inquiry Conversion**", expanded=False):
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-size: 36px; font-weight: 700; color: #500000;">{conversion_1:.1f}%</div>
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">Current Performance</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Formula</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace;">(Applications ÷ Inquiries) × 100</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Meaning</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6;">Percentage of inquiries that convert to applications. Higher values indicate effective engagement.</td>
+                        </tr>
+                    </table>
+                    """, unsafe_allow_html=True)
+                
+                # Metric 2: Application Completion
+                with st.expander("**Application Completion**", expanded=False):
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-size: 36px; font-weight: 700; color: #500000;">{app_completion_rate:.1f}%</div>
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">Current Performance</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Formula</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace;">(Complete Apps ÷ Total Apps) × 100</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Meaning</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6;">Percentage of started applications that are completed. Indicates application process efficiency.</td>
+                        </tr>
+                    </table>
+                    """, unsafe_allow_html=True)
+                
+                # Metric 3: Selectivity
+                with st.expander("**Selectivity**", expanded=False):
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-size: 36px; font-weight: 700; color: #500000;">{conversion_2:.1f}%</div>
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">Current Performance</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Formula</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace;">(Offers ÷ Applications) × 100</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Meaning</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6;">Percentage of applications that receive offers. Reflects admission standards and competitiveness.</td>
+                        </tr>
+                    </table>
+                    """, unsafe_allow_html=True)
+                
+                # Metric 4: Yield Rate
+                with st.expander("**Yield Rate**", expanded=False):
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-size: 36px; font-weight: 700; color: #500000;">{yield_rate:.1f}%</div>
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">Current Performance</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Formula</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace;">(Accepted ÷ Offers) × 100</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Meaning</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6;">Percentage of offers that are accepted. Indicates program attractiveness and competitiveness.</td>
+                        </tr>
+                    </table>
+                    """, unsafe_allow_html=True)
+                
+                # Metric 5: Overall Efficiency
+                with st.expander("**Overall Efficiency**", expanded=False):
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-size: 36px; font-weight: 700; color: #500000;">{overall_conversion:.1f}%</div>
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">Current Performance</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Formula</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace;">(Enrolled ÷ Inquiries) × 100</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #dee2e6; font-weight: 600; color: #500000;">Meaning</td>
+                            <td style="padding: 10px; border: 1px solid #dee2e6;">End-to-end conversion from inquiry to enrollment. Measures overall funnel effectiveness.</td>
+                        </tr>
+                    </table>
+                    """, unsafe_allow_html=True)
             
             # Add Correlation Matrix and Performance Benchmarks to Performance Analysis
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -483,6 +721,73 @@ def render():
                     col_spacer1, col_chart, col_spacer2 = st.columns([0.2, 3, 0.2])
                     with col_chart:
                         st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Add dynamic explanation dropdown - centered
+                    col_exp_spacer1, col_exp_content, col_exp_spacer2 = st.columns([0.2, 3, 0.2])
+                    with col_exp_content:
+                        with st.expander("How to Use This Section", expanded=False):
+                            # Generate dynamic insights based on correlation values
+                            insights_html = []
+                            
+                            # Find key correlations (if columns exist)
+                            key_metrics = ['inquiries_received', 'total_applications', 'admissions_offered', 
+                                         'admissions_accepted', 'anticipated_cohort_size']
+                            
+                            available_metrics = [m for m in key_metrics if m in correlation_matrix.columns]
+                            
+                            if len(available_metrics) >= 2:
+                                # Find strongest positive correlations
+                                for i, metric1 in enumerate(available_metrics):
+                                    for metric2 in available_metrics[i+1:]:
+                                        corr_value = correlation_matrix.loc[metric1, metric2]
+                                        if abs(corr_value) > 0.7:  # Strong correlation
+                                            metric1_clean = metric1.replace('_', ' ').title()
+                                            metric2_clean = metric2.replace('_', ' ').title()
+                                            
+                                            if corr_value > 0.7:
+                                                insights_html.append(f"<p style='margin: 10px 0; font-size: 14px; color: #495057; line-height: 1.6; text-align: center;'><strong style='color: #28a745;'>Strong Positive Link:</strong> {metric1_clean} and {metric2_clean} move together ({corr_value:.2f}). When one increases, the other typically does too.</p>")
+                                            elif corr_value < -0.7:
+                                                insights_html.append(f"<p style='margin: 10px 0; font-size: 14px; color: #495057; line-height: 1.6; text-align: center;'><strong style='color: #dc3545;'>Inverse Relationship:</strong> {metric1_clean} and {metric2_clean} move in opposite directions ({corr_value:.2f}). This may indicate a bottleneck.</p>")
+                            
+                            # Build the complete HTML
+                            html_content = """<div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0;">
+<h5 style="color: #500000; margin-top: 0; text-align: center;">Understanding the Correlation Matrix</h5>
+<div style="margin-bottom: 20px;">
+<strong style="color: #500000; display: block; text-align: center;">What It Shows:</strong>
+<p style="margin: 5px 0; font-size: 14px; color: #495057; line-height: 1.6; text-align: center;">This matrix reveals how different metrics relate to each other. Each cell shows the correlation between two metrics, ranging from -1 (perfect inverse relationship) to +1 (perfect positive relationship).</p>
+</div>
+<div style="margin-bottom: 20px;">
+<strong style="color: #500000; display: block; text-align: center;">Color Guide:</strong>
+<ul style="margin: 5px 0; font-size: 14px; color: #495057; line-height: 1.6; list-style-position: inside; text-align: center; list-style-type: none;">
+<li><span style="color: #28a745; font-weight: 600;">Green (0.7 to 1.0)</span>: Strong positive correlation - metrics move together</li>
+<li><span style="color: #ffc107; font-weight: 600;">Yellow (0.3 to 0.7)</span>: Moderate correlation - some relationship exists</li>
+<li><span style="color: #dc3545; font-weight: 600;">Red (-1.0 to 0.3)</span>: Weak or negative correlation - metrics don't move together</li>
+</ul>
+</div>
+<div style="margin-bottom: 20px;">
+<strong style="color: #500000; display: block; text-align: center;">How to Use This:</strong>
+<ol style="margin: 5px 0; font-size: 14px; color: #495057; line-height: 1.6; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto;">
+<li><strong>Identify Leading Indicators:</strong> Strong correlations help predict future outcomes. If inquiries strongly correlate with enrollments, early inquiry numbers forecast final results.</li>
+<li><strong>Spot Bottlenecks:</strong> Weak correlations between sequential stages (e.g., applications to offers) may indicate process issues.</li>
+<li><strong>Validate Strategies:</strong> Check if marketing spend correlates with inquiries, or if program changes impact conversion rates.</li>
+<li><strong>Benchmark Health:</strong> Healthy programs show predictable patterns. Unusual correlations flag areas needing attention.</li>
+</ol>
+</div>"""
+                            
+                            # Add dynamic insights if any were found
+                            if insights_html:
+                                html_content += """<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+<strong style="color: #500000; display: block; text-align: center;">Key Insights from Your Data:</strong>
+</div>"""
+                                html_content += "".join(insights_html[:3])  # Show top 3 insights
+                            else:
+                                html_content += """<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px;">
+<p style="margin: 0; font-size: 14px; color: #856404; line-height: 1.6; text-align: center;"><strong>Tip:</strong> Look for dark green cells to find your strongest predictive relationships. These are the metrics you should monitor most closely for forecasting.</p>
+</div>"""
+                            
+                            html_content += "</div>"
+                            
+                            st.markdown(html_content, unsafe_allow_html=True)
             
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             
@@ -624,46 +929,107 @@ def render():
                         ))
                 
                 fig.update_layout(
-                    title='Key Metrics Trends Over Time - Interactive View',
+                    title={
+                        'text': 'Key Metrics Trends Over Time - Interactive View',
+                        'x': 0.5,
+                        'xanchor': 'center',
+                        'yanchor': 'top'
+                    },
                     height=500,
                     xaxis_title='Date',
                     yaxis_title='Count',
                     legend=dict(
-                        x=1, y=1,
-                        xanchor='right', yanchor='top',
+                        orientation='h',
+                        x=0.5,
+                        y=1.12,
+                        xanchor='center',
+                        yanchor='top',
                         bgcolor='rgba(255,255,255,0.9)',
                         bordercolor='rgba(0,0,0,0.3)',
                         borderwidth=1
-                    )
+                    ),
+                    margin=dict(t=120, b=50, l=80, r=80)
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 
                 # Growth rate analysis
-                st.markdown("<h4 style='text-align: center; color: #500000;'>📊 Growth Rate Analysis</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='text-align: center; color: #500000;'>Growth Rate Analysis</h4>", unsafe_allow_html=True)
+                
+                # Add helpful hint explaining the growth rate analysis
+                st.markdown("""
+                <div style="background: #f0f8ff;
+                            padding: 12px;
+                            border-radius: 6px;
+                            margin-bottom: 15px;
+                            text-align: center;
+                            font-size: 0.9rem;">
+                    💡 <strong>Tip:</strong> Compares latest vs. previous period • 🟢 Positive growth • 🔴 Decline • 🟡 Moderate change
+                </div>
+                """, unsafe_allow_html=True)
                 
                 growth_data = []
                 for metric in key_metrics:
-                    if metric in time_series.columns and len(time_series) > 1:
+                    if metric in time_series.columns:
+                        # Get all values for this metric
                         values = time_series[metric].values
-                        if len(values) >= 2 and values[-2] > 0:
-                            growth_rate = ((values[-1] - values[-2]) / values[-2] * 100)
-                            growth_data.append({
-                                'Metric': metric.replace('_', ' ').title(),
-                                'Growth Rate (%)': growth_rate,
-                                'Latest Value': values[-1],
-                                'Previous Value': values[-2]
-                            })
+                        dates = time_series.index
+                        
+                        # Find the last two non-zero values (or use zeros if that's all we have)
+                        non_zero_indices = [i for i, v in enumerate(values) if v > 0]
+                        
+                        if len(non_zero_indices) >= 2:
+                            # Use the last two non-zero values
+                            latest_idx = non_zero_indices[-1]
+                            previous_idx = non_zero_indices[-2]
+                            latest_val = float(values[latest_idx])
+                            previous_val = float(values[previous_idx])
+                            latest_date = dates[latest_idx]
+                            previous_date = dates[previous_idx]
+                        elif len(values) >= 2:
+                            # Fall back to last two values even if zero
+                            latest_val = float(values[-1])
+                            previous_val = float(values[-2])
+                            latest_date = dates[-1]
+                            previous_date = dates[-2]
+                        else:
+                            continue  # Not enough data points
+                        
+                        # Calculate growth rate
+                        if previous_val > 0:
+                            growth_rate = ((latest_val - previous_val) / previous_val * 100)
+                        elif latest_val > 0 and previous_val == 0:
+                            growth_rate = 100.0  # Growth from zero
+                        else:
+                            growth_rate = 0.0  # Both zero
+                        
+                        # Add to growth data
+                        growth_data.append({
+                            'Metric': metric.replace('_', ' ').title(),
+                            'Growth Rate (%)': growth_rate,
+                            'Latest Value': latest_val,
+                            'Previous Value': previous_val,
+                            'Latest Date': latest_date.strftime('%b %Y'),
+                            'Previous Date': previous_date.strftime('%b %Y')
+                        })
                 
                 if growth_data:
                     growth_df = pd.DataFrame(growth_data)
-                    st.dataframe(
-                        growth_df.style.format({
-                            'Growth Rate (%)': '{:+.1f}%',
-                            'Latest Value': '{:.0f}',
-                            'Previous Value': '{:.0f}'
-                        }).background_gradient(subset=['Growth Rate (%)'], cmap='RdYlGn'),
-                        use_container_width=True
+                    
+                    # Apply color styling with proper gradient
+                    styled_df = growth_df.style.format({
+                        'Growth Rate (%)': '{:+.1f}%',
+                        'Latest Value': '{:.0f}',
+                        'Previous Value': '{:.0f}'
+                    }).background_gradient(
+                        subset=['Growth Rate (%)'], 
+                        cmap='RdYlGn',
+                        vmin=-50,  # Red for large declines
+                        vmax=50    # Green for large growth
                     )
+                    
+                    st.dataframe(styled_df, use_container_width=True)
+                else:
+                    st.info("📊 Growth rate analysis requires at least two time periods with data. Please check back when more data is available.")
         
         with tab3:
             # Define metric categories
@@ -833,24 +1199,30 @@ def render():
                         fig_app.update_layout(barmode='group')
                     
                     fig_app.update_layout(
-                        title='Applications Metrics Over Time',
+                        title={
+                            'text': 'Applications Metrics Over Time',
+                            'x': 0.5,
+                            'xanchor': 'center',
+                            'yanchor': 'top'
+                        },
                         height=600,
                         xaxis_title='Date',
                         yaxis_title='Count',
                         yaxis_type='log' if st.session_state.exec_app_log else 'linear',
                         legend=dict(
                             orientation='h',
-                            yanchor='bottom',
-                            y=-0.35,
-                            xanchor='center',
                             x=0.5,
+                            y=1.15,
+                            xanchor='center',
+                            yanchor='top',
                             bgcolor='rgba(255,255,255,0.9)',
                             bordercolor='rgba(0,0,0,0.3)',
                             borderwidth=1,
-                            font=dict(size=11),
-                            itemwidth=30
+                            font=dict(size=10),
+                            itemwidth=30,
+                            tracegroupgap=5
                         ),
-                        margin=dict(b=180, t=50, l=40, r=40)
+                        margin=dict(b=50, t=150, l=40, r=40)
                     )
                     st.plotly_chart(fig_app, use_container_width=True)
                 else:
@@ -1001,24 +1373,30 @@ def render():
                         fig_adm.update_layout(barmode='group')
                     
                     fig_adm.update_layout(
-                        title='Admissions Metrics Over Time',
+                        title={
+                            'text': 'Admissions Metrics Over Time',
+                            'x': 0.5,
+                            'xanchor': 'center',
+                            'yanchor': 'top'
+                        },
                         height=600,
                         xaxis_title='Date',
                         yaxis_title='Count',
                         yaxis_type='log' if st.session_state.exec_adm_log else 'linear',
                         legend=dict(
                             orientation='h',
-                            yanchor='bottom',
-                            y=-0.35,
-                            xanchor='center',
                             x=0.5,
+                            y=1.15,
+                            xanchor='center',
+                            yanchor='top',
                             bgcolor='rgba(255,255,255,0.9)',
                             bordercolor='rgba(0,0,0,0.3)',
                             borderwidth=1,
-                            font=dict(size=11),
-                            itemwidth=30
+                            font=dict(size=10),
+                            itemwidth=30,
+                            tracegroupgap=5
                         ),
-                        margin=dict(b=180, t=50, l=40, r=40)
+                        margin=dict(b=50, t=150, l=40, r=40)
                     )
                     st.plotly_chart(fig_adm, use_container_width=True)
                 else:
@@ -1142,8 +1520,6 @@ def render():
                 </div>
                 """, unsafe_allow_html=True)
 
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-
             # Load comparison data
             if comparison_cohort:
                 comp_data = load_yoy_comparison_data(primary_cohort, comparison_cohort)
@@ -1192,8 +1568,6 @@ def render():
                         </p>
                     </div>
                     """, unsafe_allow_html=True)
-
-                    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
                     # Calculate metrics for both cohorts
                     primary_metrics = primary_latest.groupby('metric_name')['metric_value'].sum()
@@ -1618,27 +1992,11 @@ def render():
         </div>
         """, unsafe_allow_html=True)
     with footer_col2:
-        st.components.v1.html("""
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 60px;">
-            <button onclick="window.top.print()" 
-                    style="background-color: white;
-                           color: #500000;
-                           border: 2px solid #e0e0e0;
-                           border-radius: 8px;
-                           padding: 0.6rem 1.2rem;
-                           font-size: 0.95rem;
-                           font-weight: 600;
-                           cursor: pointer;
-                           transition: all 0.3s ease;
-                           width: 100%;
-                           min-height: 45px;
-                           font-family: 'Source Sans Pro', sans-serif;"
-                    onmouseover="this.style.backgroundColor='#e9ecef'; this.style.borderColor='#500000';"
-                    onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#e0e0e0';">
-                🖨️ Print Page
-            </button>
+        st.markdown("""
+        <div class="footer-center footer-content" style="text-align: center;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;"></p>
         </div>
-        """, height=70)
+        """, unsafe_allow_html=True)
     with footer_col3:
         st.markdown("""
         <div class="footer-right footer-content" style="text-align: right;">
