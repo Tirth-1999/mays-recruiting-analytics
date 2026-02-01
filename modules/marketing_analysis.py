@@ -1532,6 +1532,127 @@ def render():
                 </div>
                 """, unsafe_allow_html=True)
                 
+                # Define CSS for metrics boxes (needed in this tab)
+                st.markdown("""
+                <style>
+                .metrics-container-marketing {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 1rem;
+                    margin: 20px 0;
+                }
+                .metric-box-marketing {
+                    background: white !important;
+                    padding: 1.5rem 1rem !important;
+                    border-radius: 12px !important;
+                    border: 1px solid #e0e0e0 !important;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+                    text-align: center !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                    min-height: 120px !important;
+                }
+                .metric-box-marketing * {
+                    text-align: center !important;
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                }
+                .metric-number-marketing {
+                    color: #500000 !important;
+                    margin: 0 !important;
+                    padding: 0 0 0 15px !important;
+                    font-size: clamp(1rem, 1.8vw + 0.5rem, 1.8rem) !important;
+                    font-weight: bold !important;
+                    line-height: 1.1 !important;
+                    text-align: center !important;
+                    width: 100% !important;
+                    display: block !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                    box-sizing: border-box !important;
+                    text-indent: 0 !important;
+                    letter-spacing: 0 !important;
+                }
+                /* Override Streamlit's default h2 styles */
+                .metric-box-marketing h2 {
+                    text-align: center !important;
+                    margin: 0 !important;
+                    padding: 0 0 0 15px !important;
+                    text-indent: 0 !important;
+                }
+                .metric-label-marketing {
+                    margin: 8px auto 0 auto !important;
+                    padding: 0 5px !important;
+                    color: #495057 !important;
+                    font-weight: 600 !important;
+                    font-size: clamp(0.75rem, 1.2vw + 0.3rem, 0.95rem) !important;
+                    line-height: 1.2 !important;
+                    text-align: center !important;
+                    width: 100% !important;
+                    display: block !important;
+                    word-wrap: break-word !important;
+                    hyphens: auto !important;
+                }
+                
+                /* Adjust for narrower screens (sidebar open on laptop) */
+                @media (max-width: 1400px) {
+                    .metrics-container-marketing {
+                        grid-template-columns: repeat(4, 1fr) !important;
+                        gap: 0.8rem !important;
+                    }
+                    .metric-number-marketing {
+                        font-size: clamp(0.9rem, 1.5vw + 0.4rem, 1.5rem) !important;
+                    }
+                    .metric-label-marketing {
+                        font-size: clamp(0.7rem, 1vw + 0.25rem, 0.85rem) !important;
+                    }
+                }
+                
+                /* Switch to 2 columns when space is tight (sidebar open on smaller laptop) */
+                @media (max-width: 1200px) {
+                    .metrics-container-marketing {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 1rem !important;
+                    }
+                    .metric-number-marketing {
+                        font-size: clamp(1.2rem, 2vw + 0.5rem, 1.8rem) !important;
+                    }
+                    .metric-label-marketing {
+                        font-size: clamp(0.8rem, 1.3vw + 0.3rem, 0.95rem) !important;
+                    }
+                }
+                
+                /* Tablet portrait */
+                @media (max-width: 900px) {
+                    .metrics-container-marketing {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                    .metric-number-marketing {
+                        font-size: clamp(1.3rem, 2.5vw + 0.5rem, 1.9rem) !important;
+                    }
+                    .metric-label-marketing {
+                        font-size: clamp(0.85rem, 1.5vw + 0.3rem, 1rem) !important;
+                    }
+                }
+                
+                /* Mobile */
+                @media (max-width: 768px) {
+                    .metrics-container-marketing {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .metric-number-marketing {
+                        font-size: clamp(1.5rem, 3vw + 0.5rem, 2rem) !important;
+                    }
+                    .metric-label-marketing {
+                        font-size: clamp(0.9rem, 2vw + 0.3rem, 1.1rem) !important;
+                    }
+                }
+                </style>
+                """, unsafe_allow_html=True)
+                
                 total_spend_chan = filtered_spend_chan['spend_amount'].sum()
                 num_channels = filtered_spend_chan['channel'].nunique()
                 num_programs = filtered_spend_chan['program'].nunique()
