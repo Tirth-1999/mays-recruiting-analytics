@@ -1413,7 +1413,7 @@ def render():
                             fig = make_subplots(
                                 rows=2, cols=1,
                                 subplot_titles=('Marketing Spend Over Time', 'Outcomes Over Time'),
-                                vertical_spacing=0.15,
+                                vertical_spacing=0.20,  # Increased spacing between graphs
                                 row_heights=[0.4, 0.6]
                             )
                             
@@ -1452,17 +1452,17 @@ def render():
                             fig.update_yaxes(title_text="Count", row=2, col=1)
                             
                             fig.update_layout(
-                                height=650,
+                                height=700,  # Increased height to accommodate legend at top
                                 hovermode='x unified',
                                 showlegend=True,
                                 legend=dict(
                                     orientation="h", 
-                                    yanchor="bottom", 
-                                    y=-0.15, 
+                                    yanchor="top", 
+                                    y=1.08,  # Position legend above the top chart
                                     xanchor="center", 
                                     x=0.5
                                 ),
-                                margin=dict(t=80, b=100, l=60, r=60)
+                                margin=dict(t=120, b=80, l=60, r=60)  # Increased top margin for legend
                             )
                             
                             # Center subplot titles
