@@ -11,7 +11,7 @@ PROGRAM_CODE_TO_NAME = {
     'MS HRM': 'Flex Online MS Human Resource Management',
     'MS MISY': 'Flex Online MS Management Information Systems',
     'MS MKTG': 'Flex Online MS Marketing',
-    'MS SPBA': 'Flex Online AI in Business Program',
+    'AI': 'Flex Online AI and Business Program',  # Updated from MS SPBA
 }
 
 # Reverse mapping (FULL NAME → SHORT CODE)
@@ -31,7 +31,7 @@ PROGRAM_COLORS = {
     'Flex Online MS Human Resource Management': '#2ECC71',  # Green
     'Flex Online MS Management Information Systems': '#9B59B6',  # Purple
     'Flex Online MS Marketing': '#F39C12',  # Gold
-    'Flex Online AI in Business Program': '#E74C3C',  # Red
+    'Flex Online AI and Business Program': '#E74C3C',  # Red - Updated name
 }
 
 def get_program_display_name(code_or_name):
@@ -69,12 +69,19 @@ def get_program_display_name(code_or_name):
     # Handle marketing Excel variations (abbreviated names)
     marketing_variations = {
         'flex online accounting': 'Flex Online MS Accounting',
+        'flex online hrm': 'Flex Online MS Human Resource Management', 
+        'flex online marketing': 'Flex Online MS Marketing',
+        'flex online mis': 'Flex Online MS Management Information Systems',
+        'flex online ai and business program': 'Flex Online AI and Business Program',  # Updated
+        'flex online ai in business program': 'Flex Online AI and Business Program',  # Handle old name
+        'flex online mba': 'Flex Online MBA',
+        'flex online ms entrepreneurial leadership': 'Flex Online MS Entrepreneurial Leadership',
+        # Handle short names from your list
+        'general awareness': 'General Awareness',
+        'flex online accounting': 'Flex Online MS Accounting',
         'flex online hrm': 'Flex Online MS Human Resource Management',
         'flex online marketing': 'Flex Online MS Marketing',
         'flex online mis': 'Flex Online MS Management Information Systems',
-        'flex online ai and business program': 'Flex Online AI in Business Program',
-        'flex online mba': 'Flex Online MBA',
-        'flex online ms entrepreneurial leadership': 'Flex Online MS Entrepreneurial Leadership',
     }
     
     if code_or_name_lower in marketing_variations:

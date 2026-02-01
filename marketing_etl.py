@@ -1,7 +1,7 @@
 """
-Marketing Data ETL Pipeline
-Load marketing ad spend data from Ologie into the database
-Handles dynamic month detection and incremental updates
+Marketing Data ETL Pipeline - Enhanced Version
+Load marketing ad spend data from the new cleaner Excel file
+Handles dynamic sheets, months, and programs with state tracking
 """
 
 import pandas as pd
@@ -16,12 +16,13 @@ from utils.program_mapping import get_program_display_name
 
 # Database connection
 DB_PATH = 'edulytix.db'
+EXCEL_FILE = 'Dataset/Mays Flex Online Ad Spend.xlsx'
 
 def create_marketing_tables():
     """Create marketing tables with proper schema"""
     conn = sqlite3.connect(DB_PATH)
     
-    # Main spend table - individual channel spend by month
+    # Main spend table - individual channel spend by month (NO notes here)
     conn.execute('''
         CREATE TABLE IF NOT EXISTS marketing_spend (
             spend_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +31,6 @@ def create_marketing_tables():
             fiscal_year TEXT NOT NULL,
             month_date TEXT NOT NULL,
             spend_amount REAL DEFAULT 0,
-            extra_notes TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(program, channel, fiscal_year, month_date)
         )
@@ -49,10 +49,39 @@ def create_marketing_tables():
         )
     ''')
     
+    # Incremental notes table - one note per program-channel-fiscal_year
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS marketing_incremental_notes (
+            note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            program TEXT NOT NULL,
+            channel TEXT NOT NULL,
+            fiscal_year TEXT NOT NULL,
+            incremental_note TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(program, channel, fiscal_year)
+        )
+    ''')
+    
+    # State tracking table - track what we've processed
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS marketing_etl_state (
+            state_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fiscal_year TEXT NOT NULL,
+            sheet_name TEXT NOT NULL,
+            programs TEXT NOT NULL,  -- JSON array of programs
+            channels TEXT NOT NULL,  -- JSON array of channels  
+            months TEXT NOT NULL,    -- JSON array of months
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(fiscal_year, sheet_name)
+        )
+    ''')
+    
     # Create indexes for performance
     conn.execute('CREATE INDEX IF NOT EXISTS idx_spend_program ON marketing_spend(program)')
     conn.execute('CREATE INDEX IF NOT EXISTS idx_spend_date ON marketing_spend(month_date)')
+    conn.execute('CREATE INDEX IF NOT EXISTS idx_spend_fiscal ON marketing_spend(fiscal_year)')
     conn.execute('CREATE INDEX IF NOT EXISTS idx_totals_program ON marketing_spend_totals(program)')
+    conn.execute('CREATE INDEX IF NOT EXISTS idx_notes_program_channel ON marketing_incremental_notes(program, channel)')
     
     conn.commit()
     conn.close()
@@ -71,107 +100,163 @@ def standardize_program_name(program_name):
     
     return standardized
 
-def detect_fiscal_year_columns(df):
+def get_current_state(conn):
+    """Get current ETL state from database"""
+    try:
+        state_df = pd.read_sql("SELECT * FROM marketing_etl_state", conn)
+        state_dict = {}
+        for _, row in state_df.iterrows():
+            state_dict[row['fiscal_year']] = {
+                'sheet_name': row['sheet_name'],
+                'programs': json.loads(row['programs']),
+                'channels': json.loads(row['channels']),
+                'months': json.loads(row['months']),
+                'last_updated': row['last_updated']
+            }
+        return state_dict
+    except:
+        return {}
+
+def update_state(conn, fiscal_year, sheet_name, programs, channels, months):
+    """Update ETL state in database"""
+    conn.execute('''
+        INSERT OR REPLACE INTO marketing_etl_state 
+        (fiscal_year, sheet_name, programs, channels, months, last_updated)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ''', (
+        fiscal_year, 
+        sheet_name, 
+        json.dumps(sorted(programs)), 
+        json.dumps(sorted(channels)), 
+        json.dumps(months)
+    ))
+    conn.commit()
+
+def detect_sheet_structure(df, sheet_name):
     """
-    Detect FY25 and FY26 columns dynamically
-    Returns: (fy25_months, fy26_months, fy25_notes_col, fy26_notes_col, header_row_idx)
+    Detect the structure of a sheet dynamically
+    Returns: (programs, channels, month_columns, notes_column)
     """
-    # Row 0 has FY headers, Row 1 has month names
-    fy_header_row = df.iloc[0]
-    month_header_row = df.iloc[1]
+    print(f"\n📊 Analyzing sheet: {sheet_name}")
     
-    # Month name mapping
+    # Assume first row is headers
+    headers = df.iloc[0].tolist()
+    
+    # Find Program and Channel columns (should be first two)
+    program_col = 0  # Column A
+    channel_col = 1  # Column B
+    
+    print(f"   Program column: {headers[program_col]} (Column {program_col})")
+    print(f"   Channel column: {headers[channel_col]} (Column {channel_col})")
+    
+    # Find month columns (start from column 2, exclude notes column)
+    month_columns = []
+    notes_column = None
+    
     month_names = ['January', 'February', 'March', 'April', 'May', 'June', 
                    'July', 'August', 'September', 'October', 'November', 'December']
     
-    fy25_months = []
-    fy26_months = []
-    fy25_notes_col = None
-    fy26_notes_col = None
-    
-    # Find FY25 and FY26 start columns by scanning row 0
-    fy25_start = None
-    fy26_start = None
-    
-    for col_idx in range(len(fy_header_row)):
-        cell_value = str(fy_header_row[col_idx]).strip()
+    for i, header in enumerate(headers[2:], start=2):  # Start from column 2
+        header_str = str(header).strip()
         
-        if ('FY25' in cell_value or 'Year 1' in cell_value) and 'note' not in cell_value.lower():
-            fy25_start = col_idx
-            print(f"   FY25 section starts at column: {col_idx}")
-        elif ('FY26' in cell_value or 'Year 2' in cell_value) and 'note' not in cell_value.lower():
-            fy26_start = col_idx
-            print(f"   FY26 section starts at column: {col_idx}")
+        # Check if it's a notes column
+        if 'note' in header_str.lower() or 'incremental' in header_str.lower():
+            notes_column = i
+            print(f"   Notes column: {header_str} (Column {i})")
+            continue
         
-        # Find notes columns
-        if 'note' in cell_value.lower() or 'incremental' in cell_value.lower():
-            if 'FY25' in cell_value or 'Y1' in cell_value:
-                fy25_notes_col = col_idx
-                print(f"   FY25 notes column: {col_idx}")
-            elif 'FY26' in cell_value or 'Y2' in cell_value:
-                fy26_notes_col = col_idx
-                print(f"   FY26 notes column: {col_idx}")
+        # Check if it's a month column
+        if any(month in header_str for month in month_names):
+            month_name = next((m for m in month_names if m in header_str), header_str)
+            month_columns.append((i, month_name, header_str))
+            print(f"   Month column: {month_name} (Column {i})")
     
-    # Now scan month names in row 1 and assign to FY25 or FY26
-    for col_idx in range(len(month_header_row)):
-        cell_value = str(month_header_row[col_idx]).strip()
+    # Extract unique programs and channels from data
+    programs = set()
+    channels = set()
+    
+    for idx in range(1, len(df)):  # Skip header row
+        program_val = df.iloc[idx, program_col]
+        channel_val = df.iloc[idx, channel_col]
         
-        # Check if it's a month name
-        if any(month in cell_value for month in month_names):
-            month_name = next((m for m in month_names if m in cell_value), None)
-            
-            # Determine if it's FY25 or FY26 based on column position
-            if fy25_start is not None and col_idx >= fy25_start:
-                # Check if we've entered FY26 territory
-                if fy26_start is not None and col_idx >= fy26_start:
-                    # This is FY26
-                    if month_name in ['August', 'September', 'October', 'November', 'December']:
-                        year = 2025
-                    else:
-                        year = 2026
-                    month_num = month_names.index(month_name) + 1
-                    month_date = f"{year}-{month_num:02d}-01"
-                    fy26_months.append((col_idx, month_name, month_date))
-                else:
-                    # This is FY25
-                    if month_name in ['September', 'October', 'November', 'December']:
-                        year = 2024
-                    else:
-                        year = 2025
-                    month_num = month_names.index(month_name) + 1
-                    month_date = f"{year}-{month_num:02d}-01"
-                    fy25_months.append((col_idx, month_name, month_date))
+        if pd.notna(program_val) and str(program_val).strip():
+            standardized = standardize_program_name(str(program_val).strip())
+            if standardized:
+                programs.add(standardized)
+        
+        if pd.notna(channel_val) and str(channel_val).strip():
+            channels.add(str(channel_val).strip())
     
-    return fy25_months, fy26_months, fy25_notes_col, fy26_notes_col, 1  # header_row_idx = 1
+    print(f"   Programs found: {len(programs)}")
+    print(f"   Channels found: {len(channels)}")
+    print(f"   Months found: {len(month_columns)}")
+    
+    return list(programs), list(channels), month_columns, notes_column
 
-def parse_ad_spend_file(file_path):
+def convert_month_to_date(month_name, fiscal_year):
+    """Convert month name to proper date based on fiscal year"""
+    month_names = ['January', 'February', 'March', 'April', 'May', 'June', 
+                   'July', 'August', 'September', 'October', 'November', 'December']
+    
+    if month_name not in month_names:
+        return None
+    
+    month_num = month_names.index(month_name) + 1
+    
+    # Determine year based on fiscal year and month
+    # Fiscal year runs from September to August of the following year
+    if fiscal_year == 'FY25':
+        if month_name in ['September', 'October', 'November', 'December']:
+            year = 2024  # Fall semester of FY25
+        else:  # Jan-Aug (Spring/Summer of FY25)
+            year = 2025
+    elif fiscal_year == 'FY26':
+        # Special case: FY26 data only includes August-December 2025
+        # August 2025 is the END of FY25, but it's included in FY26 sheet
+        if month_name == 'August':
+            year = 2025  # August 2025 (end of FY25, but in FY26 sheet)
+        elif month_name in ['September', 'October', 'November', 'December']:
+            year = 2025  # Fall semester of FY26
+        else:  # Jan-July (Spring/Summer of FY26) - not present in current data
+            year = 2026
+    else:
+        # For future fiscal years, extract year from FY format
+        try:
+            fy_num = int(fiscal_year[2:])  # Get '27' from 'FY27'
+            base_year = 2000 + fy_num
+            if month_name in ['September', 'October', 'November', 'December']:
+                year = base_year - 1  # Fall semester
+            else:
+                year = base_year  # Spring/Summer semester
+        except:
+            return None
+    
+    return f"{year}-{month_num:02d}-01"
+
+def parse_sheet_data(df, sheet_name, fiscal_year):
     """
-    Parse the marketing spend file with dynamic month detection
-    Returns: (spend_records, totals_records)
+    Parse data from a single sheet
+    Returns: (spend_records, totals_records, notes_records)
     """
-    print(f"\n📊 Processing: {file_path}")
+    print(f"\n📊 Processing sheet: {sheet_name} ({fiscal_year})")
     
-    # Read the raw file
-    df = pd.read_excel(file_path, header=None)
+    # Detect sheet structure
+    programs, channels, month_columns, notes_column = detect_sheet_structure(df, sheet_name)
     
-    # Detect fiscal year columns (row 0 has FY headers, row 1 has months)
-    fy25_months, fy26_months, fy25_notes_col, fy26_notes_col, header_row_idx = detect_fiscal_year_columns(df)
+    if not month_columns:
+        print("   ❌ No month columns detected!")
+        return [], [], []
     
-    print(f"   FY25 months detected: {len(fy25_months)}")
-    print(f"   FY26 months detected: {len(fy26_months)}")
-    
-    all_months = fy25_months + fy26_months
-    
-    if not all_months:
-        print("   ❌ No months detected!")
-        return [], []
-    
-    # Parse data rows (start from row 2, which is index 2)
     spend_records = []
     totals_records = []
+    notes_records = []
     current_program = None
     
-    for idx in range(2, min(len(df), 57)):  # Rows 2-56 (data rows)
+    # Track notes we've already processed to avoid duplicates
+    processed_notes = set()
+    
+    # Process data rows (skip header row)
+    for idx in range(1, len(df)):
         row = df.iloc[idx]
         
         program_cell = str(row[0]).strip() if pd.notna(row[0]) else ''
@@ -181,82 +266,45 @@ def parse_ad_spend_file(file_path):
         if not program_cell and not channel_cell:
             continue
         
-        # Check if this is a Totals row (Program='Totals', Channel is empty)
-        if program_cell.lower() == 'totals' and not channel_cell:
-            # This is a totals row for the current program
-            if current_program:
-                # Get notes if available
-                notes_list = []
-                if fy25_notes_col and pd.notna(row[fy25_notes_col]):
-                    note = str(row[fy25_notes_col]).strip()
-                    if note and note not in ['', 'nan', 'NaN']:
-                        notes_list.append(f"FY25: {note}")
-                if fy26_notes_col and pd.notna(row[fy26_notes_col]):
-                    note = str(row[fy26_notes_col]).strip()
-                    if note and note not in ['', 'nan', 'NaN']:
-                        notes_list.append(f"FY26: {note}")
-                
-                # Process each month for totals
-                for col_idx, month_name, month_date in all_months:
-                    value = row[col_idx]
-                    
-                    # Determine fiscal year
-                    fiscal_year = 'FY25' if (col_idx, month_name, month_date) in fy25_months else 'FY26'
-                    
-                    # Parse value - "No Ad Spend" or "-" = 0
-                    spend_amount = 0.0
-                    if pd.notna(value):
-                        value_str = str(value).strip().lower()
-                        if value_str not in ['', '-', 'no ad spend', 'nan']:
-                            try:
-                                spend_amount = float(value)
-                            except (ValueError, TypeError):
-                                spend_amount = 0.0
-                    
-                    totals_records.append({
-                        'program': current_program,
-                        'fiscal_year': fiscal_year,
-                        'month_date': month_date,
-                        'total_spend': spend_amount
-                    })
-            continue
-        
-        # Check if this is a new program row
-        if program_cell and program_cell not in ['', 'nan', 'NaN', 'Totals']:
+        # Update current program if we have a new one
+        if program_cell and program_cell not in ['', 'nan', 'NaN']:
             current_program = standardize_program_name(program_cell)
-            print(f"   Processing program: {current_program}")
+            if current_program:
+                print(f"   Processing program: {current_program}")
         
         # Skip if no current program
         if not current_program:
             continue
         
-        # This is a channel row
+        # Process channel data
         if channel_cell and channel_cell not in ['', 'nan', 'NaN']:
-            # Get notes if available
-            notes_list = []
-            if fy25_notes_col and pd.notna(row[fy25_notes_col]):
-                note = str(row[fy25_notes_col]).strip()
+            # Check for incremental notes (only once per program-channel-fiscal_year)
+            note_key = (current_program, channel_cell, fiscal_year)
+            if note_key not in processed_notes and notes_column and pd.notna(row[notes_column]):
+                note = str(row[notes_column]).strip()
                 if note and note not in ['', 'nan', 'NaN']:
-                    notes_list.append(f"FY25: {note}")
-            if fy26_notes_col and pd.notna(row[fy26_notes_col]):
-                note = str(row[fy26_notes_col]).strip()
-                if note and note not in ['', 'nan', 'NaN']:
-                    notes_list.append(f"FY26: {note}")
+                    notes_records.append({
+                        'program': current_program,
+                        'channel': channel_cell,
+                        'fiscal_year': fiscal_year,
+                        'incremental_note': note
+                    })
+                    processed_notes.add(note_key)
+                    print(f"     📝 Note for {current_program} - {channel_cell}: {note[:50]}...")
             
-            notes_json = json.dumps(notes_list) if notes_list else None
-            
-            # Process each month
-            for col_idx, month_name, month_date in all_months:
+            # Process each month for spend data
+            for col_idx, month_name, header_str in month_columns:
                 value = row[col_idx]
+                month_date = convert_month_to_date(month_name, fiscal_year)
                 
-                # Determine fiscal year
-                fiscal_year = 'FY25' if (col_idx, month_name, month_date) in fy25_months else 'FY26'
+                if not month_date:
+                    continue
                 
-                # Parse value - "No Ad Spend" or "-" = 0
+                # Parse value - handle various formats
                 spend_amount = 0.0
                 if pd.notna(value):
                     value_str = str(value).strip().lower()
-                    if value_str not in ['', '-', 'no ad spend', 'nan']:
+                    if value_str not in ['', '-', 'no ad spend', 'nan', '0']:
                         try:
                             spend_amount = float(value)
                         except (ValueError, TypeError):
@@ -267,118 +315,160 @@ def parse_ad_spend_file(file_path):
                     'channel': channel_cell,
                     'fiscal_year': fiscal_year,
                     'month_date': month_date,
-                    'spend_amount': spend_amount,
-                    'extra_notes': notes_json
+                    'spend_amount': spend_amount
                 })
+    
+    # Calculate totals by program and month
+    if spend_records:
+        spend_df = pd.DataFrame(spend_records)
+        totals_df = spend_df.groupby(['program', 'fiscal_year', 'month_date'])['spend_amount'].sum().reset_index()
+        
+        for _, row in totals_df.iterrows():
+            totals_records.append({
+                'program': row['program'],
+                'fiscal_year': row['fiscal_year'],
+                'month_date': row['month_date'],
+                'total_spend': row['spend_amount']
+            })
     
     print(f"   ✅ Extracted {len(spend_records)} spend records")
     print(f"   ✅ Extracted {len(totals_records)} totals records")
+    print(f"   ✅ Extracted {len(notes_records)} incremental notes")
     
-    return spend_records, totals_records
+    return spend_records, totals_records, notes_records
 
-def get_existing_data(conn):
-    """Get existing data from database to detect new records"""
-    try:
-        existing_spend = pd.read_sql(
-            "SELECT program, channel, fiscal_year, month_date FROM marketing_spend",
-            conn
-        )
-        existing_totals = pd.read_sql(
-            "SELECT program, fiscal_year, month_date FROM marketing_spend_totals",
-            conn
-        )
-        return existing_spend, existing_totals
-    except:
-        return pd.DataFrame(), pd.DataFrame()
 
 def load_marketing_spend():
-    """Load marketing spend data into database with incremental updates"""
+    """Load marketing spend data from the new Excel file with dynamic detection"""
     conn = sqlite3.connect(DB_PATH)
     
-    # Parse the ad spend file
-    file_path = 'Dataset/Mays Flex Online Ad Spend Year 1.xlsx'
-    spend_records, totals_records = parse_ad_spend_file(file_path)
+    # Get current state
+    current_state = get_current_state(conn)
     
-    if not spend_records and not totals_records:
-        print("⚠️  No records to load")
+    # Read Excel file and get all sheets
+    try:
+        excel_file = pd.ExcelFile(EXCEL_FILE)
+        available_sheets = excel_file.sheet_names
+        print(f"\n📋 Available sheets: {available_sheets}")
+    except Exception as e:
+        print(f"❌ Error reading Excel file: {e}")
         conn.close()
         return
     
-    # Get existing data
-    existing_spend, existing_totals = get_existing_data(conn)
+    all_spend_records = []
+    all_totals_records = []
+    all_notes_records = []
     
-    # Convert to DataFrames
-    df_spend = pd.DataFrame(spend_records)
-    df_totals = pd.DataFrame(totals_records)
+    # Process each sheet
+    for sheet_name in available_sheets:
+        try:
+            # Determine fiscal year from sheet name
+            if 'FY25' in sheet_name.upper():
+                fiscal_year = 'FY25'
+            elif 'FY26' in sheet_name.upper():
+                fiscal_year = 'FY26'
+            else:
+                # Try to extract FY from sheet name (e.g., "FY27", "27", etc.)
+                import re
+                fy_match = re.search(r'(?:FY)?(\d{2})', sheet_name.upper())
+                if fy_match:
+                    fiscal_year = f"FY{fy_match.group(1)}"
+                else:
+                    print(f"⚠️ Cannot determine fiscal year for sheet: {sheet_name}")
+                    continue
+            
+            print(f"\n📊 Processing sheet: {sheet_name} → {fiscal_year}")
+            
+            # Read sheet data
+            df = pd.read_excel(EXCEL_FILE, sheet_name=sheet_name, header=None)
+            
+            # Detect current structure
+            programs, channels, month_columns, notes_column = detect_sheet_structure(df, sheet_name)
+            
+            # Check if this is new or changed
+            is_new_or_changed = True
+            if fiscal_year in current_state:
+                old_state = current_state[fiscal_year]
+                if (set(programs) == set(old_state['programs']) and 
+                    set(channels) == set(old_state['channels']) and
+                    len(month_columns) == len(old_state['months'])):
+                    print(f"   ℹ️ No changes detected for {fiscal_year}")
+                    is_new_or_changed = False
+            
+            if is_new_or_changed:
+                print(f"   🔄 Processing changes for {fiscal_year}")
+                
+                # Parse the sheet data
+                spend_records, totals_records, notes_records = parse_sheet_data(df, sheet_name, fiscal_year)
+                
+                all_spend_records.extend(spend_records)
+                all_totals_records.extend(totals_records)
+                all_notes_records.extend(notes_records)
+                
+                # Update state
+                month_list = [f"{month_name}:{header}" for _, month_name, header in month_columns]
+                update_state(conn, fiscal_year, sheet_name, programs, channels, month_list)
+            
+        except Exception as e:
+            print(f"❌ Error processing sheet {sheet_name}: {e}")
+            continue
     
-    # Detect new records
-    if not existing_spend.empty:
-        # Merge to find new records
-        df_spend_merged = df_spend.merge(
-            existing_spend,
-            on=['program', 'channel', 'fiscal_year', 'month_date'],
-            how='left',
-            indicator=True
-        )
-        new_spend = df_spend_merged[df_spend_merged['_merge'] == 'left_only'].drop('_merge', axis=1)
-        updated_spend = df_spend_merged[df_spend_merged['_merge'] == 'both'].drop('_merge', axis=1)
-        
-        print(f"\n📊 Spend Records: {len(new_spend)} new, {len(updated_spend)} existing")
-    else:
-        new_spend = df_spend
-        print(f"\n📊 Spend Records: {len(new_spend)} new (first load)")
+    if not all_spend_records and not all_totals_records and not all_notes_records:
+        print("ℹ️ No new data to load")
+        conn.close()
+        return
     
-    if not existing_totals.empty:
-        df_totals_merged = df_totals.merge(
-            existing_totals,
-            on=['program', 'fiscal_year', 'month_date'],
-            how='left',
-            indicator=True
-        )
-        new_totals = df_totals_merged[df_totals_merged['_merge'] == 'left_only'].drop('_merge', axis=1)
-        updated_totals = df_totals_merged[df_totals_merged['_merge'] == 'both'].drop('_merge', axis=1)
-        
-        print(f"📊 Totals Records: {len(new_totals)} new, {len(updated_totals)} existing")
-    else:
-        new_totals = df_totals
-        print(f"📊 Totals Records: {len(new_totals)} new (first load)")
+    # Load spend data to database (INSERT OR REPLACE for updates)
+    if all_spend_records:
+        print(f"\n💾 Loading {len(all_spend_records)} spend records to database...")
+        for record in all_spend_records:
+            conn.execute('''
+                INSERT OR REPLACE INTO marketing_spend 
+                (program, channel, fiscal_year, month_date, spend_amount)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (record['program'], record['channel'], record['fiscal_year'], 
+                  record['month_date'], record['spend_amount']))
     
-    # Load to database (INSERT OR REPLACE for updates)
-    for _, row in df_spend.iterrows():
-        conn.execute('''
-            INSERT OR REPLACE INTO marketing_spend 
-            (program, channel, fiscal_year, month_date, spend_amount, extra_notes)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (row['program'], row['channel'], row['fiscal_year'], 
-              row['month_date'], row['spend_amount'], row['extra_notes']))
+    # Load totals data to database
+    if all_totals_records:
+        print(f"💾 Loading {len(all_totals_records)} totals records to database...")
+        for record in all_totals_records:
+            conn.execute('''
+                INSERT OR REPLACE INTO marketing_spend_totals 
+                (program, fiscal_year, month_date, total_spend)
+                VALUES (?, ?, ?, ?)
+            ''', (record['program'], record['fiscal_year'], record['month_date'], record['total_spend']))
     
-    for _, row in df_totals.iterrows():
-        conn.execute('''
-            INSERT OR REPLACE INTO marketing_spend_totals 
-            (program, fiscal_year, month_date, total_spend)
-            VALUES (?, ?, ?, ?)
-        ''', (row['program'], row['fiscal_year'], row['month_date'], row['total_spend']))
+    # Load notes data to database (separate table)
+    if all_notes_records:
+        print(f"💾 Loading {len(all_notes_records)} incremental notes to database...")
+        for record in all_notes_records:
+            conn.execute('''
+                INSERT OR REPLACE INTO marketing_incremental_notes 
+                (program, channel, fiscal_year, incremental_note)
+                VALUES (?, ?, ?, ?)
+            ''', (record['program'], record['channel'], record['fiscal_year'], record['incremental_note']))
     
     conn.commit()
     
-    print(f"\n✅ Loaded {len(df_spend)} spend records to database")
-    print(f"✅ Loaded {len(df_totals)} totals records to database")
+    print(f"\n✅ Successfully loaded:")
+    print(f"   • {len(all_spend_records)} spend records")
+    print(f"   • {len(all_totals_records)} totals records")
+    print(f"   • {len(all_notes_records)} incremental notes")
     
-    # Show summary
-    print("\n📊 Summary by Program:")
-    summary = df_spend.groupby('program')['spend_amount'].agg(['count', 'sum']).round(2)
-    summary.columns = ['Records', 'Total Spend ($)']
-    print(summary.to_string())
-    
-    print("\n📊 Summary by Channel:")
-    channel_summary = df_spend.groupby('channel')['spend_amount'].agg(['count', 'sum']).round(2)
-    channel_summary.columns = ['Records', 'Total Spend ($)']
-    print(channel_summary.to_string())
-    
-    print("\n📊 Summary by Fiscal Year:")
-    fy_summary = df_spend.groupby('fiscal_year')['spend_amount'].agg(['count', 'sum']).round(2)
-    fy_summary.columns = ['Records', 'Total Spend ($)']
-    print(fy_summary.to_string())
+    # Show summary if we have data
+    if all_spend_records:
+        df_spend = pd.DataFrame(all_spend_records)
+        
+        print("\n📊 Summary by Program:")
+        summary = df_spend.groupby('program')['spend_amount'].agg(['count', 'sum']).round(2)
+        summary.columns = ['Records', 'Total Spend ($)']
+        print(summary.to_string())
+        
+        print("\n📊 Summary by Fiscal Year:")
+        fy_summary = df_spend.groupby('fiscal_year')['spend_amount'].agg(['count', 'sum']).round(2)
+        fy_summary.columns = ['Records', 'Total Spend ($)']
+        print(fy_summary.to_string())
     
     conn.close()
 
@@ -407,12 +497,25 @@ def validate_data():
     )
     print(f"\n✅ Date range: {date_range['earliest'].iloc[0]} to {date_range['latest'].iloc[0]}")
     
-    # Check for notes
-    notes_count = pd.read_sql(
-        "SELECT COUNT(*) as count FROM marketing_spend WHERE extra_notes IS NOT NULL",
-        conn
-    )['count'].iloc[0]
-    print(f"\n✅ Records with notes: {notes_count}")
+    # Check for incremental notes (separate table now)
+    try:
+        notes_count = pd.read_sql(
+            "SELECT COUNT(*) as count FROM marketing_incremental_notes",
+            conn
+        )['count'].iloc[0]
+        print(f"\n✅ Incremental notes: {notes_count} unique program-channel combinations")
+        
+        # Show sample notes
+        sample_notes = pd.read_sql(
+            "SELECT program, channel, fiscal_year, LEFT(incremental_note, 50) as note_preview FROM marketing_incremental_notes LIMIT 5",
+            conn
+        )
+        if not sample_notes.empty:
+            print("\n📝 Sample incremental notes:")
+            for _, row in sample_notes.iterrows():
+                print(f"   • {row['program']} - {row['channel']} ({row['fiscal_year']}): {row['note_preview']}...")
+    except:
+        print("\n✅ Incremental notes: 0 (table may not exist yet)")
     
     # Verify totals match
     print("\n🔍 Verifying totals...")
@@ -468,13 +571,14 @@ def update_metadata():
 def main():
     """Main ETL process"""
     print("=" * 80)
-    print("🚀 Marketing Data ETL Pipeline - Enhanced Version")
+    print("🚀 Marketing Data ETL Pipeline - Enhanced Dynamic Version")
     print("=" * 80)
+    print(f"📁 Source file: {EXCEL_FILE}")
     
     # Step 1: Create tables
     create_marketing_tables()
     
-    # Step 2: Load marketing spend data (with auto-detection)
+    # Step 2: Load marketing spend data (with dynamic detection)
     load_marketing_spend()
     
     # Step 3: Validate data
@@ -486,18 +590,22 @@ def main():
     print("\n" + "=" * 80)
     print("✅ Marketing ETL Complete!")
     print("=" * 80)
-    print("\n💡 Features:")
-    print("   ✅ Auto-detects new months in Excel file")
-    print("   ✅ Handles both FY25 and FY26 data")
-    print("   ✅ Stores notes as JSON lists")
-    print("   ✅ Separate totals table")
-    print("   ✅ Standardized program names")
-    print("   ✅ 'No Ad Spend' = 0 (not NULL)")
+    print("\n💡 Enhanced Features:")
+    print("   ✅ Dynamic sheet detection (FY25, FY26, FY27+)")
+    print("   ✅ Flexible month column detection")
+    print("   ✅ State tracking for incremental updates")
+    print("   ✅ Automatic program name standardization")
+    print("   ✅ Smart change detection")
+    print("   ✅ Separate incremental notes table (no duplication)")
+    print("   ✅ Month-wise spend tracking")
+    print("   ✅ Robust error handling")
     print("\n💡 Next steps:")
     print("   1. Run main_app.py to view the dashboard")
-    print("   2. Check Data Explorer for new tables:")
-    print("      • marketing_spend (channel-level)")
-    print("      • marketing_spend_totals (program-level)")
+    print("   2. Check Data Explorer for updated tables:")
+    print("      • marketing_spend (channel-level, month-wise)")
+    print("      • marketing_spend_totals (program-level, month-wise)")
+    print("      • marketing_incremental_notes (program-channel notes)")
+    print("      • marketing_etl_state (tracking)")
     print("\n" + "=" * 80)
 
 if __name__ == "__main__":

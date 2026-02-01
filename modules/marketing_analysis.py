@@ -65,15 +65,14 @@ def render():
         - 📝 Incremental spend notes
         """)
     else:
-        # Load data from new tables
+        # Load data from new tables (remove extra_notes column)
         spend_df = pd.read_sql("""
             SELECT 
                 program,
                 channel,
                 fiscal_year,
                 month_date,
-                spend_amount,
-                extra_notes
+                spend_amount
             FROM marketing_spend
             ORDER BY month_date DESC, program, channel
         """, conn)
@@ -127,8 +126,10 @@ def render():
             st.session_state.prog_reset_count = 0
         if 'chan_reset_count' not in st.session_state:
             st.session_state.chan_reset_count = 0
+        if 'month_reset_count' not in st.session_state:
+            st.session_state.month_reset_count = 0
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         
         # FISCAL YEAR MULTI-SELECT
         with col1:
@@ -379,6 +380,153 @@ def render():
         
         selected_channels_global = st.session_state.get(chan_state_key_global, channels_list_global)
         
+        channel_filtered_global = program_filtered_global.copy()
+        if len(selected_channels_global) > 0:
+            channel_filtered_global = channel_filtered_global[channel_filtered_global['channel'].isin(selected_channels_global)]
+        else:
+            channel_filtered_global = channel_filtered_global.head(0)
+        
+        # MONTH MULTI-SELECT (Fiscal Year Specific)
+        with col4:
+            # Extract month names from dates for filtering - only from selected fiscal years
+            channel_filtered_global['month_name'] = pd.to_datetime(channel_filtered_global['month_date']).dt.strftime('%B %Y')
+            
+            # Get months sorted chronologically (not alphabetically)
+            if not channel_filtered_global.empty:
+                # Create a temporary dataframe to sort months chronologically
+                temp_months = channel_filtered_global[['month_date', 'month_name']].drop_duplicates()
+                temp_months['month_date'] = pd.to_datetime(temp_months['month_date'])
+                temp_months = temp_months.sort_values('month_date')
+                months_list_global = temp_months['month_name'].tolist()
+            else:
+                months_list_global = []
+            
+            # Use independent reset counter for months
+            month_reset_suffix = f"_{st.session_state.month_reset_count}"
+            month_state_key_global = f'selected_months_global{month_reset_suffix}'
+            month_available_key = f'available_months_global{month_reset_suffix}'
+            
+            if month_state_key_global not in st.session_state:
+                st.session_state[month_state_key_global] = months_list_global.copy()
+            
+            # Track the previously available months to detect when the list changes
+            previous_available_months = st.session_state.get(month_available_key, None)
+            current_month_selection_global = st.session_state[month_state_key_global]
+            
+            # Only auto-select if the AVAILABLE list changed (upstream filter changed)
+            if previous_available_months is not None and set(months_list_global) != set(previous_available_months):
+                # Available months changed due to upstream filter change
+                valid_months = [m for m in current_month_selection_global if m in months_list_global]
+                
+                # If none of the previously selected months are valid, select all new months
+                if len(valid_months) == 0 and len(months_list_global) > 0:
+                    st.session_state[month_state_key_global] = months_list_global.copy()
+                    current_month_selection_global = st.session_state[month_state_key_global]
+                # If some months are still valid, keep those AND auto-select any NEW months
+                elif len(valid_months) > 0:
+                    # Find newly available months (in current list but not in previous list)
+                    new_months = [m for m in months_list_global if m not in previous_available_months]
+                    # Combine valid existing selections with new months
+                    updated_selection = list(set(valid_months + new_months))
+                    st.session_state[month_state_key_global] = updated_selection
+                    current_month_selection_global = st.session_state[month_state_key_global]
+            
+            # Always update the tracked available list for next render
+            st.session_state[month_available_key] = months_list_global.copy()
+            
+            if len(current_month_selection_global) == len(months_list_global):
+                if len(months_list_global) == 0:
+                    month_summary_text_global = "No months available"
+                else:
+                    month_summary_text_global = "All months"
+            elif len(current_month_selection_global) == 0:
+                month_summary_text_global = "No months selected"
+            elif len(current_month_selection_global) == 1:
+                month_summary_text_global = current_month_selection_global[0]
+            else:
+                month_summary_text_global = f"{len(current_month_selection_global)} months"
+            
+            st.markdown("**📅 Month**")
+            
+            with st.popover(month_summary_text_global, use_container_width=True):
+                if len(months_list_global) == 0:
+                    st.info("No months available for selected filters")
+                else:
+                    col_a, col_b = st.columns(2)
+                    with col_a:
+                        if st.button("✓ All", key=f"month_all_global{month_reset_suffix}", use_container_width=True, type="primary"):
+                            st.session_state.month_reset_count += 1
+                            new_month_key_global = f'selected_months_global_{st.session_state.month_reset_count}'
+                            st.session_state[new_month_key_global] = months_list_global.copy()
+                            st.rerun()
+                    with col_b:
+                        if st.button("✗ Clear", key=f"month_clear_global{month_reset_suffix}", use_container_width=True, type="secondary"):
+                            st.session_state.month_reset_count += 1
+                            new_month_key_global = f'selected_months_global_{st.session_state.month_reset_count}'
+                            st.session_state[new_month_key_global] = []
+                            st.rerun()
+                    
+                    st.divider()
+                    
+                    # Group months by fiscal year for better organization
+                    if len(selected_fy_global) > 1:
+                        # Show fiscal year groupings when multiple FYs are selected
+                        for fy in sorted(selected_fy_global, reverse=True):
+                            fy_months = []
+                            for month in months_list_global:
+                                # Determine which FY this month belongs to based on date
+                                month_date = pd.to_datetime(f"01 {month}", format="%d %B %Y")
+                                if fy == 'FY25':
+                                    if (month_date >= pd.to_datetime('2024-09-01') and 
+                                        month_date <= pd.to_datetime('2025-06-30')):
+                                        fy_months.append(month)
+                                elif fy == 'FY26':
+                                    if (month_date >= pd.to_datetime('2025-08-01') and 
+                                        month_date <= pd.to_datetime('2025-12-31')):
+                                        fy_months.append(month)
+                            
+                            if fy_months:
+                                st.markdown(f"**{fy}:**")
+                                for idx, month in enumerate(fy_months):
+                                    is_checked = month in st.session_state[month_state_key_global]
+                                    new_value = st.checkbox(
+                                        month, 
+                                        value=is_checked, 
+                                        key=f"month_cb_{fy}_{idx}_global{month_reset_suffix}"
+                                    )
+                                    
+                                    if new_value != is_checked:
+                                        if new_value:
+                                            if month not in st.session_state[month_state_key_global]:
+                                                st.session_state[month_state_key_global].append(month)
+                                        else:
+                                            if month in st.session_state[month_state_key_global]:
+                                                st.session_state[month_state_key_global].remove(month)
+                                        st.rerun()
+                                
+                                if fy != sorted(selected_fy_global, reverse=True)[-1]:
+                                    st.divider()
+                    else:
+                        # Single FY selected - show months directly
+                        for idx, month in enumerate(months_list_global):
+                            is_checked = month in st.session_state[month_state_key_global]
+                            new_value = st.checkbox(
+                                month, 
+                                value=is_checked, 
+                                key=f"month_cb_{idx}_global{month_reset_suffix}"
+                            )
+                            
+                            if new_value != is_checked:
+                                if new_value:
+                                    if month not in st.session_state[month_state_key_global]:
+                                        st.session_state[month_state_key_global].append(month)
+                                else:
+                                    if month in st.session_state[month_state_key_global]:
+                                        st.session_state[month_state_key_global].remove(month)
+                                st.rerun()
+        
+        selected_months_global = st.session_state.get(month_state_key_global, months_list_global)
+        
         # Apply all global filters to create the master filtered dataset
         filtered_spend_global = spend_df.copy()
         
@@ -394,6 +542,15 @@ def render():
         
         if len(selected_channels_global) > 0:
             filtered_spend_global = filtered_spend_global[filtered_spend_global['channel'].isin(selected_channels_global)]
+        else:
+            filtered_spend_global = filtered_spend_global.head(0)
+        
+        # Apply month filter
+        if len(selected_months_global) > 0:
+            filtered_spend_global['month_name'] = pd.to_datetime(filtered_spend_global['month_date']).dt.strftime('%B %Y')
+            filtered_spend_global = filtered_spend_global[filtered_spend_global['month_name'].isin(selected_months_global)]
+            # Remove the temporary column
+            filtered_spend_global = filtered_spend_global.drop('month_name', axis=1)
         else:
             filtered_spend_global = filtered_spend_global.head(0)
         
@@ -1948,55 +2105,92 @@ def render():
                 )
         
         with notes_tab:
-            # Use globally filtered data
-            notes_filtered = filtered_spend_global.copy()
-            notes_filtered['month_name'] = notes_filtered['month_date'].dt.strftime('%B %Y')
+            # NOTES SECTION HEADER
+            st.markdown("""
+            <div class="section-header">
+                <h3>📋 Incremental Notes</h3>
+            </div>
+            """, unsafe_allow_html=True)
             
-            # Extract notes
-            notes_df = notes_filtered[notes_filtered['extra_notes'].notna()].copy()
-            unique_notes = []
+            # Query incremental notes from the new separate table
+            # Apply global filters to notes
+            notes_query = """
+                SELECT DISTINCT 
+                    n.program,
+                    n.channel,
+                    n.fiscal_year,
+                    n.incremental_note
+                FROM marketing_incremental_notes n
+                WHERE 1=1
+            """
             
-            if not notes_df.empty:
-                for _, row in notes_df.iterrows():
-                    try:
-                        import json
-                        notes_list = json.loads(row['extra_notes'])
-                        for note in notes_list:
-                            note_key = f"{row['program']}_{row['month_date'].strftime('%Y-%m')}_{note[:50]}"
-                            if not any(existing['key'] == note_key for existing in unique_notes):
-                                unique_notes.append({
-                                    'key': note_key,
-                                    'program': row['program'],
-                                    'month': row['month_date'].strftime('%B %Y'),
-                                    'year': row['month_date'].year,
-                                    'month_num': row['month_date'].month,
-                                    'fiscal_year': row['fiscal_year'],
-                                    'note': note
-                                })
-                    except:
-                        pass
+            query_params = []
             
-            if unique_notes:
-                notes_display_df = pd.DataFrame(unique_notes)
-                notes_display_df = notes_display_df.sort_values(['year', 'month_num'], ascending=[False, False])
+            # Apply fiscal year filter
+            if selected_fy_global:
+                placeholders = ','.join(['?' for _ in selected_fy_global])
+                notes_query += f" AND n.fiscal_year IN ({placeholders})"
+                query_params.extend(selected_fy_global)
+            
+            # Apply program filter
+            if selected_programs_global:
+                placeholders = ','.join(['?' for _ in selected_programs_global])
+                notes_query += f" AND n.program IN ({placeholders})"
+                query_params.extend(selected_programs_global)
+            
+            # Apply channel filter
+            if selected_channels_global:
+                placeholders = ','.join(['?' for _ in selected_channels_global])
+                notes_query += f" AND n.channel IN ({placeholders})"
+                query_params.extend(selected_channels_global)
+            
+            notes_query += " ORDER BY n.fiscal_year DESC, n.program, n.channel"
+            
+            try:
+                notes_df = pd.read_sql(notes_query, conn, params=query_params)
                 
-                # NOTES SECTION HEADER
-                st.markdown("""
-                <div class="section-header">
-                    <h3>📋 Incremental Notes</h3>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.markdown(f"**Found {len(notes_display_df)} notes**")
-                
-                # Scrollable container
-                notes_container = st.container(height=450)
-                with notes_container:
-                    for i, (_, note_row) in enumerate(notes_display_df.iterrows()):
-                        with st.expander(f"📅 {note_row['program']} - {note_row['month']} ({note_row['fiscal_year']})", expanded=(i < 3)):
-                            st.markdown(f"**Note:** {note_row['note']}")
-            else:
-                st.info("No notes available for selected filters.")
+                if not notes_df.empty:
+                    st.markdown(f"**Found {len(notes_df)} incremental notes**")
+                    
+                    # Group by fiscal year for better organization
+                    notes_by_fy = notes_df.groupby('fiscal_year')
+                    
+                    # Scrollable container
+                    notes_container = st.container(height=450)
+                    with notes_container:
+                        for fy in sorted(notes_by_fy.groups.keys(), reverse=True):
+                            fy_notes = notes_by_fy.get_group(fy)
+                            
+                            st.markdown(f"### 📅 {fy}")
+                            
+                            for i, (_, note_row) in enumerate(fy_notes.iterrows()):
+                                # Create a unique key for each note
+                                note_key = f"{note_row['program']}_{note_row['channel']}_{note_row['fiscal_year']}"
+                                
+                                with st.expander(
+                                    f"🎓 {get_short_program_name(note_row['program'])} - 📢 {note_row['channel']}", 
+                                    expanded=(i < 2)  # Expand first 2 notes per fiscal year
+                                ):
+                                    st.markdown(f"**Program:** {note_row['program']}")
+                                    st.markdown(f"**Channel:** {note_row['channel']}")
+                                    st.markdown(f"**Fiscal Year:** {note_row['fiscal_year']}")
+                                    st.markdown("**Incremental Note:**")
+                                    st.markdown(f"> {note_row['incremental_note']}")
+                            
+                            if fy != sorted(notes_by_fy.groups.keys(), reverse=True)[-1]:
+                                st.divider()
+                else:
+                    st.info("📝 No incremental notes available for the selected filters.")
+                    st.markdown("""
+                    **About Incremental Notes:**
+                    - Notes are yearly decisions for specific program-channel combinations
+                    - Each note represents strategic insights or changes for that program and channel
+                    - Use the filters above to narrow down to specific programs, channels, or fiscal years
+                    """)
+                    
+            except Exception as e:
+                st.error(f"Error loading incremental notes: {e}")
+                st.info("The incremental notes table may not exist yet. Run `python3 marketing_etl.py` to load the data.")
     
     # Footer for Marketing Analysis page
     st.divider()

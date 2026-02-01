@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [6.8.0] - 2026-02-01
+
+### 🔧 Enhancement Release - Marketing Analytics Enhancement
+
+#### Added
+- **Dynamic Sheet Detection**: Automatically detects FY25, FY26, and future fiscal year sheets (FY27+)
+- **Fiscal Year-Specific Month Filtering**: Month options now depend on selected fiscal years
+- **Chronological Month Sorting**: Months display in date order instead of alphabetical
+- **Fiscal Year Grouping**: When multiple FYs selected, months organized by fiscal year sections
+- **Separate Incremental Notes Table**: New `marketing_incremental_notes` table structure
+- **State Tracking System**: Incremental updates with intelligent change detection
+- **Centralized Program Mapping**: Single source of truth for program name standardization
+
+#### Changed
+- **Marketing ETL Pipeline**: Enhanced to handle dynamic Excel structures and varying month ranges
+- **Month Filter Logic**: Now fiscal-year dependent with improved UX and empty states
+- **Notes Database Structure**: Moved from embedded JSON to separate table (16 unique vs 167 duplicates)
+- **Date Conversion Logic**: Fixed August 2026 → August 2025 for proper FY26 representation
+- **Program Name Handling**: "AI" code now maps to "Flex Online AI and Business Program"
+- **Notes Display**: Organized by fiscal year with expandable program-channel sections
+
+#### Removed
+- **Data Duplication**: Eliminated 151 duplicate note records through proper normalization
+- **Hard-coded Month Logic**: Replaced with dynamic detection based on Excel content
+- **Date Conversion Bug**: Fixed incorrect August 2026 entries in FY26 data
+
+#### Technical Implementation
+- **Enhanced ETL Processing**: Handles FY25 (Sept 2024-June 2025) and FY26 (Aug-Dec 2025) correctly
+- **Database Schema Updates**: Added `marketing_incremental_notes` and `marketing_etl_state` tables
+- **Performance Optimization**: State tracking prevents unnecessary reprocessing of unchanged data
+- **4-Column Filtering**: Fiscal Year → Program → Channel → Month drill-down capability
+- **Robust Error Handling**: Graceful processing of dynamic Excel structures with validation
+- **Data Quality Assurance**: 585 spend records, 120 totals records, 16 incremental notes across 2 fiscal years
+
+---
+
 ## Development Timeline
 
 ```
@@ -47,6 +83,8 @@ Jan 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 Jan 2026  ████████████████████████████  v6.2 - Professor Feedback Implementation
           │
 Jan 2026  ████████████████████████████  v6.5 - UI/UX Polish & Mobile Optimization
+          │
+Feb 2026  ████████████████████████████  v6.8 - Marketing Analytics Enhancement
 ```
 
 ---
@@ -55,6 +93,7 @@ Jan 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **6.8** | Major | Marketing Analytics Enhancement | 3 | +450 |
 | **6.5** | Major | UI/UX Polish & Mobile Optimization | 3 | +850 |
 | **6.2** | Major | Professor Feedback Implementation | 20 | +4,095 |
 | 6.1 | UI Enhancement | Restored profile card with scrollable sidebar | 2 | ~50 |

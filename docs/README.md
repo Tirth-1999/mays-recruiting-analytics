@@ -4,6 +4,48 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 6.8
+
+**Marketing Analytics Enhancement** - Released February 1, 2026
+
+### 📊 Enhanced Marketing ETL Pipeline
+- **Dynamic Sheet Detection**: Automatically detects FY25, FY26, and future fiscal year sheets (FY27+)
+- **Flexible Month Columns**: Handles varying month ranges across fiscal years (FY25: Sept 2024-June 2025, FY26: Aug-Dec 2025)
+- **State Tracking System**: Incremental updates with intelligent change detection for efficient processing
+- **Program Name Standardization**: Centralized mapping utility with "AI" code → "Flex Online AI and Business Program"
+- **Robust Error Handling**: Graceful processing of dynamic Excel structures with comprehensive validation
+
+### 🗓️ Fiscal Year-Specific Month Filtering
+- **Smart Month Dependencies**: Month filter options now dynamically depend on selected fiscal years
+- **Chronological Organization**: Months display in date order (not alphabetical) for intuitive navigation
+- **Fiscal Year Grouping**: When multiple FYs selected, months organized by fiscal year sections
+- **Enhanced UX**: Clear "No months available" states and improved filter interactions
+- **Fixed Date Conversion Bug**: Corrected August 2026 → August 2025 for proper FY26 representation
+
+### 📝 Incremental Notes Database Restructure
+- **Separate Notes Table**: New `marketing_incremental_notes` table eliminates data duplication
+- **One Note Per Combination**: Single record per program-channel-fiscal_year (reduced from 167 duplicates to 16 unique)
+- **Enhanced Display**: Notes organized by fiscal year with expandable program-channel sections
+- **Better Identification**: Uses short program names (MBA, AI) for cleaner interface
+- **Improved Query Performance**: Dedicated table with proper indexing for faster note retrieval
+
+### 🔧 Technical Architecture Improvements
+- **4-Column Filtering Hierarchy**: Fiscal Year → Program → Channel → Month drill-down capability
+- **Database Schema Optimization**: Separate tables for spend data, totals, and notes with proper relationships
+- **Dynamic Excel Processing**: Handles varying sheet structures and month ranges automatically
+- **Performance Optimization**: State tracking prevents unnecessary reprocessing of unchanged data
+- **Centralized Program Mapping**: Single source of truth for program name standardization across the platform
+
+### 📈 Data Quality Enhancements
+- **Accurate Date Ranges**: FY25 (Sept 2024-June 2025), FY26 (Aug 2025-Dec 2025)
+- **Consistent Program Names**: All programs follow standardized naming convention
+- **Validated Totals**: Automatic verification that calculated totals match stored aggregates
+- **Clean Data Structure**: 585 spend records, 120 totals records, 16 incremental notes across 2 fiscal years
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 6.5
 
 **UI/UX Polish & Mobile Optimization** - Released January 27, 2026
@@ -300,8 +342,8 @@ MIT License information.
 
 ## Platform Overview
 
-**Current Version:** 6.5  
-**Last Updated:** January 27, 2026
+**Current Version:** 6.8  
+**Last Updated:** February 1, 2026
 
 ### Analytics Pages
 - Home Dashboard
@@ -431,4 +473,4 @@ See the [Technical Guide](TECHNICAL_GUIDE.md) for common issues and solutions.
 
 ---
 
-**Mays Analytics Documentation** | Version 6.5 | Last Updated: January 27, 2026
+**Mays Analytics Documentation** | Version 6.8 | Last Updated: February 1, 2026

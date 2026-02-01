@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 6.5** | **Last Updated: January 27, 2026**
+**Version 6.8** | **Last Updated: February 1, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, featuring natural language query interface, real-time insights, and secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-6.5-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.8-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,39 +17,33 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 6.5
+## What's New in Version 6.8
 
-**UI/UX Polish & Mobile Optimization** - Released January 27, 2026
+**Marketing Analytics Enhancement** - Released February 1, 2026
 
-### 🎨 Enhanced Visualizations
-- **Responsive Metrics**: Dynamic font sizing with CSS clamp() for all key metrics
-- **Mobile-Optimized Charts**: Vertical labels (0°) on mobile, angled (-45°) on desktop
-- **Enhanced Tooltips**: Added helpful tooltips to all major charts with filter guidance
-- **Value Labels**: Numbers displayed on bar charts with proper Y-axis spacing
-- **Centered Titles**: All chart titles and legends properly centered
+### 📊 Enhanced Marketing ETL Pipeline
+- **Dynamic Sheet Detection**: Automatically detects FY25, FY26, and future fiscal year sheets
+- **Flexible Month Columns**: Handles varying month ranges (FY25: Sept-June, FY26: Aug-Dec)
+- **State Tracking**: Incremental updates with change detection for efficient processing
+- **Program Name Standardization**: Centralized mapping with "AI" → "Flex Online AI and Business Program"
 
-### 📊 Layout Improvements
-- **Performance Radar**: Responsive breakpoint at 1400px - explanation boxes move to bottom on smaller screens
-- **Channel Performance**: Full-width heatmap with color-coded top channels below
-- **Spend Trends**: Shadow effects under line graphs, legend moved to top center
-- **Program Comparison**: Mobile-friendly with dynamic legend positioning
+### 🗓️ Fiscal Year-Specific Month Filtering
+- **Smart Month Filtering**: Month options now depend on selected fiscal years
+- **Chronological Sorting**: Months appear in date order, not alphabetical
+- **Fiscal Year Grouping**: When multiple FYs selected, months grouped by fiscal year
+- **Fixed Date Bug**: Corrected August 2026 → August 2025 for FY26
 
-### 🧹 Interface Cleanup
-- **Removed Dividers**: Cleaner sections without excessive visual separators
-- **Removed Print Buttons**: Streamlit's native print functionality used instead
-- **Removed Dead Code**: Cleaned up ~150 lines of unused print CSS
+### 📝 Incremental Notes Restructure
+- **Separate Notes Table**: One note per program-channel-fiscal_year (no duplication)
+- **Enhanced Notes Display**: Organized by fiscal year with expandable sections
+- **Reduced Data Redundancy**: From 167 duplicated records to 16 unique combinations
+- **Better UX**: Clear program-channel identification with short names
 
-### Previous Major Release: Version 6.0 (January 25, 2026)
-
-**AI-Powered Analytics**
-
-- **Natural Language Queries**: AI Chat Assistant with plain English query interface
-- **Conversation Memory**: Context-aware follow-up questions and reference resolution
-- **Smart Query Processing**: Understands business terms, abbreviations, and complex queries
-- **Rate Limiting**: 10 queries/minute per user with visual indicators
-- **Feedback System**: Thumbs up/down ratings with analytics dashboard
-- **Chat History**: Search, export, and manage all conversations
-- **GDPR Compliance**: Complete data deletion and privacy controls
+### 🔧 Technical Improvements
+- **4-Column Filtering**: Fiscal Year → Program → Channel → Month drill-down
+- **Database Optimization**: New `marketing_incremental_notes` table structure
+- **Error Handling**: Robust processing of dynamic Excel structures
+- **Performance**: Efficient state tracking prevents unnecessary reprocessing
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -206,6 +200,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **6.8** | Feb 1, 2026 | Marketing Analytics Enhancement & Fiscal Year-Specific Month Filtering |
 | **6.5** | Jan 27, 2026 | UI/UX Polish & Mobile Optimization |
 | **6.0** | Jan 25, 2026 | AI Chat Assistant with Natural Language Queries |
 | **5.2** | Jan 25, 2026 | OAuth Button Refinement |
@@ -243,6 +238,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 6.5 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 6.8 • Built for Texas A&M Mays Business School
 
 </div>
