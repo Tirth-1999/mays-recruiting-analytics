@@ -6,6 +6,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 from version import VERSION_FULL
 from utils import auth
+import sqlite3
+import os
 
 # Page config
 st.set_page_config(
@@ -14,6 +16,43 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# Database initialization check for production
+@st.cache_resource
+def ensure_database_exists():
+    """Ensure database exists and has required tables"""
+    try:
+        # Check if database file exists
+        if not os.path.exists('edulytix.db'):
+            st.warning("🔄 Database not found. Initializing...")
+            # Run ETL scripts to create database
+            from etl_pipeline import load_all_data
+            from marketing_etl import main as marketing_main
+            load_all_data()
+            marketing_main()
+            st.success("✅ Database initialized successfully!")
+            return True
+        
+        # Check if marketing tables exist
+        conn = sqlite3.connect('edulytix.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('marketing_data', 'incremental_notes')")
+        marketing_tables = cursor.fetchall()
+        conn.close()
+        
+        if len(marketing_tables) < 2:
+            st.info("🔄 Marketing tables missing. Running marketing ETL...")
+            from marketing_etl import main as marketing_main
+            marketing_main()
+            st.success("✅ Marketing tables created!")
+            
+        return True
+    except Exception as e:
+        st.error(f"❌ Database initialization failed: {e}")
+        return False
+
+# Initialize database
+ensure_database_exists()
 
 # Initialize authentication session state
 auth.init_session_state()

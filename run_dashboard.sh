@@ -25,8 +25,11 @@ echo ""
 
 # Check if database exists
 if [ ! -f "edulytix.db" ]; then
-    echo "⚠️  Database not found. Running ETL pipeline first..."
+    echo "⚠️  Database not found. Running ETL pipelines first..."
+    echo "📊 Loading admissions data..."
     python etl_pipeline.py
+    echo "💰 Loading marketing data..."
+    python marketing_etl.py
     echo ""
 fi
 
