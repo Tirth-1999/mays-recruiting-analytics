@@ -117,6 +117,64 @@ def process_table_display(conn, selected_table, user_filter=None):
                     'Internal SQLite sequence information',
                     'Auto-incrementing field management'
                 ]
+            },
+            'marketing_data': {
+                'icon': '📊',
+                'title': 'Marketing ETL State Tracking',
+                'questions': [
+                    'What marketing data has been processed?',
+                    'When was the last ETL update?',
+                    'Which fiscal years have been loaded?',
+                    'What programs and channels are tracked?'
+                ]
+            },
+            'incremental_notes': {
+                'icon': '📝',
+                'title': 'Marketing Incremental Notes',
+                'questions': [
+                    'What incremental spend changes were made?',
+                    'Which programs had budget adjustments?',
+                    'What are the reasons for spend increases?',
+                    'How are channels being optimized?'
+                ]
+            },
+            'marketing_spend_totals': {
+                'icon': '💰',
+                'title': 'Marketing Spend Totals',
+                'questions': [
+                    'What are the total monthly spends by program?',
+                    'How do program budgets compare?',
+                    'What are the spending trends over time?',
+                    'Which months had the highest investment?'
+                ]
+            },
+            'metadata': {
+                'icon': '🔧',
+                'title': 'System Metadata',
+                'questions': [
+                    'When was data last updated?',
+                    'What is the system configuration?',
+                    'What are the data refresh timestamps?'
+                ]
+            },
+            'model_predictions': {
+                'icon': '🔮',
+                'title': 'AI Model Predictions',
+                'questions': [
+                    'What are the forecasted enrollment numbers?',
+                    'Which programs are predicted to grow?',
+                    'What are the confidence intervals?',
+                    'How accurate are the predictions?'
+                ]
+            },
+            'users': {
+                'icon': '👥',
+                'title': 'User Management',
+                'questions': [
+                    'Who has access to the system?',
+                    'What are the user roles and permissions?',
+                    'When did users last log in?'
+                ]
             }
         }
         

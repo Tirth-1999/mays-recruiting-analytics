@@ -380,7 +380,10 @@ def render():
                     'Marketing Campaigns': 'Campaigns',
                     'Marketing Spend': 'Spend',
                     'Marketing Spend Totals': 'Spend Totals',
+                    'Marketing Data': 'Marketing Data',  # New table name
+                    'Incremental Notes': 'Notes',  # New table name
                     'Inquiry Sources': 'Sources',
+                    'Programs': 'Programs',
                     'Sqlite Sequence': 'System',
                     'Chat History': 'Chat History',
                     'Chat Feedback': 'Feedback',
