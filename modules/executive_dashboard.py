@@ -78,6 +78,38 @@ def render():
             key=f"program_select_home_{st.session_state.home_reset_count}"
         )
     
+    # How to Use This Dashboard - Collapsible
+    with st.expander("💡 How to Use This Dashboard", expanded=False):
+        st.markdown("""
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #495057;">
+            <div>
+                <strong style="color: #500000;">📊 Dashboard Sections:</strong>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li><strong>Current Stats:</strong> Key metrics for the selected cohort</li>
+                    <li><strong>Admissions Funnel:</strong> Complete application journey visualization</li>
+                    <li><strong>Trend Analysis:</strong> Application and inquiry patterns over time</li>
+                    <li><strong>Program Comparison:</strong> Cross-program performance analysis</li>
+                    <li><strong>Marketing Insights:</strong> High-level spend and channel overview</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color: #500000;">🎯 Interactive Features:</strong>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li><strong>Cohort & Program Filters:</strong> Focus on specific cohorts or programs</li>
+                    <li><strong>Toggle Buttons:</strong> Show/hide metrics on charts</li>
+                    <li><strong>Scale Options:</strong> Switch between linear and log scales</li>
+                    <li><strong>Independent Filters:</strong> Each section has its own filter controls</li>
+                </ul>
+            </div>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; text-align: center; border: 1px solid #e9ecef;">
+            <strong style="color: #495057;">📸 State Snapshot Data:</strong>
+            <p style="margin: 8px 0 0 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                Admissions data represents point-in-time snapshots showing natural funnel progression, not cumulative totals.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
     # Load data for selected cohort
     conn = get_connection()
     query = 'SELECT * FROM admissions_metrics WHERE cohort_year = ? ORDER BY report_date, program'

@@ -4,6 +4,38 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 7.1
+
+**Marketing Analysis ROI Fix** - Released February 2, 2026
+
+### 🔧 Critical Marketing Analysis Fixes
+- **Fixed Cost per Application**: Resolved "N/A" values in Marketing Analysis Overview and Advanced Analytics tabs by connecting to correct `total_applications` metric
+- **Fixed Average Conversion Rate**: Now properly calculates inquiry-to-application conversion rates using accurate admissions data
+- **Enhanced Debug Information**: Added comprehensive debug sections showing program name matching, date ranges, and data availability
+- **Corrected Data Connections**: Fixed all utility files to reference the correct admissions metrics for consistent calculations
+
+### 📊 State Snapshot User Experience Improvements  
+- **Professional Explanation Boxes**: Added centered, clean state snapshot explanations across Executive Dashboard, Director's Deep Dive, and Marketing Analysis
+- **Consistent Styling**: Uniform light gray background with proper padding, spacing, and professional appearance
+- **Shortened Messaging**: Concise, business-appropriate explanations without overwhelming technical details
+- **Enhanced Performance Radar**: Added auto-scale functionality, better zoom controls, and clear user guidance for chart interaction
+
+### 🔍 Technical Database Improvements
+- **Database Query Optimization**: Updated marketing analysis to use `total_applications` (2,403 records) instead of `applications_received` (62 records)
+- **Utility File Consistency**: Updated `utils/validation.py`, `utils/ml_models.py`, `utils/database.py`, and `utils/ai_chat/vector_store.py`
+- **Enhanced Error Handling**: Better debugging information when marketing-admissions data matching fails
+- **Program Name Normalization**: Verified consistent program name matching between marketing spend and admissions metrics
+
+### 🎯 User Experience Impact
+- **Marketing ROI Metrics**: Cost per Application and Conversion Rate now display actual values instead of "N/A"
+- **Professional Interface**: Clean, centered state snapshot explanations improve user understanding
+- **Better Chart Controls**: Performance radar chart with proper zoom/reset functionality
+- **Comprehensive Debugging**: Clear visibility into data matching issues for troubleshooting
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 7.0
 
 **State Snapshot ETL & Dashboard Enhancement** - Released February 2, 2026

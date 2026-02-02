@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.1.0] - 2026-02-02
+
+### 🔧 Minor Release - Marketing Analysis ROI Fix
+
+#### Fixed
+- **Marketing Analysis ROI Calculations**: Resolved "N/A" values for Cost per Application and Average Conversion Rate
+- **Database Query Correction**: Changed from `applications_received` (62 records) to `total_applications` (2,403 records) for accurate calculations
+- **Data Matching Issues**: Fixed program name normalization and date range matching between marketing and admissions data
+- **Utility File Consistency**: Updated all references across validation, ML models, database functions, and AI chat components
+
+#### Added
+- **Enhanced Debug Information**: Comprehensive debug sections in Overview and Advanced Analytics tabs showing:
+  - Marketing data programs (original and normalized names)
+  - Admissions data programs (original and normalized names)  
+  - Date ranges for both datasets
+  - Clear explanations of matching requirements
+- **Professional State Snapshot Explanations**: Added centered, clean explanation boxes across all dashboards
+- **Performance Radar Enhancements**: Auto-scale functionality and better zoom controls with user guidance
+
+#### Changed
+- **State Snapshot Styling**: Updated explanation boxes with consistent gray background, proper padding, and professional appearance
+- **Marketing Analysis Queries**: All ROI calculations now use `total_applications` instead of `applications_received`
+- **Debug Visibility**: Debug sections now always show when ROI metrics display "N/A" for better troubleshooting
+
+#### Technical Implementation
+- **Database Schema Alignment**: Ensured all utility files reference correct admissions metrics
+- **Query Optimization**: Marketing analysis now properly joins with main applications data
+- **Error Handling**: Enhanced debugging information for data matching failures
+- **Consistent Styling**: Uniform explanation boxes across Executive Dashboard, Director's Deep Dive, and Marketing Analysis
+
+---
+
 ## [7.0.0] - 2026-02-02
 
 ### 🔄 Major Release - State Snapshot ETL & Dashboard Enhancement
@@ -194,6 +226,8 @@ Feb 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 Feb 2026  ████████████████████████████  v6.10 - Data Explorer Restructure
           │
 Feb 2026  ████████████████████████████  v7.0 - State Snapshot ETL & Dashboard Enhancement
+          │
+Feb 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v7.1 - Marketing Analysis ROI Fix
 ```
 
 ---
@@ -202,6 +236,7 @@ Feb 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **7.1** | Minor | Marketing Analysis ROI Fix | 7 | +150 |
 | **7.0** | Major | State Snapshot ETL & Dashboard Enhancement | 8 | +650 |
 | **6.10** | Major | Data Explorer Restructure | 4 | +150 |
 | **6.9** | Minor | Database Optimization | 6 | +25 |

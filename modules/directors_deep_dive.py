@@ -62,6 +62,12 @@ def render():
                 </ul>
             </div>
         </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; text-align: center; border: 1px solid #e9ecef;">
+            <strong style="color: #495057;">📸 State Snapshot Data:</strong>
+            <p style="margin: 8px 0 0 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                Data represents point-in-time snapshots. Fewer complete applications than offers indicates natural funnel progression.
+            </p>
+        </div>
         """, unsafe_allow_html=True)
 
     # Load data based on selection
@@ -708,6 +714,13 @@ def render():
             # Performance metrics radar chart - WITH PROFESSIONAL DROPDOWN EXPLANATION
             st.markdown("<h4 style='text-align: center; color: #500000;'>Performance Radar</h4>", unsafe_allow_html=True)
             
+            # Add helpful note about chart interactivity
+            st.markdown("""
+            <div style="background: #f0f8ff; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.85rem;">
+                💡 <strong>Interactive Chart:</strong> Use toolbar to zoom, pan, or reset view • Double-click to auto-scale • Hover for exact values
+            </div>
+            """, unsafe_allow_html=True)
+            
             # Calculate current values for display
             app_completion_rate = (complete / applications * 100) if applications > 0 else 0
             
@@ -792,7 +805,23 @@ def render():
                     height=600,
                     margin=dict(t=50, b=50, l=80, r=120)
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                
+                # Enhanced config with better zoom controls
+                config = {
+                    'displayModeBar': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToAdd': ['resetScale2d'],
+                    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+                    'toImageButtonOptions': {
+                        'format': 'png',
+                        'filename': 'performance_radar',
+                        'height': 600,
+                        'width': 800,
+                        'scale': 1
+                    }
+                }
+                
+                st.plotly_chart(fig, use_container_width=True, config=config)
             
             with explanation_col:
                 # Add vertical spacing to center the widget (responsive)

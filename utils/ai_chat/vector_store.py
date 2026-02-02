@@ -229,7 +229,7 @@ class VectorStore:
         schema_docs = [
             {
                 'id': 'admissions_metrics_table',
-                'text': 'Table: admissions_metrics. Contains core admissions funnel metrics including inquiries_received, total_applications, applications_received, admits, enrolled, deposits, confirmed for each program and cohort year. Columns: program (TEXT, full names like "Flex Online MBA", "Flex Online MS Accounting"), cohort_year (INTEGER, e.g., 2024, 2025), metric_name (TEXT, lowercase with underscores), metric_value (REAL, count), report_date (TEXT, YYYY-MM-DD format). Use for: enrollment data, application counts, conversion analysis. Sample values: metric_name can be inquiries_received, total_applications, enrolled. Programs use full names like "Flex Online MBA" not short codes.',
+                'text': 'Table: admissions_metrics. Contains core admissions funnel metrics including inquiries_received, total_applications, total_applications, admits, enrolled, deposits, confirmed for each program and cohort year. Columns: program (TEXT, full names like "Flex Online MBA", "Flex Online MS Accounting"), cohort_year (INTEGER, e.g., 2024, 2025), metric_name (TEXT, lowercase with underscores), metric_value (REAL, count), report_date (TEXT, YYYY-MM-DD format). Use for: enrollment data, application counts, conversion analysis. Sample values: metric_name can be inquiries_received, total_applications, enrolled. Programs use full names like "Flex Online MBA" not short codes.',
                 'metadata': {'type': 'table', 'name': 'admissions_metrics', 'primary_use': 'enrollment_data'}
             },
             {

@@ -140,7 +140,7 @@ def load_yoy_comparison_data(current_cohort, comparison_cohort):
                 cumulative_metrics = [
                     'inquiries_received', 
                     'total_applications', 
-                    'applications_received',
+                    'total_applications',
                     'applications_complete', 
                     'applications_in_progress',
                     'applications_manual',
@@ -163,7 +163,7 @@ def load_yoy_comparison_data(current_cohort, comparison_cohort):
                     cumulative_metrics = [
                         'inquiries_received', 
                         'total_applications', 
-                        'applications_received',
+                        'total_applications',
                         'applications_complete', 
                         'applications_in_progress',
                         'applications_manual',

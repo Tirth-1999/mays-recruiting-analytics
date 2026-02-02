@@ -24,7 +24,7 @@ VALID_PROGRAMS = [
 
 # Valid metrics
 VALID_METRICS = [
-    'inquiries_received', 'applications_received', 'applications_complete',
+    'inquiries_received', 'total_applications', 'applications_complete',
     'admissions_offered', 'admissions_accepted', 'anticipated_cohort_size'
 ]
 
@@ -437,7 +437,7 @@ class BoundsChecker:
         
         # Lower bound: 0 for count metrics, or historical_min - 3*std for others
         count_metrics = [
-            'inquiries_received', 'applications_received', 'applications_complete',
+            'inquiries_received', 'total_applications', 'applications_complete',
             'admissions_offered', 'admissions_accepted', 'anticipated_cohort_size'
         ]
         

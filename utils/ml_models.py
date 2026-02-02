@@ -498,7 +498,7 @@ class TimeSeriesForecaster:
         """Apply bounds checking to ensure non-negative values for count metrics."""
         # Count metrics should be non-negative
         count_metrics = [
-            'inquiries_received', 'applications_received', 'applications_complete',
+            'inquiries_received', 'total_applications', 'applications_complete',
             'admissions_offered', 'admissions_accepted', 'anticipated_cohort_size'
         ]
         
@@ -516,7 +516,7 @@ class TimeSeriesForecaster:
         """Round count-based predictions to integers."""
         # Count metrics should be integers
         count_metrics = [
-            'inquiries_received', 'applications_received', 'applications_complete',
+            'inquiries_received', 'total_applications', 'applications_complete',
             'admissions_offered', 'admissions_accepted', 'anticipated_cohort_size'
         ]
         
@@ -1150,7 +1150,7 @@ class TimingOptimizer:
         ].copy()
         
         applications_data = program_data[
-            program_data['metric_name'] == 'applications_received'
+            program_data['metric_name'] == 'total_applications'
         ].copy()
         
         if inquiries_data.empty or applications_data.empty:
@@ -1313,7 +1313,7 @@ class TimingOptimizer:
         ].copy()
         
         applications_data = program_data[
-            program_data['metric_name'] == 'applications_received'
+            program_data['metric_name'] == 'total_applications'
         ].copy()
         
         if inquiries_data.empty or applications_data.empty:
@@ -1423,7 +1423,7 @@ class TimingOptimizer:
         ].copy()
         
         applications_data = program_data[
-            program_data['metric_name'] == 'applications_received'
+            program_data['metric_name'] == 'total_applications'
         ].copy()
         
         if inquiries_data.empty or applications_data.empty:
@@ -1876,7 +1876,7 @@ class BudgetAllocator:
                     ]['metric_value'].sum()
                     
                     applications = program_admissions[
-                        program_admissions['metric_name'] == 'applications_received'
+                        program_admissions['metric_name'] == 'total_applications'
                     ]['metric_value'].sum()
                     
                     admissions = program_admissions[

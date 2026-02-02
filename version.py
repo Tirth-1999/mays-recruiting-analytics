@@ -4,7 +4,7 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "7.0"
+VERSION = "7.1"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
@@ -14,8 +14,8 @@ VERSION_SHORT = f"v{VERSION}"
 LAST_UPDATED = "February 2, 2026"
 
 # Version metadata
-VERSION_NAME = "State Snapshot ETL & Dashboard Enhancement"
-VERSION_STATUS = "Production Ready - Enhanced ETL Pipeline with State Snapshot Processing and Comprehensive Dashboard Improvements"
+VERSION_NAME = "Marketing Analysis ROI Fix"
+VERSION_STATUS = "Production Ready - Fixed Cost per Application and Conversion Rate Calculations"
 
 # Feature flags
 ENABLE_AI_CHAT = True

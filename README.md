@@ -2,12 +2,12 @@
 
 # Mays Analytics Platform
 
-[![Version](https://img.shields.io/badge/version-7.0-blue.svg)](https://github.com/Tirth-1999/mays-recruiting-analytics)
+[![Version](https://img.shields.io/badge/version-7.1-blue.svg)](https://github.com/Tirth-1999/mays-recruiting-analytics)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io)
 
-**Version 7.0** | **Last Updated: February 2, 2026**
+**Version 7.1** | **Last Updated: February 2, 2026**
 
 *A comprehensive analytics platform for Texas A&M University's Mays Business School Flex Online Programs, providing real-time admissions tracking, marketing ROI analysis, and AI-powered insights.*
 
@@ -17,43 +17,29 @@
 
 <div align="center">
 
-## What's New in Version 7.0
+## What's New in Version 7.1
 
-**State Snapshot ETL & Dashboard Enhancement** - Released February 2, 2026
+**Marketing Analysis ROI Fix** - Released February 2, 2026
 
 </div>
 
-### 🔄 Enhanced ETL Pipeline with State Snapshot Processing
-- **State Snapshot Approach**: All data now treated as point-in-time snapshots rather than cumulative totals
-- **Unified Cohort Calculation**: All programs (including MBA) use consistent +2 years cohort assignment
-- **Smart File Processing**: Processes only 3 key files with `_fall` suffix for accurate cohort tracking
-- **Enhanced Schema**: Added `cohort_season` and `file_source` columns for better data lineage
-- **Fixed Cohort Assignment**: Corrected Class 2028 data that was incorrectly marked as 2027
+### 🔧 Critical Marketing Analysis Fixes
+- **Fixed Cost per Application**: Resolved "N/A" values by connecting to correct `total_applications` metric instead of `applications_received`
+- **Fixed Average Conversion Rate**: Now properly calculates inquiry-to-application conversion rates using accurate data
+- **Enhanced Debug Information**: Added comprehensive debug sections to troubleshoot data matching issues
+- **Corrected Data Connections**: Fixed all utility files to reference the correct admissions metrics
 
-### 📊 Comprehensive Dashboard Improvements
-- **Executive Dashboard Filtering**: Fixed broken filter logic with proper flow control structure
-- **No-Data Handling**: Enhanced handling for programs without data, restored "All Programs" functionality
-- **Director's Deep Dive Enhancements**: 
-  - Added comprehensive metrics breakdown with expandable sections
-  - Implemented trend analysis with scale options (Linear → Log → Square Root)
-  - Fixed growth rate analysis to show true fiscal year performance
-  - Enhanced chart type buttons and legend label cleanup
-- **Comparison Tool Data Quality**: Smart backfilling logic prevents artificial data drops
-- **Marketing Analysis Optimization**: Consolidated program/channel/fiscal year into single header line
+### 📊 State Snapshot User Experience Improvements  
+- **Professional Explanation Boxes**: Added centered, clean state snapshot explanations across all dashboards
+- **Consistent Styling**: Uniform gray background with proper padding and spacing
+- **Shortened Messaging**: Concise, business-appropriate explanations without overwhelming text
+- **Enhanced Performance Radar**: Added auto-scale functionality and better zoom controls with user guidance
 
-### 🔧 Data Quality & Performance Improvements
-- **Smart Backfilling**: Cumulative metrics (inquiries, applications) never decrease with intelligent backfill
-- **Suspicious Zero Detection**: Prevents artificial drops in visualizations
-- **Column-Level Filtering**: Skips empty date columns for cleaner data processing
-- **Enhanced Validation**: Comprehensive data validation with proper error handling
-- **Professional Styling**: Removed emoticons and improved spacing throughout interface
-
-### 📈 Advanced Analytics Features
-- **Trend Analysis Scale Options**: Multiple scaling options for better data visualization
-- **Growth Rate Analysis**: Compares fiscal year start vs end values for accurate performance metrics
-- **Chart Type Flexibility**: Improved chart switching between line and bar graphs
-- **Legend Optimization**: Shortened legend labels while maintaining full dropdown names
-- **Incremental Notes Optimization**: 70% space reduction with consolidated headers
+### 🔍 Technical Improvements
+- **Database Query Optimization**: Updated all marketing analysis queries to use `total_applications` (2,403 records) instead of `applications_received` (62 records)
+- **Utility File Consistency**: Updated validation, ML models, database functions, and AI chat references
+- **Enhanced Error Handling**: Better debugging information when data matching fails
+- **Program Name Normalization**: Verified consistent program name matching between marketing and admissions data
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -217,6 +203,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Type | Key Features |
 |---------|------|------|--------------|
+| **7.1** | Feb 2, 2026 | Minor | Marketing Analysis ROI Fix |
 | **7.0** | Feb 2, 2026 | Major | State Snapshot ETL & Dashboard Enhancement |
 | **6.10** | Feb 1, 2026 | Major | Data Explorer Restructure |
 | **6.9** | Feb 1, 2026 | Minor | Database Optimization |
@@ -284,6 +271,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Mays Analytics Platform** | Version 7.0 | © 2024-2026 Texas A&M University
+**Mays Analytics Platform** | Version 7.1 | © 2024-2026 Texas A&M University
 
 </div>

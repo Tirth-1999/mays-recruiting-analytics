@@ -577,6 +577,12 @@ def render():
                     </ul>
                 </div>
             </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; text-align: center; border: 1px solid #e9ecef;">
+                <strong style="color: #495057;">📸 State Snapshot Data:</strong>
+                <p style="margin: 8px 0 0 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                    Marketing spend represents point-in-time snapshots of campaign investments at specific reporting periods.
+                </p>
+            </div>
             """, unsafe_allow_html=True)
         
         # Chrome-style CSS for tabs with always-visible scrollbar when needed
@@ -720,7 +726,7 @@ def render():
                             metric_name,
                             metric_value
                         FROM admissions_metrics
-                        WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                        WHERE metric_name IN ('inquiries_received', 'total_applications', 'admissions_accepted')
                         AND cohort_season = 'fall'
                     """, conn)
                     
@@ -755,18 +761,37 @@ def render():
                     if has_roi_data:
                         # Calculate ROI metrics
                         roi_df['CPI'] = roi_df.apply(lambda x: x['spend_amount'] / x['inquiries_received'] if x['inquiries_received'] > 0 else 0, axis=1)
-                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['applications_received'] if x['applications_received'] > 0 else 0, axis=1)
+                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['total_applications'] if x['total_applications'] > 0 else 0, axis=1)
                         roi_df['CPAd'] = roi_df.apply(lambda x: x['spend_amount'] / x['admissions_accepted'] if x['admissions_accepted'] > 0 else 0, axis=1)
-                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['applications_received'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
+                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['total_applications'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
                     else:
-                        # Debug: Show why no match
-                        if len(monthly_spend_norm) > 0 and len(admissions_pivot) > 0:
-                            with st.expander("🔍 Debug: Why are metrics showing N/A?", expanded=False):
-                                st.markdown("**Marketing Data Programs:**")
+                        # Debug: Show why no match - ALWAYS show this for troubleshooting
+                        with st.expander("🔍 Debug: Why are metrics showing N/A?", expanded=True):
+                            st.markdown("**Marketing Data Programs (normalized):**")
+                            if len(monthly_spend_norm) > 0:
                                 st.write(sorted(monthly_spend_norm['program_normalized'].unique().tolist()))
-                                st.markdown("**Admissions Data Programs:**")
+                                st.markdown("**Marketing Data Programs (original):**")
+                                marketing_orig = filtered_spend['program'].unique().tolist()
+                                st.write(sorted(marketing_orig))
+                            else:
+                                st.write("No marketing data found")
+                            
+                            st.markdown("**Admissions Data Programs (normalized):**")
+                            if len(admissions_pivot) > 0:
                                 st.write(sorted(admissions_pivot['program_normalized'].unique().tolist()))
-                                st.info("💡 If your selected program doesn't appear in both lists, that's why metrics show N/A. The program names need to match between marketing and admissions data.")
+                                st.markdown("**Admissions Data Programs (original):**")
+                                admissions_orig = admissions_df['program'].unique().tolist() if 'admissions_df' in locals() else []
+                                st.write(sorted(admissions_orig))
+                            else:
+                                st.write("No admissions data found")
+                            
+                            st.markdown("**Date Ranges:**")
+                            if len(monthly_spend_norm) > 0:
+                                st.write(f"Marketing: {monthly_spend_norm['month_date'].min()} to {monthly_spend_norm['month_date'].max()}")
+                            if len(admissions_pivot) > 0:
+                                st.write(f"Admissions: {admissions_pivot['month_date'].min()} to {admissions_pivot['month_date'].max()}")
+                            
+                            st.info("💡 For metrics to show, programs must match between marketing and admissions data, and date ranges must overlap.")
                 except Exception as e:
                     has_roi_data = False
                     with st.expander("⚠️ Debug: Error loading admissions data", expanded=False):
@@ -1209,7 +1234,7 @@ def render():
                                 metric_name,
                                 metric_value
                             FROM admissions_metrics
-                            WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                            WHERE metric_name IN ('inquiries_received', 'total_applications', 'admissions_accepted')
                             AND cohort_season = 'fall'
                             AND ({date_conditions})
                         """, conn)
@@ -1246,9 +1271,44 @@ def render():
                     if not roi_df.empty and len(roi_df) > 0:
                         # Calculate ROI metrics
                         roi_df['CPI'] = roi_df.apply(lambda x: x['spend_amount'] / x['inquiries_received'] if x['inquiries_received'] > 0 else 0, axis=1)
-                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['applications_received'] if x['applications_received'] > 0 else 0, axis=1)
+                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['total_applications'] if x['total_applications'] > 0 else 0, axis=1)
                         roi_df['CPAd'] = roi_df.apply(lambda x: x['spend_amount'] / x['admissions_accepted'] if x['admissions_accepted'] > 0 else 0, axis=1)
-                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['applications_received'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
+                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['total_applications'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
+                    else:
+                        # Debug: Show why no match - ALWAYS show this for troubleshooting
+                        with st.expander("🔍 Debug: Why are ROI metrics showing N/A?", expanded=True):
+                            st.markdown("**Marketing Data Programs (normalized):**")
+                            if len(monthly_spend_norm) > 0:
+                                st.write(sorted(monthly_spend_norm['program_normalized'].unique().tolist()))
+                                st.markdown("**Marketing Data Programs (original):**")
+                                marketing_orig = filtered_spend_adv['program'].unique().tolist()
+                                st.write(sorted(marketing_orig))
+                            else:
+                                st.write("No marketing data found")
+                            
+                            st.markdown("**Admissions Data Programs (normalized):**")
+                            if len(admissions_pivot) > 0:
+                                st.write(sorted(admissions_pivot['program_normalized'].unique().tolist()))
+                                st.markdown("**Admissions Data Programs (original):**")
+                                admissions_orig = admissions_df['program'].unique().tolist() if 'admissions_df' in locals() else []
+                                st.write(sorted(admissions_orig))
+                            else:
+                                st.write("No admissions data found")
+                            
+                            st.markdown("**Date Ranges:**")
+                            if len(monthly_spend_norm) > 0:
+                                st.write(f"Marketing: {monthly_spend_norm['month_date'].min()} to {monthly_spend_norm['month_date'].max()}")
+                            if len(admissions_pivot) > 0:
+                                st.write(f"Admissions: {admissions_pivot['month_date'].min()} to {admissions_pivot['month_date'].max()}")
+                            
+                            st.info("💡 For ROI metrics to show, programs must match between marketing and admissions data, and date ranges must overlap.")
+                    
+                    if not roi_df.empty and len(roi_df) > 0:
+                        # Calculate ROI metrics
+                        roi_df['CPI'] = roi_df.apply(lambda x: x['spend_amount'] / x['inquiries_received'] if x['inquiries_received'] > 0 else 0, axis=1)
+                        roi_df['CPA'] = roi_df.apply(lambda x: x['spend_amount'] / x['total_applications'] if x['total_applications'] > 0 else 0, axis=1)
+                        roi_df['CPAd'] = roi_df.apply(lambda x: x['spend_amount'] / x['admissions_accepted'] if x['admissions_accepted'] > 0 else 0, axis=1)
+                        roi_df['Conversion_Rate'] = roi_df.apply(lambda x: (x['total_applications'] / x['inquiries_received'] * 100) if x['inquiries_received'] > 0 else 0, axis=1)
                         
                         # ROI SUMMARY SECTION
                         st.markdown("""
@@ -1561,7 +1621,7 @@ def render():
                         monthly_trends = roi_df.groupby('month_date').agg({
                             'spend_amount': 'sum',
                             'inquiries_received': 'sum',
-                            'applications_received': 'sum',
+                            'total_applications': 'sum',
                             'admissions_accepted': 'sum'
                         }).reset_index()
                         
@@ -1592,7 +1652,7 @@ def render():
                                 row=2, col=1
                             )
                             fig.add_trace(
-                                go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['applications_received'],
+                                go.Scatter(x=monthly_trends['month_date'], y=monthly_trends['total_applications'],
                                           name='Applications', mode='lines+markers',
                                           line=dict(color='#2ca02c', width=3), marker=dict(size=8),
                                           fill='tozeroy', fillcolor='rgba(44, 160, 44, 0.1)'),
@@ -1644,7 +1704,7 @@ def render():
                         program_roi = roi_df.groupby('program').agg({
                             'spend_amount': 'sum',
                             'inquiries_received': 'sum',
-                            'applications_received': 'sum',
+                            'total_applications': 'sum',
                             'admissions_accepted': 'sum',
                             'CPI': 'mean',
                             'CPA': 'mean',
@@ -1658,7 +1718,7 @@ def render():
                             ).format({
                                 'spend_amount': '${:,.2f}',
                                 'inquiries_received': '{:.0f}',
-                                'applications_received': '{:.0f}',
+                                'total_applications': '{:.0f}',
                                 'admissions_accepted': '{:.0f}',
                                 'CPI': '${:,.2f}',
                                 'CPA': '${:,.2f}',
