@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 6.8** | **Last Updated: February 1, 2026**
+**Version 6.9** | **Last Updated: February 1, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, featuring natural language query interface, real-time insights, and secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-6.8-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.9-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,33 +17,20 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 6.8
+## What's New in Version 6.9
 
-**Marketing Analytics Enhancement** - Released February 1, 2026
+**Database Optimization** - Released February 1, 2026
 
-### 📊 Enhanced Marketing ETL Pipeline
-- **Dynamic Sheet Detection**: Automatically detects FY25, FY26, and future fiscal year sheets
-- **Flexible Month Columns**: Handles varying month ranges (FY25: Sept-June, FY26: Aug-Dec)
-- **State Tracking**: Incremental updates with change detection for efficient processing
-- **Program Name Standardization**: Centralized mapping with "AI" → "Flex Online AI and Business Program"
-
-### 🗓️ Fiscal Year-Specific Month Filtering
-- **Smart Month Filtering**: Month options now depend on selected fiscal years
-- **Chronological Sorting**: Months appear in date order, not alphabetical
-- **Fiscal Year Grouping**: When multiple FYs selected, months grouped by fiscal year
-- **Fixed Date Bug**: Corrected August 2026 → August 2025 for FY26
-
-### 📝 Incremental Notes Restructure
-- **Separate Notes Table**: One note per program-channel-fiscal_year (no duplication)
-- **Enhanced Notes Display**: Organized by fiscal year with expandable sections
-- **Reduced Data Redundancy**: From 167 duplicated records to 16 unique combinations
-- **Better UX**: Clear program-channel identification with short names
+### 🗄️ Streamlined Database Structure
+- **Shorter Table Names**: Renamed `marketing_etl_state` → `marketing_data` and `marketing_incremental_notes` → `incremental_notes`
+- **Improved User Experience**: Cleaner table names in Data Explorer for better readability
+- **Maintained Functionality**: All features work seamlessly with new table structure
+- **Updated Documentation**: All references updated across codebase and documentation
 
 ### 🔧 Technical Improvements
-- **4-Column Filtering**: Fiscal Year → Program → Channel → Month drill-down
-- **Database Optimization**: New `marketing_incremental_notes` table structure
-- **Error Handling**: Robust processing of dynamic Excel structures
-- **Performance**: Efficient state tracking prevents unnecessary reprocessing
+- **Database Consistency**: Unified naming convention for better maintainability
+- **Code Updates**: All ETL pipelines and queries updated to use new table names
+- **Documentation Sync**: Complete alignment between code and documentation
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -200,6 +187,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **6.9** | Feb 1, 2026 | Database Optimization with Shorter Table Names |
 | **6.8** | Feb 1, 2026 | Marketing Analytics Enhancement & Fiscal Year-Specific Month Filtering |
 | **6.5** | Jan 27, 2026 | UI/UX Polish & Mobile Optimization |
 | **6.0** | Jan 25, 2026 | AI Chat Assistant with Natural Language Queries |
@@ -238,6 +226,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 6.8 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 6.9 • Built for Texas A&M Mays Business School
 
 </div>

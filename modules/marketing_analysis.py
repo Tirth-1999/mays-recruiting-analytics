@@ -2120,7 +2120,7 @@ def render():
                     n.channel,
                     n.fiscal_year,
                     n.incremental_note
-                FROM marketing_incremental_notes n
+                FROM incremental_notes n
                 WHERE 1=1
             """
             

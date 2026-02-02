@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [6.9.0] - 2026-02-01
+
+### 🗄️ Optimization Release - Database Optimization
+
+#### Changed
+- **Table Names Simplified**: Renamed `marketing_etl_state` → `marketing_data` for cleaner interface
+- **Table Names Simplified**: Renamed `marketing_incremental_notes` → `incremental_notes` for better readability
+- **Data Explorer UX**: Shorter, more intuitive table names improve user experience
+- **Code Consistency**: Updated all ETL pipelines, queries, and modules to use new table names
+- **Documentation Sync**: Complete alignment between code and documentation references
+
+#### Technical Implementation
+- **Database Schema**: Maintained all data integrity during table renaming process
+- **Marketing ETL Updates**: All references updated to use new table names (`marketing_data`, `incremental_notes`)
+- **Query Optimization**: Updated marketing analysis module to use new table structure
+- **Documentation Updates**: Synchronized all README, CHANGELOG, and code documentation
+- **Production Ready**: Thoroughly tested to ensure seamless functionality with new names
+
+---
+
 ## [6.8.0] - 2026-02-01
 
 ### 🔧 Enhancement Release - Marketing Analytics Enhancement
@@ -16,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fiscal Year-Specific Month Filtering**: Month options now depend on selected fiscal years
 - **Chronological Month Sorting**: Months display in date order instead of alphabetical
 - **Fiscal Year Grouping**: When multiple FYs selected, months organized by fiscal year sections
-- **Separate Incremental Notes Table**: New `marketing_incremental_notes` table structure
+- **Separate Incremental Notes Table**: New `incremental_notes` table structure
 - **State Tracking System**: Incremental updates with intelligent change detection
 - **Centralized Program Mapping**: Single source of truth for program name standardization
 
@@ -35,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Technical Implementation
 - **Enhanced ETL Processing**: Handles FY25 (Sept 2024-June 2025) and FY26 (Aug-Dec 2025) correctly
-- **Database Schema Updates**: Added `marketing_incremental_notes` and `marketing_etl_state` tables
+- **Database Schema Updates**: Added `incremental_notes` and `marketing_data` tables
 - **Performance Optimization**: State tracking prevents unnecessary reprocessing of unchanged data
 - **4-Column Filtering**: Fiscal Year → Program → Channel → Month drill-down capability
 - **Robust Error Handling**: Graceful processing of dynamic Excel structures with validation
@@ -93,6 +113,7 @@ Feb 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **6.9** | Minor | Database Optimization | 6 | +25 |
 | **6.8** | Major | Marketing Analytics Enhancement | 3 | +450 |
 | **6.5** | Major | UI/UX Polish & Mobile Optimization | 3 | +850 |
 | **6.2** | Major | Professor Feedback Implementation | 20 | +4,095 |

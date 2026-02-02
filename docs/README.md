@@ -4,6 +4,31 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 6.9
+
+**Database Optimization** - Released February 1, 2026
+
+### 🗄️ Streamlined Database Structure
+- **Shorter Table Names**: Renamed `marketing_etl_state` → `marketing_data` and `marketing_incremental_notes` → `incremental_notes`
+- **Improved User Experience**: Cleaner, more intuitive table names in Data Explorer for better readability
+- **Maintained Data Integrity**: All existing data preserved during table renaming process
+- **Seamless Functionality**: All features continue to work without interruption
+
+### 🔧 Technical Implementation
+- **Complete Code Updates**: All ETL pipelines, queries, and modules updated to use new table names
+- **Documentation Synchronization**: Updated all references across codebase, README, and documentation files
+- **Database Consistency**: Unified naming convention improves maintainability and reduces confusion
+- **Production Ready**: Thoroughly tested to ensure no functionality is affected by the changes
+
+### 📊 Enhanced Data Explorer Experience
+- **Cleaner Interface**: Table names are now more concise and user-friendly
+- **Better Organization**: Simplified naming makes it easier to identify table purposes
+- **Consistent Naming**: Follows standard database naming conventions for professional appearance
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 6.8
 
 **Marketing Analytics Enhancement** - Released February 1, 2026
@@ -23,7 +48,7 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 - **Fixed Date Conversion Bug**: Corrected August 2026 → August 2025 for proper FY26 representation
 
 ### 📝 Incremental Notes Database Restructure
-- **Separate Notes Table**: New `marketing_incremental_notes` table eliminates data duplication
+- **Separate Notes Table**: New `incremental_notes` table eliminates data duplication
 - **One Note Per Combination**: Single record per program-channel-fiscal_year (reduced from 167 duplicates to 16 unique)
 - **Enhanced Display**: Notes organized by fiscal year with expandable program-channel sections
 - **Better Identification**: Uses short program names (MBA, AI) for cleaner interface

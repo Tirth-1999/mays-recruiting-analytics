@@ -51,7 +51,7 @@ def create_marketing_tables():
     
     # Incremental notes table - one note per program-channel-fiscal_year
     conn.execute('''
-        CREATE TABLE IF NOT EXISTS marketing_incremental_notes (
+        CREATE TABLE IF NOT EXISTS incremental_notes (
             note_id INTEGER PRIMARY KEY AUTOINCREMENT,
             program TEXT NOT NULL,
             channel TEXT NOT NULL,
@@ -64,7 +64,7 @@ def create_marketing_tables():
     
     # State tracking table - track what we've processed
     conn.execute('''
-        CREATE TABLE IF NOT EXISTS marketing_etl_state (
+        CREATE TABLE IF NOT EXISTS marketing_data (
             state_id INTEGER PRIMARY KEY AUTOINCREMENT,
             fiscal_year TEXT NOT NULL,
             sheet_name TEXT NOT NULL,
@@ -81,7 +81,7 @@ def create_marketing_tables():
     conn.execute('CREATE INDEX IF NOT EXISTS idx_spend_date ON marketing_spend(month_date)')
     conn.execute('CREATE INDEX IF NOT EXISTS idx_spend_fiscal ON marketing_spend(fiscal_year)')
     conn.execute('CREATE INDEX IF NOT EXISTS idx_totals_program ON marketing_spend_totals(program)')
-    conn.execute('CREATE INDEX IF NOT EXISTS idx_notes_program_channel ON marketing_incremental_notes(program, channel)')
+    conn.execute('CREATE INDEX IF NOT EXISTS idx_notes_program_channel ON incremental_notes(program, channel)')
     
     conn.commit()
     conn.close()
@@ -103,7 +103,7 @@ def standardize_program_name(program_name):
 def get_current_state(conn):
     """Get current ETL state from database"""
     try:
-        state_df = pd.read_sql("SELECT * FROM marketing_etl_state", conn)
+        state_df = pd.read_sql("SELECT * FROM marketing_data", conn)
         state_dict = {}
         for _, row in state_df.iterrows():
             state_dict[row['fiscal_year']] = {
@@ -120,7 +120,7 @@ def get_current_state(conn):
 def update_state(conn, fiscal_year, sheet_name, programs, channels, months):
     """Update ETL state in database"""
     conn.execute('''
-        INSERT OR REPLACE INTO marketing_etl_state 
+        INSERT OR REPLACE INTO marketing_data 
         (fiscal_year, sheet_name, programs, channels, months, last_updated)
         VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     ''', (
@@ -444,7 +444,7 @@ def load_marketing_spend():
         print(f"💾 Loading {len(all_notes_records)} incremental notes to database...")
         for record in all_notes_records:
             conn.execute('''
-                INSERT OR REPLACE INTO marketing_incremental_notes 
+                INSERT OR REPLACE INTO incremental_notes 
                 (program, channel, fiscal_year, incremental_note)
                 VALUES (?, ?, ?, ?)
             ''', (record['program'], record['channel'], record['fiscal_year'], record['incremental_note']))
@@ -500,14 +500,14 @@ def validate_data():
     # Check for incremental notes (separate table now)
     try:
         notes_count = pd.read_sql(
-            "SELECT COUNT(*) as count FROM marketing_incremental_notes",
+            "SELECT COUNT(*) as count FROM incremental_notes",
             conn
         )['count'].iloc[0]
         print(f"\n✅ Incremental notes: {notes_count} unique program-channel combinations")
         
         # Show sample notes
         sample_notes = pd.read_sql(
-            "SELECT program, channel, fiscal_year, LEFT(incremental_note, 50) as note_preview FROM marketing_incremental_notes LIMIT 5",
+            "SELECT program, channel, fiscal_year, SUBSTR(incremental_note, 1, 50) as note_preview FROM incremental_notes LIMIT 5",
             conn
         )
         if not sample_notes.empty:
@@ -604,8 +604,8 @@ def main():
     print("   2. Check Data Explorer for updated tables:")
     print("      • marketing_spend (channel-level, month-wise)")
     print("      • marketing_spend_totals (program-level, month-wise)")
-    print("      • marketing_incremental_notes (program-channel notes)")
-    print("      • marketing_etl_state (tracking)")
+    print("      • incremental_notes (program-channel notes)")
+    print("      • marketing_data (tracking)")
     print("\n" + "=" * 80)
 
 if __name__ == "__main__":

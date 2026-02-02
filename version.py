@@ -4,7 +4,7 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "6.8"
+VERSION = "6.9"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
@@ -14,8 +14,8 @@ VERSION_SHORT = f"v{VERSION}"
 LAST_UPDATED = "February 1, 2026"
 
 # Version metadata
-VERSION_NAME = "Marketing Analytics Enhancement"
-VERSION_STATUS = "Production Ready - Enhanced Marketing ETL & Fiscal Year-Specific Month Filtering"
+VERSION_NAME = "Database Optimization"
+VERSION_STATUS = "Production Ready - Streamlined Database with Shorter Table Names"
 
 # Feature flags
 ENABLE_AI_CHAT = True
