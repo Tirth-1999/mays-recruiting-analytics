@@ -4,7 +4,7 @@ Update this file to change the version number across the entire application
 """
 
 # Current version of the platform
-VERSION = "6.9"
+VERSION = "6.10"
 
 # Version display formats
 VERSION_FULL = f"Version {VERSION}"
@@ -14,8 +14,8 @@ VERSION_SHORT = f"v{VERSION}"
 LAST_UPDATED = "February 1, 2026"
 
 # Version metadata
-VERSION_NAME = "Database Optimization"
-VERSION_STATUS = "Production Ready - Streamlined Database with Shorter Table Names"
+VERSION_NAME = "Data Explorer Restructure"
+VERSION_STATUS = "Production Ready - Organized Data Explorer with Grouped Categories"
 
 # Feature flags
 ENABLE_AI_CHAT = True

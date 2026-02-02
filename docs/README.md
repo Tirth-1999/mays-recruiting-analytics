@@ -4,32 +4,36 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
-## What's New in Version 6.9
+## What's New in Version 6.10
 
-**Database Optimization** - Released February 1, 2026
+**Data Explorer Restructure** - Released February 1, 2026
 
-### 🗄️ Streamlined Database Structure
-- **Shorter Table Names**: Renamed `marketing_etl_state` → `marketing_data` and `marketing_incremental_notes` → `incremental_notes`
-- **Improved User Experience**: Cleaner, more intuitive table names in Data Explorer for better readability
-- **Maintained Data Integrity**: All existing data preserved during table renaming process
-- **Seamless Functionality**: All features continue to work without interruption
+### 📊 Organized Data Explorer Interface
+- **Grouped Categories**: Transformed overwhelming 13 individual table tabs into 4 logical groups for better user experience
+- **Two-Level Navigation**: Intuitive category tabs → table sub-tabs structure reduces cognitive load
+- **Marketing Tables Group**: Spend (individual channels), Totals (aggregated), Notes (strategy context), Processing Logs (ETL metadata)
+- **Core Data Tables Group**: Admissions (funnel metrics), Programs (definitions), Metadata (system info)
+- **AI Chat Tables Group**: History (conversations), Feedback (ratings), Metrics (performance)
+- **System Tables Group**: Users (authentication), Predictions (ML forecasts)
+
+### 🎨 Enhanced User Experience Design
+- **Centered Navigation**: All main tabs and sub-tabs properly centered for balanced visual hierarchy
+- **Professional Styling**: Removed emoticons and decorative elements for clean, business-appropriate interface
+- **Improved CSS Architecture**: Fixed camouflaging issues, better hover states, and clearer active tab indicators
+- **Responsive Layout**: Seamless experience across desktop, tablet, and mobile devices
+- **Logical Information Architecture**: Related tables grouped together for intuitive data discovery
 
 ### 🔧 Technical Implementation
-- **Complete Code Updates**: All ETL pipelines, queries, and modules updated to use new table names
-- **Documentation Synchronization**: Updated all references across codebase, README, and documentation files
-- **Database Consistency**: Unified naming convention improves maintainability and reduces confusion
-- **Production Ready**: Thoroughly tested to ensure no functionality is affected by the changes
-
-### 📊 Enhanced Data Explorer Experience
-- **Cleaner Interface**: Table names are now more concise and user-friendly
-- **Better Organization**: Simplified naming makes it easier to identify table purposes
-- **Consistent Naming**: Follows standard database naming conventions for professional appearance
+- **Maintained Full Functionality**: All existing filtering, sorting, export, and analysis features preserved
+- **Enhanced Performance**: Optimized CSS reduces rendering overhead with cleaner selectors
+- **Better Accessibility**: Improved contrast ratios and clearer visual states for better usability
+- **Documentation Updates**: Complete alignment between interface changes and user guides
 
 [View complete changelog →](CHANGELOG.md)
 
 ---
 
-## What's New in Version 6.8
+## What's New in Version 6.9
 
 **Marketing Analytics Enhancement** - Released February 1, 2026
 

@@ -3,12 +3,12 @@
 # Mays Analytics
 ### Flex Online Programs Analytics Platform
 
-**Version 6.9** | **Last Updated: February 1, 2026**
+**Version 6.10** | **Last Updated: February 1, 2026**
 
 AI-powered analytics platform for Texas A&M Mays Business School's Flex Online Programs, featuring natural language query interface, real-time insights, and secure Google OAuth authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-6.9-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.10-blue.svg)](docs/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 
 [Documentation](docs/README.md) • [Quick Start](docs/QUICK_START.md) • [Changelog](docs/CHANGELOG.md)
@@ -17,20 +17,30 @@ AI-powered analytics platform for Texas A&M Mays Business School's Flex Online P
 
 ---
 
-## What's New in Version 6.9
+## What's New in Version 6.10
 
-**Database Optimization** - Released February 1, 2026
+**Data Explorer Restructure** - Released February 1, 2026
 
-### 🗄️ Streamlined Database Structure
-- **Shorter Table Names**: Renamed `marketing_etl_state` → `marketing_data` and `marketing_incremental_notes` → `incremental_notes`
-- **Improved User Experience**: Cleaner table names in Data Explorer for better readability
-- **Maintained Functionality**: All features work seamlessly with new table structure
-- **Updated Documentation**: All references updated across codebase and documentation
+### 📊 Organized Data Explorer Interface
+- **Grouped Categories**: Organized 13 individual table tabs into 4 logical groups
+- **Two-Level Navigation**: Category tabs → Table sub-tabs for better organization
+- **Marketing Tables**: Spend, Totals, Notes, Processing Logs
+- **Core Data Tables**: Admissions, Programs, Metadata
+- **AI Chat Tables**: History, Feedback, Metrics
+- **System Tables**: Users, Predictions
+
+### 🎨 Enhanced User Experience
+- **Centered Navigation**: All tabs and sub-tabs are properly centered
+- **Clean Design**: Removed emoticons and custom borders for professional appearance
+- **Improved CSS**: Fixed camouflaging issues and better visual hierarchy
+- **Reduced Cognitive Load**: 4 main categories instead of 13 individual tabs
+- **Logical Grouping**: Related tables grouped together for easier discovery
 
 ### 🔧 Technical Improvements
-- **Database Consistency**: Unified naming convention for better maintainability
-- **Code Updates**: All ETL pipelines and queries updated to use new table names
-- **Documentation Sync**: Complete alignment between code and documentation
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Better Organization**: Clear descriptions help users find what they need
+- **Maintained Functionality**: All existing features preserved
+- **Professional Styling**: Clean, modern interface without distracting elements
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -187,6 +197,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **6.10** | Feb 1, 2026 | Data Explorer Restructure with Grouped Categories |
 | **6.9** | Feb 1, 2026 | Database Optimization with Shorter Table Names |
 | **6.8** | Feb 1, 2026 | Marketing Analytics Enhancement & Fiscal Year-Specific Month Filtering |
 | **6.5** | Jan 27, 2026 | UI/UX Polish & Mobile Optimization |
@@ -226,6 +237,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Mays Analytics Platform** • Version 6.9 • Built for Texas A&M Mays Business School
+**Mays Analytics Platform** • Version 6.10 • Built for Texas A&M Mays Business School
 
 </div>

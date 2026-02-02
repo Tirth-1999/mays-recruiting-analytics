@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [6.10.0] - 2026-02-01
+
+### 🎨 UI/UX Release - Data Explorer Restructure
+
+#### Added
+- **Grouped Table Categories**: Organized 13 individual table tabs into 4 logical groups
+- **Two-Level Navigation**: Category tabs → Table sub-tabs for better information architecture
+- **Marketing Tables Group**: Spend, Totals, Notes, Processing Logs (renamed from ETL State)
+- **Core Data Tables Group**: Admissions, Programs, Metadata
+- **AI Chat Tables Group**: History, Feedback, Metrics
+- **System Tables Group**: Users, Predictions
+
+#### Changed
+- **Navigation Structure**: From flat 13-tab layout to hierarchical 4+sub-tab organization
+- **Visual Design**: Centered all tabs and sub-tabs for balanced layout
+- **Professional Styling**: Removed emoticons and decorative borders for business-appropriate interface
+- **CSS Architecture**: Enhanced hover states, active indicators, and responsive behavior
+- **Table Naming**: "ETL State" renamed to "Processing Logs" for clarity
+
+#### Removed
+- **Visual Clutter**: Eliminated emoticons from all category names and descriptions
+- **Custom Borders**: Removed maroon left borders and gradient backgrounds
+- **Camouflaging Issues**: Fixed CSS conflicts that made active states unclear
+
+#### Technical Implementation
+- **Responsive Design**: Optimized for desktop, tablet, and mobile viewing
+- **Maintained Functionality**: All existing filtering, sorting, and export features preserved
+- **Performance Optimization**: Cleaner CSS reduces rendering overhead
+- **Documentation Updates**: Updated Data Explorer guide to reflect new structure
+- **User Experience**: Reduced cognitive load from 13 choices to 4 main categories
+
+---
+
 ## [6.9.0] - 2026-02-01
 
 ### 🗄️ Optimization Release - Database Optimization
@@ -113,6 +146,7 @@ Feb 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **6.10** | Major | Data Explorer Restructure | 4 | +150 |
 | **6.9** | Minor | Database Optimization | 6 | +25 |
 | **6.8** | Major | Marketing Analytics Enhancement | 3 | +450 |
 | **6.5** | Major | UI/UX Polish & Mobile Optimization | 3 | +850 |

@@ -227,188 +227,244 @@ def render():
             st.warning("No tables found in the database.")
             st.info("Please ensure the ETL pipeline has been run to populate the database.")
         else:
-            # Chrome-style CSS for tabs with always-visible scrollbar when needed
+            # Enhanced Chrome-style CSS for grouped tabs - centered and clean
             st.markdown("""
             <style>
-            /* Chrome-style tabs for Data Explorer */
+            /* Main category tabs styling - centered */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 2px !important;
-                justify-content: flex-start !important;
-                background-color: transparent !important;
-                padding: 0px 20px !important;
-                padding-left: 40px !important;
+                justify-content: center !important;
+                background-color: #f8f9fa !important;
+                padding: 8px 20px !important;
+                border-radius: 12px !important;
                 border-bottom: none !important;
-                margin-bottom: 30px !important;
+                margin-bottom: 20px !important;
                 margin-top: 20px !important;
                 display: flex !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
+                flex-wrap: wrap !important;
+                overflow: visible !important;
                 scroll-behavior: smooth !important;
-                -webkit-overflow-scrolling: touch !important;
-                scrollbar-width: thin !important;
-                scrollbar-color: #500000 #f0f0f0 !important;
                 box-sizing: border-box !important;
             }
             
-            /* Always show scrollbar when content overflows */
-            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
-                height: 10px !important;
-                display: block !important;
-            }
-            
-            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
-                background: #f0f0f0 !important;
-                border-radius: 5px !important;
-            }
-            
-            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
-                background: #500000 !important;
-                border-radius: 5px !important;
-                min-width: 50px !important;
-            }
-            
-            .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb:hover {
-                background: #700000 !important;
-            }
-            
             .stTabs [data-baseweb="tab"] {
-                height: 45px !important;
-                padding: 0px 32px !important;
-                background-color: #f5f5f5 !important;
-                border-radius: 8px 8px 0px 0px !important;
+                height: 50px !important;
+                padding: 12px 24px !important;
+                background-color: white !important;
+                border-radius: 8px !important;
+                border: 1px solid #dee2e6 !important;
                 font-weight: 500 !important;
                 font-size: 15px !important;
-                border: none !important;
-                border-bottom: 3px solid transparent !important;
-                color: #666 !important;
-                margin-bottom: -2px !important;
+                color: #495057 !important;
+                margin: 2px !important;
                 flex-shrink: 0 !important;
                 white-space: nowrap !important;
                 min-width: fit-content !important;
                 box-sizing: border-box !important;
-            }
-            
-            .stTabs [aria-selected="true"] {
-                background-color: white !important;
-                color: #500000 !important;
-                border-bottom: 3px solid #500000 !important;
+                transition: all 0.2s ease !important;
+                cursor: pointer !important;
             }
             
             .stTabs [data-baseweb="tab"]:hover {
-                background-color: #e8e8e8 !important;
-                color: #500000 !important;
+                background-color: #e9ecef !important;
+                border-color: #adb5bd !important;
+                color: #495057 !important;
+                transform: translateY(-1px) !important;
+            }
+            
+            .stTabs [aria-selected="true"] {
+                background-color: #500000 !important;
+                color: white !important;
+                border-color: #500000 !important;
+                box-shadow: 0 2px 8px rgba(80, 0, 0, 0.2) !important;
             }
             
             .stTabs [aria-selected="true"]:hover {
-                background-color: white !important;
+                background-color: #500000 !important;
+                color: white !important;
+                transform: translateY(-1px) !important;
             }
             
-            /* Tablet adjustments - switch to left-aligned */
-            @media screen and (max-width: 1024px) {
-                .stTabs [data-baseweb="tab-list"] {
-                    justify-content: flex-start !important;
-                    padding: 0px 15px !important;
-                }
-                
-                .stTabs [data-baseweb="tab"] {
-                    padding: 0px 24px !important;
-                    font-size: 14px !important;
-                }
-                
-                .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
-                    height: 12px !important;
-                }
+            /* Sub-tabs (nested) styling - centered */
+            .stTabs .stTabs [data-baseweb="tab-list"] {
+                background-color: #ffffff !important;
+                border: 1px solid #dee2e6 !important;
+                border-radius: 8px !important;
+                padding: 4px !important;
+                margin-bottom: 15px !important;
+                margin-top: 10px !important;
+                justify-content: center !important;
+                flex-wrap: wrap !important;
             }
             
-            /* Mobile adjustments - left-aligned */
+            .stTabs .stTabs [data-baseweb="tab"] {
+                height: 40px !important;
+                padding: 8px 16px !important;
+                font-size: 14px !important;
+                background-color: #f8f9fa !important;
+                border: 1px solid #e9ecef !important;
+                border-radius: 6px !important;
+                color: #6c757d !important;
+                margin: 2px !important;
+            }
+            
+            .stTabs .stTabs [data-baseweb="tab"]:hover {
+                background-color: #e9ecef !important;
+                color: #495057 !important;
+                border-color: #adb5bd !important;
+                transform: none !important;
+            }
+            
+            .stTabs .stTabs [aria-selected="true"] {
+                background-color: #500000 !important;
+                color: white !important;
+                border-color: #500000 !important;
+                box-shadow: 0 1px 4px rgba(80, 0, 0, 0.2) !important;
+            }
+            
+            .stTabs .stTabs [aria-selected="true"]:hover {
+                background-color: #500000 !important;
+                color: white !important;
+            }
+            
+            /* Responsive design */
             @media screen and (max-width: 768px) {
                 .stTabs [data-baseweb="tab-list"] {
-                    justify-content: flex-start !important;
-                    padding: 0px 10px !important;
+                    justify-content: center !important;
+                    padding: 8px 10px !important;
                 }
                 
                 .stTabs [data-baseweb="tab"] {
-                    padding: 0px 20px !important;
+                    padding: 8px 16px !important;
+                    font-size: 14px !important;
+                    height: 45px !important;
+                }
+                
+                .stTabs .stTabs [data-baseweb="tab"] {
+                    padding: 6px 12px !important;
+                    font-size: 13px !important;
+                    height: 36px !important;
+                }
+            }
+            
+            @media screen and (max-width: 480px) {
+                .stTabs [data-baseweb="tab"] {
+                    padding: 6px 12px !important;
                     font-size: 13px !important;
                     height: 42px !important;
                 }
-            }
-            
-            /* Small mobile adjustments - left-aligned */
-            @media screen and (max-width: 480px) {
-                .stTabs [data-baseweb="tab-list"] {
-                    justify-content: flex-start !important;
-                    padding: 0px 10px !important;
-                }
                 
-                .stTabs [data-baseweb="tab"] {
-                    padding: 0px 16px !important;
+                .stTabs .stTabs [data-baseweb="tab"] {
+                    padding: 4px 8px !important;
                     font-size: 12px !important;
-                    height: 40px !important;
+                    height: 32px !important;
                 }
             }
             </style>
             """, unsafe_allow_html=True)
             
-            # Create tabs for each table with icons
-            table_icons = {
-                'users': '👥',
-                'metadata': '⚙️',
-                'model_predictions': '🔮',
-                'admissions_metrics': '📊',
-                'programs': '🎓',
-                'marketing_metrics': '📈',
-                'marketing_campaigns': '📢',
-                'marketing_spend': '💰',
-                'marketing_spend_totals': '�',
-                'inquiry_sources': '🔍',
-                'sqlite_sequence': '⚙️'
+            # Group tables by category for better organization
+            table_groups = {
+                'Marketing Tables': {
+                    'tables': ['marketing_spend', 'marketing_spend_totals', 'incremental_notes', 'marketing_data'],
+                    'description': 'Marketing spend data, totals, notes, and ETL tracking'
+                },
+                'Core Data Tables': {
+                    'tables': ['admissions_metrics', 'programs', 'metadata'],
+                    'description': 'Admissions funnel data, program definitions, and system metadata'
+                },
+                'AI Chat Tables': {
+                    'tables': ['chat_history', 'chat_feedback', 'chat_metrics'],
+                    'description': 'AI assistant conversations, feedback, and performance metrics'
+                },
+                'System Tables': {
+                    'tables': ['users', 'model_predictions'],
+                    'description': 'User management and ML prediction results'
+                }
             }
             
-            tab_labels = []
-            for table in available_tables:
-                # Format table name nicely - remove emojis and simplify names
-                display_name = table.replace('_', ' ').title()
-                # Simplify multi-word names to single words where possible
-                name_mapping = {
-                    'Users': 'Users',
-                    'Metadata': 'Metadata',
-                    'Model Predictions': 'Predictions',
-                    'Admissions Metrics': 'Admissions',
-                    'Marketing Metrics': 'Marketing',
-                    'Marketing Campaigns': 'Campaigns',
-                    'Marketing Spend': 'Spend',
-                    'Marketing Spend Totals': 'Spend Totals',
-                    'Marketing Data': 'Marketing Data',  # New table name
-                    'Incremental Notes': 'Notes',  # New table name
-                    'Inquiry Sources': 'Sources',
-                    'Programs': 'Programs',
-                    'Sqlite Sequence': 'System',
-                    'Chat History': 'Chat History',
-                    'Chat Feedback': 'Feedback',
-                    'Chat Metrics': 'Metrics'
-                }
-                display_name = name_mapping.get(display_name, display_name)
-                tab_labels.append(display_name)
+            # Filter available tables by groups and user permissions
+            filtered_groups = {}
+            for group_name, group_info in table_groups.items():
+                group_tables = [table for table in group_info['tables'] 
+                              if table in available_tables]
+                if group_tables:  # Only show groups that have available tables
+                    filtered_groups[group_name] = {
+                        'tables': group_tables,
+                        'description': group_info['description']
+                    }
             
-            tabs = st.tabs(tab_labels)
-            
-            for i, table in enumerate(available_tables):
-                with tabs[i]:
-                    # For chat tables, filter by user_id to show only user's own data
-                    if table in ['chat_history', 'chat_feedback', 'chat_metrics']:
-                        if not auth.is_admin():
-                            # Regular users see only their own chat data
-                            st.info(f"📊 Showing your personal {table.replace('_', ' ')} data")
-                            process_table_display(conn, table, user_filter={'user_id': user['user_id']})
-                        else:
-                            # Admins see all data
-                            st.info(f"👑 Admin view: Showing all {table.replace('_', ' ')} data")
-                            process_table_display(conn, table)
-                    else:
-                        # Other tables show all data
-                        process_table_display(conn, table)
+            # Create main category tabs
+            if filtered_groups:
+                main_tabs = st.tabs(list(filtered_groups.keys()))
+                
+                for i, (group_name, group_info) in enumerate(filtered_groups.items()):
+                    with main_tabs[i]:
+                        st.markdown(f"""
+                        <div style="background: #f8f9fa;
+                                    padding: 15px 20px;
+                                    border-radius: 10px;
+                                    margin-bottom: 20px;
+                                    text-align: center;">
+                            <h4 style="margin: 0; color: #500000;">{group_name}</h4>
+                            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">{group_info['description']}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Create sub-tabs for tables within this group
+                        group_tables = group_info['tables']
+                        
+                        # Create display names for sub-tabs
+                        sub_tab_labels = []
+                        for table in group_tables:
+                            display_name = table.replace('_', ' ').title()
+                            name_mapping = {
+                                'Marketing Spend': 'Spend',
+                                'Marketing Spend Totals': 'Totals',
+                                'Incremental Notes': 'Notes',
+                                'Marketing Data': 'Processing Logs',
+                                'Admissions Metrics': 'Admissions',
+                                'Programs': 'Programs',
+                                'Metadata': 'Metadata',
+                                'Chat History': 'History',
+                                'Chat Feedback': 'Feedback',
+                                'Chat Metrics': 'Metrics',
+                                'Users': 'Users',
+                                'Model Predictions': 'Predictions'
+                            }
+                            display_name = name_mapping.get(display_name, display_name)
+                            sub_tab_labels.append(display_name)
+                        
+                        # Create sub-tabs
+                        sub_tabs = st.tabs(sub_tab_labels)
+                        
+                        for j, table in enumerate(group_tables):
+                            with sub_tabs[j]:
+                                # Add table-specific info
+                                st.markdown(f"""
+                                <div style="background: white;
+                                            padding: 10px 15px;
+                                            border-radius: 8px;
+                                            margin-bottom: 15px;
+                                            border: 1px solid #dee2e6;
+                                            text-align: center;">
+                                    <strong>Table:</strong> <code>{table}</code>
+                                </div>
+                                """, unsafe_allow_html=True)
+                                
+                                # Handle chat tables with user filtering
+                                if table in ['chat_history', 'chat_feedback', 'chat_metrics']:
+                                    if not auth.is_admin():
+                                        st.info(f"Showing your personal {table.replace('_', ' ')} data")
+                                        process_table_display(conn, table, user_filter={'user_id': user['user_id']})
+                                    else:
+                                        st.info(f"Admin view: Showing all {table.replace('_', ' ')} data")
+                                        process_table_display(conn, table)
+                                else:
+                                    # Other tables show all data
+                                    process_table_display(conn, table)
+            else:
+                st.warning("No tables available for your user role.")
     
     except Exception as e:
         st.error(f"Database connection error: {str(e)}")
