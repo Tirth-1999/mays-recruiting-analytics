@@ -721,6 +721,7 @@ def render():
                             metric_value
                         FROM admissions_metrics
                         WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                        AND cohort_season = 'fall'
                     """, conn)
                     
                     # Normalize admissions program names
@@ -1209,6 +1210,7 @@ def render():
                                 metric_value
                             FROM admissions_metrics
                             WHERE metric_name IN ('inquiries_received', 'applications_received', 'admissions_accepted')
+                            AND cohort_season = 'fall'
                             AND ({date_conditions})
                         """, conn)
                     else:
@@ -2167,14 +2169,15 @@ def render():
                                 # Create a unique key for each note
                                 note_key = f"{note_row['program']}_{note_row['channel']}_{note_row['fiscal_year']}"
                                 
+                                # Optimize space by putting all info in the header with better formatting
+                                short_program = get_short_program_name(note_row['program'])
+                                header_text = f"🎓 {short_program}  •  📢 {note_row['channel']}  •  📅 {note_row['fiscal_year']}"
+                                
                                 with st.expander(
-                                    f"🎓 {get_short_program_name(note_row['program'])} - 📢 {note_row['channel']}", 
+                                    header_text, 
                                     expanded=(i < 2)  # Expand first 2 notes per fiscal year
                                 ):
-                                    st.markdown(f"**Program:** {note_row['program']}")
-                                    st.markdown(f"**Channel:** {note_row['channel']}")
-                                    st.markdown(f"**Fiscal Year:** {note_row['fiscal_year']}")
-                                    st.markdown("**Incremental Note:**")
+                                    # Just show the note content directly (no title needed)
                                     st.markdown(f"> {note_row['incremental_note']}")
                             
                             if fy != sorted(notes_by_fy.groups.keys(), reverse=True)[-1]:

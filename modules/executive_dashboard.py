@@ -88,8 +88,54 @@ def render():
     if selected_program != 'All Programs':
         df = df[df['program'] == selected_program]
 
-    if not df.empty:
-        # Find the latest date with complete data
+    # Check if we have data to display
+    if df.empty:
+        # Handle no data case
+        if selected_program != 'All Programs':
+            # Specific program selected but no data available
+            st.markdown(f"""
+            <div style="text-align: center;
+                        padding: 40px 20px;
+                        background: #fff3cd;
+                        border: 2px solid #ffeaa7;
+                        border-radius: 12px;
+                        margin: 40px 0;">
+                <h2 style="color: #856404; margin: 0 0 15px 0; font-size: 24px;">
+                    📊 No Data Available
+                </h2>
+                <p style="color: #856404; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                    There is no data available for <strong>{selected_program}</strong> in Class of {selected_cohort}.
+                </p>
+                <p style="color: #6c757d; font-size: 14px; margin: 0; line-height: 1.5;">
+                    This program may not be offered for this cohort, or data collection may not have started yet.<br>
+                    Try selecting "All Programs" or a different cohort year to see available data.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # All programs selected but no data for entire cohort
+            st.markdown(f"""
+            <div style="text-align: center;
+                        padding: 40px 20px;
+                        background: #f8d7da;
+                        border: 2px solid #f5c6cb;
+                        border-radius: 12px;
+                        margin: 40px 0;">
+                <h2 style="color: #721c24; margin: 0 0 15px 0; font-size: 24px;">
+                    📊 No Data Available
+                </h2>
+                <p style="color: #721c24; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                    There is no data available for Class of {selected_cohort}.
+                </p>
+                <p style="color: #6c757d; font-size: 14px; margin: 0; line-height: 1.5;">
+                    This cohort may not have started yet, or data collection may be in progress.<br>
+                    Try selecting a different cohort year to see available data.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        return  # Exit early, don't show empty charts
+    else:
+        # We have data - find the latest date with complete data
         # For each date, check if we have inquiries_received for all programs
         date_completeness = []
         for date in df['report_date'].unique():
@@ -130,9 +176,6 @@ def render():
                 # All dates have zero values - use the latest date anyway
                 latest_date = df['report_date'].max()
                 latest_data = df[df['report_date'] == latest_date]
-    
-    # Check if we have data to display
-    if not df.empty:
         # Section header for current stats
         st.markdown("""
         <div style="text-align: center;

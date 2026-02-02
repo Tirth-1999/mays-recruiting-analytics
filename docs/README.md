@@ -4,6 +4,54 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 7.0
+
+**State Snapshot ETL & Dashboard Enhancement** - Released February 2, 2026
+
+### 🔄 Enhanced ETL Pipeline with State Snapshot Processing
+- **State Snapshot Approach**: Completely redesigned ETL to treat all data as point-in-time snapshots rather than cumulative totals
+- **Unified Cohort Calculation**: All programs (including MBA) now use consistent +2 years cohort assignment for accurate tracking
+- **Smart File Processing**: Processes only 3 key files with `_fall` suffix (2024-07-31, 2025-07-31, 2025-12-31) for precise cohort data
+- **Enhanced Database Schema**: Added `cohort_season` and `file_source` columns for better data lineage and tracking
+- **Fixed Cohort Assignment**: Corrected Class 2028 data that was incorrectly marked as Class 2027 in previous versions
+
+### 📊 Comprehensive Dashboard Improvements
+- **Executive Dashboard Filtering Fix**: Resolved broken filter logic with proper flow control structure, restored "All Programs" functionality
+- **Enhanced No-Data Handling**: Comprehensive handling for programs without data, clear messaging for edge cases
+- **Director's Deep Dive Major Enhancements**:
+  - Added comprehensive metrics breakdown with expandable Application Status and Admissions Decision sections
+  - Implemented trend analysis scale options (Linear → Log → Square Root) for better data visualization
+  - Fixed growth rate analysis to compare fiscal year start vs end values for accurate performance metrics
+  - Enhanced chart type buttons to show what you can switch TO instead of current type
+  - Cleaned up legend labels by removing redundant prefixes while keeping full names in dropdowns
+- **Comparison Tool Data Quality**: Implemented smart backfilling logic to prevent artificial data drops in cumulative metrics
+- **Marketing Analysis Space Optimization**: Consolidated program/channel/fiscal year into single header line, achieving 70% space reduction
+
+### 🔧 Data Quality & Performance Improvements
+- **Smart Backfilling Logic**: Cumulative metrics (inquiries, applications) never decrease with intelligent previous-value backfilling
+- **Suspicious Zero Detection**: Enhanced filtering to prevent artificial drops in visualizations caused by missing data
+- **Column-Level Filtering**: Skips empty date columns for cleaner data processing and more accurate trend analysis
+- **Enhanced Data Validation**: Comprehensive validation with proper error handling for edge cases and missing data
+- **Professional Interface Styling**: Removed emoticons throughout interface and improved spacing for business-appropriate appearance
+
+### 📈 Advanced Analytics Features
+- **Trend Analysis Scale Options**: Multiple scaling options (Linear, Log, Square Root) for optimal data visualization based on data distribution
+- **Fiscal Year Growth Rate Analysis**: Compares true fiscal year start vs end values instead of last two data points
+- **Chart Type Flexibility**: Improved chart switching between line and bar graphs with proper zero-value handling for line charts
+- **Legend Optimization**: Shortened legend labels (e.g., "Admissions Offered" → "Offered") while maintaining full names in selection dropdowns
+- **Incremental Notes Optimization**: Achieved 70% space reduction by consolidating headers and removing redundant titles
+
+### 🎯 User Experience Enhancements
+- **Fixed Vertical Line Issues**: Line charts now properly connect only actual data points, eliminating vertical artifacts
+- **Improved Chart Buttons**: Buttons now show what you can switch TO rather than current state for better UX
+- **Enhanced Expandable Sections**: Proper spacing and professional styling for Application Status and Admissions Decision breakdowns
+- **Cleaner Interface**: Removed padding inconsistencies and improved visual hierarchy throughout the platform
+- **Better Error Messaging**: Clear, professional messaging for edge cases and data availability issues
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 6.10
 
 **Data Explorer Restructure** - Released February 1, 2026

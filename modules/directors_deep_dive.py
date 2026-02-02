@@ -71,9 +71,50 @@ def render():
     if selected_program_filter != "All Programs":
         current_data = current_data[current_data['program'] == selected_program_filter]
     if current_data.empty:
-        st.error(f"❌ No data available for Class of {selected_cohort}" + 
-                 (f" - {selected_program_filter}" if selected_program_filter != "All Programs" else ""))
-        st.info("💡 Try selecting a different cohort/program or check the database")
+        # Handle no data case with better messaging
+        if selected_program_filter != "All Programs":
+            # Specific program selected but no data available
+            st.markdown(f"""
+            <div style="text-align: center;
+                        padding: 40px 20px;
+                        background: #fff3cd;
+                        border: 2px solid #ffeaa7;
+                        border-radius: 12px;
+                        margin: 40px 0;">
+                <h2 style="color: #856404; margin: 0 0 15px 0; font-size: 24px;">
+                    📊 No Data Available
+                </h2>
+                <p style="color: #856404; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                    There is no data available for <strong>{selected_program_filter}</strong> in Class of {selected_cohort}.
+                </p>
+                <p style="color: #6c757d; font-size: 14px; margin: 0; line-height: 1.5;">
+                    This program may not be offered for this cohort, or data collection may not have started yet.<br>
+                    Try selecting "All Programs" or a different cohort year to see available data.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # All programs selected but no data for entire cohort
+            st.markdown(f"""
+            <div style="text-align: center;
+                        padding: 40px 20px;
+                        background: #f8d7da;
+                        border: 2px solid #f5c6cb;
+                        border-radius: 12px;
+                        margin: 40px 0;">
+                <h2 style="color: #721c24; margin: 0 0 15px 0; font-size: 24px;">
+                    📊 No Data Available
+                </h2>
+                <p style="color: #721c24; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                    There is no data available for Class of {selected_cohort}.
+                </p>
+                <p style="color: #6c757d; font-size: 14px; margin: 0; line-height: 1.5;">
+                    This cohort may not have started yet, or data collection may be in progress.<br>
+                    Try selecting a different cohort year to see available data.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        return  # Exit early, don't show empty charts
     else:
         # Find the latest date with complete data
         # For each date, check if we have inquiries_received for all programs
@@ -117,14 +158,21 @@ def render():
                 latest_date = current_data['report_date'].max()
                 latest_data = current_data[current_data['report_date'] == latest_date]
 
-        # Calculate comprehensive metrics
-        inquiries = latest_data[latest_data['metric_name'] == 'inquiries_received']['metric_value'].fillna(0).sum()
-        applications = latest_data[latest_data['metric_name'] == 'total_applications']['metric_value'].fillna(0).sum()
-        offers = latest_data[latest_data['metric_name'] == 'admissions_offered']['metric_value'].fillna(0).sum()
-        accepted = latest_data[latest_data['metric_name'] == 'admissions_accepted']['metric_value'].fillna(0).sum()
-        enrolled = latest_data[latest_data['metric_name'] == 'anticipated_cohort_size']['metric_value'].fillna(0).sum()
-        in_progress = latest_data[latest_data['metric_name'] == 'applications_in_progress']['metric_value'].fillna(0).sum()
-        complete = latest_data[latest_data['metric_name'] == 'applications_complete']['metric_value'].fillna(0).sum()
+        # Calculate comprehensive metrics using latest available value for each metric
+        def get_latest_metric_value(metric_name):
+            metric_data = current_data[current_data['metric_name'] == metric_name]
+            if not metric_data.empty:
+                return metric_data.loc[metric_data['report_date'].idxmax(), 'metric_value']
+            return 0
+        
+        inquiries = get_latest_metric_value('inquiries_received')
+        applications = get_latest_metric_value('total_applications')
+        offers = get_latest_metric_value('admissions_offered')
+        accepted = get_latest_metric_value('admissions_accepted')
+        enrolled = get_latest_metric_value('anticipated_cohort_size')
+        deferred_from_last = get_latest_metric_value('admissions_deferred_from_last')
+        in_progress = get_latest_metric_value('applications_in_progress')
+        complete = get_latest_metric_value('applications_complete')
         
         # Calculate conversion rates
         conversion_1 = (applications / inquiries * 100) if inquiries > 0 else 0
@@ -257,6 +305,20 @@ def render():
         </style>
         """, unsafe_allow_html=True)
         
+        # Get additional metrics for comprehensive view
+        applications_received = get_latest_metric_value('applications_received')
+        applications_manual = get_latest_metric_value('applications_manual')
+        applications_verified = get_latest_metric_value('applications_verified')
+        applications_on_hold = get_latest_metric_value('applications_on_hold')
+        applications_undelivered = get_latest_metric_value('applications_undelivered')
+        applications_deferral = get_latest_metric_value('applications_deferral')
+        
+        admissions_denied = get_latest_metric_value('admissions_denied')
+        admissions_declined = get_latest_metric_value('admissions_declined')
+        admissions_deferred_to_next = get_latest_metric_value('admissions_deferred_to_next')
+        admissions_withdrawn = get_latest_metric_value('admissions_withdrawn')
+        admissions_moved_to_other = get_latest_metric_value('admissions_moved_to_other')
+        
         st.markdown(f"""
         <div class="full-metrics-container">
             <div class="full-metric-box">
@@ -291,6 +353,151 @@ def render():
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Add comprehensive metrics breakdown section
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        
+        # Add consistent spacing above expandable sections
+        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
+        
+        # Create expandable sections for detailed metrics
+        col1, col2 = st.columns(2)
+        
+        # Add CSS styles once for both tables
+        st.markdown("""
+        <style>
+        .metric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .metric-table th {
+            background: #500000;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .metric-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .metric-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .metric-number {
+            font-weight: 600;
+            color: #500000;
+            text-align: right;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        with col1:
+            with st.expander("**Application Status Breakdown**", expanded=False):
+                st.markdown(f"""
+                <table class="metric-table">
+                    <thead>
+                        <tr>
+                            <th>Application Status</th>
+                            <th style="text-align: right;">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Total Applications</td>
+                            <td class="metric-number">{int(applications):,}</td>
+                        </tr>
+                        <tr>
+                            <td>In Progress</td>
+                            <td class="metric-number">{int(in_progress):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Complete</td>
+                            <td class="metric-number">{int(complete):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Received</td>
+                            <td class="metric-number">{int(applications_received):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Manual Review</td>
+                            <td class="metric-number">{int(applications_manual):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Verified</td>
+                            <td class="metric-number">{int(applications_verified):,}</td>
+                        </tr>
+                        <tr>
+                            <td>On Hold</td>
+                            <td class="metric-number">{int(applications_on_hold):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Undelivered</td>
+                            <td class="metric-number">{int(applications_undelivered):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Deferral</td>
+                            <td class="metric-number">{int(applications_deferral):,}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                """, unsafe_allow_html=True)
+        
+        with col2:
+            with st.expander("**Admissions Decision Breakdown**", expanded=False):
+                st.markdown(f"""
+                <table class="metric-table">
+                    <thead>
+                        <tr>
+                            <th>Admissions Decision</th>
+                            <th style="text-align: right;">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Offers Made</td>
+                            <td class="metric-number">{int(offers):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Accepted</td>
+                            <td class="metric-number">{int(accepted):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Denied</td>
+                            <td class="metric-number">{int(admissions_denied):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Declined by Student</td>
+                            <td class="metric-number">{int(admissions_declined):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Deferred to Next Cohort</td>
+                            <td class="metric-number">{int(admissions_deferred_to_next):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Deferred from Previous</td>
+                            <td class="metric-number">{int(deferred_from_last):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Moved to Other Program</td>
+                            <td class="metric-number">{int(admissions_moved_to_other):,}</td>
+                        </tr>
+                        <tr>
+                            <td>Withdrawn</td>
+                            <td class="metric-number">{int(admissions_withdrawn):,}</td>
+                        </tr>
+                        <tr style="background: #e8f5e8; font-weight: 600;">
+                            <td><strong>Final Enrolled</strong></td>
+                            <td class="metric-number" style="color: #28a745;"><strong>{int(enrolled):,}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                """, unsafe_allow_html=True)
+
+        # Add consistent spacing below expandable sections
+        st.markdown("<div style='margin: 0px 0;'></div>", unsafe_allow_html=True)
 
         # Advanced Analytics Tabs
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -423,7 +630,7 @@ def render():
             columns='metric_name',
             values='metric_value',
             aggfunc='sum'
-        ).fillna(0).reset_index()
+        ).reset_index()  # No fillna - preserve actual data patterns
         
         # Tab content using native Streamlit tabs (Chrome-style)
         tab1, tab2, tab3, tab4, tab5 = st.tabs(["Performance Analysis", "Trend Analysis", "Program Deep Dive", "Data Tables", "Comparison Tool"])
@@ -484,6 +691,16 @@ def render():
                     margin=dict(t=50, b=50, l=80, r=80)
                 )
             st.plotly_chart(fig, use_container_width=True)
+            
+            # Add note about deferred students if applicable
+            if deferred_from_last > 0:
+                st.markdown(f"""
+                <div style="text-align: center; margin: 20px 0; padding: 8px 15px; background: #f8f9fa; border-radius: 6px;">
+                    <small style="color: #6c757d; font-size: 14px;">
+                        Note: {int(deferred_from_last)} student(s) deferred from previous cohort joined this class.
+                    </small>
+                </div>
+                """, unsafe_allow_html=True)
             
             # Divider between charts
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -842,7 +1059,6 @@ def render():
                     )
         
         with tab2:
-            
             # Initialize session state for toggle buttons
             if 'exec_full_show_inq' not in st.session_state:
                 st.session_state.exec_full_show_inq = True
@@ -854,8 +1070,7 @@ def render():
                 st.session_state.exec_full_show_cohort = True
             
             # Toggle buttons for metric selection
-            st.markdown("**📊 Select Metrics to Display:**")
-            metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+            metric_col1, metric_col2, metric_col3, metric_col4, scale_col = st.columns([1, 1, 1, 1, 1])
             
             with metric_col1:
                 if st.button(
@@ -897,13 +1112,33 @@ def render():
                     st.session_state.exec_full_show_cohort = not st.session_state.exec_full_show_cohort
                     st.rerun()
             
-            # Multi-line time series
+            # Initialize scale type state
+            if 'exec_full_scale_type' not in st.session_state:
+                st.session_state.exec_full_scale_type = 'Linear'
+            
+            with scale_col:
+                scale_options = ['Linear', 'Log', 'Square Root']
+                current_scale = st.session_state.exec_full_scale_type
+                next_scale_idx = (scale_options.index(current_scale) + 1) % len(scale_options)
+                next_scale = scale_options[next_scale_idx]
+                
+                if st.button(
+                    f"📊 {current_scale}",
+                    key="toggle_scale_full",
+                    use_container_width=True,
+                    type="secondary",
+                    help=f"Click to switch to {next_scale} scale"
+                ):
+                    st.session_state.exec_full_scale_type = next_scale
+                    st.rerun()
+            
+            # Multi-line time series - only use actual reported data (no fillna)
             time_series = current_data.pivot_table(
                 index='report_date',
                 columns='metric_name',
                 values='metric_value',
                 aggfunc='sum'
-            ).fillna(0)
+            )  # No fillna - preserve natural data endpoints
             
             if not time_series.empty:
                 fig = go.Figure()
@@ -915,9 +1150,19 @@ def render():
                 
                 for i, (metric, label, show_flag) in enumerate(zip(key_metrics, metric_labels, show_flags)):
                     if metric in time_series.columns and show_flag:
+                        # Apply scale transformation to y values
+                        y_values = time_series[metric]
+                        
+                        if st.session_state.exec_full_scale_type == 'Log':
+                            # For log scale, replace zeros with small value to avoid log(0)
+                            y_values = y_values.replace(0, 0.1)
+                        elif st.session_state.exec_full_scale_type == 'Square Root':
+                            # Apply square root transformation
+                            y_values = np.sqrt(y_values)
+                        
                         fig.add_trace(go.Scatter(
                             x=time_series.index,
-                            y=time_series[metric],
+                            y=y_values,
                             mode='lines+markers',
                             name=label,
                             line=dict(color=colors[i], width=3),
@@ -928,16 +1173,28 @@ def render():
                                          '<extra></extra>'
                         ))
                 
+                # Set y-axis type and title based on scale
+                if st.session_state.exec_full_scale_type == 'Log':
+                    yaxis_type = 'log'
+                    yaxis_title = 'Count (Log Scale)'
+                elif st.session_state.exec_full_scale_type == 'Square Root':
+                    yaxis_type = 'linear'
+                    yaxis_title = 'Count (Square Root Scale)'
+                else:
+                    yaxis_type = 'linear'
+                    yaxis_title = 'Count'
+                
                 fig.update_layout(
                     title={
-                        'text': 'Key Metrics Trends Over Time - Interactive View',
+                        'text': f'Key Metrics Trends Over Time - {st.session_state.exec_full_scale_type} Scale',
                         'x': 0.5,
                         'xanchor': 'center',
                         'yanchor': 'top'
                     },
                     height=500,
                     xaxis_title='Date',
-                    yaxis_title='Count',
+                    yaxis_title=yaxis_title,
+                    yaxis_type=yaxis_type,
                     legend=dict(
                         orientation='h',
                         x=0.5,
@@ -963,7 +1220,7 @@ def render():
                             margin-bottom: 15px;
                             text-align: center;
                             font-size: 0.9rem;">
-                    💡 <strong>Tip:</strong> Compares latest vs. previous period • 🟢 Positive growth • 🔴 Decline • 🟡 Moderate change
+                    💡 <strong>Tip:</strong> Compares first vs. last data point for the fiscal year • 🟢 Positive growth • 🔴 Decline • 🟡 Moderate change
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -974,30 +1231,33 @@ def render():
                         values = time_series[metric].values
                         dates = time_series.index
                         
-                        # Find the last two non-zero values (or use zeros if that's all we have)
+                        # Find all non-zero values to get the actual data range
                         non_zero_indices = [i for i, v in enumerate(values) if v > 0]
                         
                         if len(non_zero_indices) >= 2:
-                            # Use the last two non-zero values
-                            latest_idx = non_zero_indices[-1]
-                            previous_idx = non_zero_indices[-2]
-                            latest_val = float(values[latest_idx])
-                            previous_val = float(values[previous_idx])
-                            latest_date = dates[latest_idx]
-                            previous_date = dates[previous_idx]
+                            # Use the FIRST and LAST non-zero values (start vs end of fiscal year)
+                            first_idx = non_zero_indices[0]  # First data point
+                            last_idx = non_zero_indices[-1]  # Last data point
+                            first_val = float(values[first_idx])
+                            last_val = float(values[last_idx])
+                            first_date = dates[first_idx]
+                            last_date = dates[last_idx]
+                        elif len(non_zero_indices) == 1:
+                            # Only one data point - no growth calculation possible
+                            continue
                         elif len(values) >= 2:
-                            # Fall back to last two values even if zero
-                            latest_val = float(values[-1])
-                            previous_val = float(values[-2])
-                            latest_date = dates[-1]
-                            previous_date = dates[-2]
+                            # Fall back to first and last values even if zero
+                            first_val = float(values[0])
+                            last_val = float(values[-1])
+                            first_date = dates[0]
+                            last_date = dates[-1]
                         else:
                             continue  # Not enough data points
                         
-                        # Calculate growth rate
-                        if previous_val > 0:
-                            growth_rate = ((latest_val - previous_val) / previous_val * 100)
-                        elif latest_val > 0 and previous_val == 0:
+                        # Calculate growth rate from start to end of period
+                        if first_val > 0:
+                            growth_rate = ((last_val - first_val) / first_val * 100)
+                        elif last_val > 0 and first_val == 0:
                             growth_rate = 100.0  # Growth from zero
                         else:
                             growth_rate = 0.0  # Both zero
@@ -1006,10 +1266,10 @@ def render():
                         growth_data.append({
                             'Metric': metric.replace('_', ' ').title(),
                             'Growth Rate (%)': growth_rate,
-                            'Latest Value': latest_val,
-                            'Previous Value': previous_val,
-                            'Latest Date': latest_date.strftime('%b %Y'),
-                            'Previous Date': previous_date.strftime('%b %Y')
+                            'End Value': last_val,
+                            'Start Value': first_val,
+                            'End Date': last_date.strftime('%b %Y'),
+                            'Start Date': first_date.strftime('%b %Y')
                         })
                 
                 if growth_data:
@@ -1018,8 +1278,8 @@ def render():
                     # Apply color styling with proper gradient
                     styled_df = growth_df.style.format({
                         'Growth Rate (%)': '{:+.1f}%',
-                        'Latest Value': '{:.0f}',
-                        'Previous Value': '{:.0f}'
+                        'End Value': '{:.0f}',
+                        'Start Value': '{:.0f}'
                     }).background_gradient(
                         subset=['Growth Rate (%)'], 
                         cmap='RdYlGn',
@@ -1052,7 +1312,46 @@ def render():
                 columns='metric_name',
                 values='metric_value',
                 aggfunc='sum'
-            ).fillna(0)
+            )  # No fillna - preserve natural data endpoints
+            
+            # Function to clean up metric names for shorter legends
+            def clean_metric_name(metric_name):
+                """Clean up metric names for shorter, cleaner legends"""
+                # Convert to title case first
+                display_name = metric_name.replace('_', ' ').title()
+                
+                # Remove redundant prefixes for cleaner legends
+                prefixes_to_remove = [
+                    'Applications ', 'Admissions ', 'Anticipated ', 'Total '
+                ]
+                
+                for prefix in prefixes_to_remove:
+                    if display_name.startswith(prefix):
+                        display_name = display_name[len(prefix):]
+                        break
+                
+                # Handle special cases for even cleaner names
+                replacements = {
+                    'Cohort Size': 'Enrolled',
+                    'In Progress': 'In Progress',
+                    'Received': 'Received',
+                    'Complete': 'Complete',
+                    'Manual': 'Manual Review',
+                    'Verified': 'Verified',
+                    'On Hold': 'On Hold',
+                    'Undelivered': 'Undelivered',
+                    'Deferral': 'Deferral',
+                    'Offered': 'Offered',
+                    'Denied': 'Denied',
+                    'Accepted': 'Accepted',
+                    'Declined': 'Declined',
+                    'Deferred To Next': 'Deferred Out',
+                    'Deferred From Last': 'Deferred In',
+                    'Moved To Other': 'Moved',
+                    'Withdrawn': 'Withdrawn'
+                }
+                
+                return replacements.get(display_name, display_name)
             
             if not program_time_series.empty:
                 # ===== APPLICATIONS SECTION =====
@@ -1129,13 +1428,15 @@ def render():
                                 st.rerun()
                 
                 with col_chart_type:
+                    # Show what you can switch TO, not what you currently have
+                    next_chart_type = 'Bar' if st.session_state.exec_app_chart_type == 'Line' else 'Line'
                     if st.button(
-                        f"📊 {st.session_state.exec_app_chart_type}",
+                        f"📊 {next_chart_type}",
                         key="toggle_chart_type_app",
                         use_container_width=True,
                         type="secondary"
                     ):
-                        st.session_state.exec_app_chart_type = 'Bar' if st.session_state.exec_app_chart_type == 'Line' else 'Line'
+                        st.session_state.exec_app_chart_type = next_chart_type
                         st.rerun()
                 
                 with col_button:
@@ -1159,30 +1460,38 @@ def render():
                                  '#FF4444', '#FF6666', '#FF8888', '#FFAAAA', '#FFCCCC']
                     
                     if st.session_state.exec_app_chart_type == 'Line':
-                        # Line chart with data labels
+                        # Line chart with data labels - filter out zeros to avoid vertical lines
                         for i, metric in enumerate(selected_app_metrics):
                             if metric in program_time_series.columns:
-                                metric_display = metric.replace('_', ' ').title()
-                                fig_app.add_trace(go.Scatter(
-                                    x=program_time_series.index,
-                                    y=program_time_series[metric],
-                                    mode='lines+markers+text',
-                                    name=metric_display,
-                                    line=dict(color=app_colors[i % len(app_colors)], width=3),
-                                    marker=dict(size=8),
-                                    text=[f'{int(val)}' if val > 0 else '' for val in program_time_series[metric]],
-                                    textposition='top center',
-                                    textfont=dict(size=10, color=app_colors[i % len(app_colors)]),
-                                    hovertemplate=f'<b>{metric_display}</b><br>' +
-                                                 'Date: %{x}<br>' +
-                                                 'Value: %{y:,.0f}<br>' +
-                                                 '<extra></extra>'
-                                ))
+                                metric_display = clean_metric_name(metric)
+                                
+                                # Filter out zero values for line charts to avoid vertical lines
+                                metric_data = program_time_series[metric]
+                                non_zero_mask = metric_data > 0
+                                filtered_dates = program_time_series.index[non_zero_mask]
+                                filtered_values = metric_data[non_zero_mask]
+                                
+                                if len(filtered_values) > 0:  # Only add trace if there's data
+                                    fig_app.add_trace(go.Scatter(
+                                        x=filtered_dates,
+                                        y=filtered_values,
+                                        mode='lines+markers+text',
+                                        name=metric_display,
+                                        line=dict(color=app_colors[i % len(app_colors)], width=3),
+                                        marker=dict(size=8),
+                                        text=[f'{int(val)}' for val in filtered_values],
+                                        textposition='top center',
+                                        textfont=dict(size=10, color=app_colors[i % len(app_colors)]),
+                                        hovertemplate=f'<b>{metric_display}</b><br>' +
+                                                     'Date: %{x}<br>' +
+                                                     'Value: %{y:,.0f}<br>' +
+                                                     '<extra></extra>'
+                                    ))
                     else:
                         # Bar chart (grouped)
                         for i, metric in enumerate(selected_app_metrics):
                             if metric in program_time_series.columns:
-                                metric_display = metric.replace('_', ' ').title()
+                                metric_display = clean_metric_name(metric)
                                 fig_app.add_trace(go.Bar(
                                     x=program_time_series.index,
                                     y=program_time_series[metric],
@@ -1303,13 +1612,15 @@ def render():
                                 st.rerun()
                 
                 with col_chart_type_adm:
+                    # Show what you can switch TO, not what you currently have
+                    next_chart_type = 'Bar' if st.session_state.exec_adm_chart_type == 'Line' else 'Line'
                     if st.button(
-                        f"📊 {st.session_state.exec_adm_chart_type}",
+                        f"📊 {next_chart_type}",
                         key="toggle_chart_type_adm",
                         use_container_width=True,
                         type="secondary"
                     ):
-                        st.session_state.exec_adm_chart_type = 'Bar' if st.session_state.exec_adm_chart_type == 'Line' else 'Line'
+                        st.session_state.exec_adm_chart_type = next_chart_type
                         st.rerun()
                 
                 with col_button_adm:
@@ -1333,30 +1644,38 @@ def render():
                                  '#3399FF', '#5AADFF', '#7AC1FF', '#99D5FF']
                     
                     if st.session_state.exec_adm_chart_type == 'Line':
-                        # Line chart with data labels
+                        # Line chart with data labels - filter out zeros to avoid vertical lines
                         for i, metric in enumerate(selected_adm_metrics):
                             if metric in program_time_series.columns:
-                                metric_display = metric.replace('_', ' ').title()
-                                fig_adm.add_trace(go.Scatter(
-                                    x=program_time_series.index,
-                                    y=program_time_series[metric],
-                                    mode='lines+markers+text',
-                                    name=metric_display,
-                                    line=dict(color=adm_colors[i % len(adm_colors)], width=3),
-                                    marker=dict(size=8),
-                                    text=[f'{int(val)}' if val > 0 else '' for val in program_time_series[metric]],
-                                    textposition='top center',
-                                    textfont=dict(size=10, color=adm_colors[i % len(adm_colors)]),
-                                    hovertemplate=f'<b>{metric_display}</b><br>' +
-                                                 'Date: %{x}<br>' +
-                                                 'Value: %{y:,.0f}<br>' +
-                                                 '<extra></extra>'
-                                ))
+                                metric_display = clean_metric_name(metric)
+                                
+                                # Filter out zero values for line charts to avoid vertical lines
+                                metric_data = program_time_series[metric]
+                                non_zero_mask = metric_data > 0
+                                filtered_dates = program_time_series.index[non_zero_mask]
+                                filtered_values = metric_data[non_zero_mask]
+                                
+                                if len(filtered_values) > 0:  # Only add trace if there's data
+                                    fig_adm.add_trace(go.Scatter(
+                                        x=filtered_dates,
+                                        y=filtered_values,
+                                        mode='lines+markers+text',
+                                        name=metric_display,
+                                        line=dict(color=adm_colors[i % len(adm_colors)], width=3),
+                                        marker=dict(size=8),
+                                        text=[f'{int(val)}' for val in filtered_values],
+                                        textposition='top center',
+                                        textfont=dict(size=10, color=adm_colors[i % len(adm_colors)]),
+                                        hovertemplate=f'<b>{metric_display}</b><br>' +
+                                                     'Date: %{x}<br>' +
+                                                     'Value: %{y:,.0f}<br>' +
+                                                     '<extra></extra>'
+                                    ))
                     else:
                         # Bar chart (grouped)
                         for i, metric in enumerate(selected_adm_metrics):
                             if metric in program_time_series.columns:
-                                metric_display = metric.replace('_', ' ').title()
+                                metric_display = clean_metric_name(metric)
                                 fig_adm.add_trace(go.Bar(
                                     x=program_time_series.index,
                                     y=program_time_series[metric],
@@ -1910,9 +2229,9 @@ def render():
                     if excluded_metrics:
                         excluded_list = ', '.join([m.replace('_', ' ').title() for m in excluded_metrics])
                         st.markdown(f"""
-                        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 15px; border-radius: 6px; margin: 15px 0;">
-                            <p style="margin: 0; color: #856404; font-size: 14px;">
-                                ℹ️ <strong>Note:</strong> The following metrics were excluded from comparison as they have no data for either cohort: <strong>{excluded_list}</strong>
+                        <div style="background: #f8f9fa; padding: 15px 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e9ecef;">
+                            <p style="margin: 0; color: #6c757d; font-size: 14px; text-align: center;">
+                                <strong>Note:</strong> The following metrics were excluded from comparison as they have no data for either cohort: <strong style="color: #495057;">{excluded_list}</strong>
                             </p>
                         </div>
                         """, unsafe_allow_html=True)

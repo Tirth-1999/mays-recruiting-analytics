@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.0.0] - 2026-02-02
+
+### 🔄 Major Release - State Snapshot ETL & Dashboard Enhancement
+
+#### Added
+- **State Snapshot ETL Processing**: Complete redesign to treat all data as point-in-time snapshots
+- **Enhanced Database Schema**: Added `cohort_season` and `file_source` columns for better data lineage
+- **Smart Backfilling Logic**: Intelligent backfill for cumulative metrics to prevent artificial data drops
+- **Trend Analysis Scale Options**: Linear → Log → Square Root scaling options for optimal data visualization
+- **Comprehensive Metrics Breakdown**: Expandable Application Status and Admissions Decision sections in Director's Deep Dive
+- **Growth Rate Analysis Enhancement**: True fiscal year start vs end comparison for accurate performance metrics
+- **Chart Type Flexibility**: Improved switching between line and bar graphs with proper zero-value handling
+- **Professional Interface Styling**: Removed emoticons and improved spacing throughout platform
+
+#### Changed
+- **ETL Pipeline Architecture**: All data now processed as state snapshots rather than cumulative totals
+- **Cohort Calculation**: Unified +2 years cohort assignment for ALL programs (including MBA)
+- **File Processing**: Processes only 3 key files with `_fall` suffix for accurate cohort tracking
+- **Executive Dashboard Filtering**: Fixed broken filter logic with proper flow control structure
+- **Director's Deep Dive Interface**: Enhanced with expandable sections and professional styling
+- **Comparison Tool Data Quality**: Smart backfilling prevents artificial drops in cumulative metrics
+- **Marketing Analysis Layout**: Consolidated program/channel/fiscal year into single header line (70% space reduction)
+- **Legend Labels**: Shortened labels (e.g., "Admissions Offered" → "Offered") while keeping full dropdown names
+- **Chart Button Logic**: Buttons now show what you can switch TO instead of current state
+
+#### Fixed
+- **Cohort Assignment Error**: Corrected Class 2028 data that was incorrectly marked as Class 2027
+- **Executive Dashboard Filters**: Restored "All Programs" functionality and fixed no-data handling
+- **Vertical Line Issues**: Line charts now connect only actual data points, eliminating vertical artifacts
+- **Growth Rate Calculation**: Fixed to compare fiscal year start vs end instead of last two values
+- **Padding Inconsistencies**: Resolved spacing issues in expandable sections and throughout interface
+- **Suspicious Zero Detection**: Enhanced filtering to prevent artificial drops in visualizations
+
+#### Removed
+- **Pattern Detection Logic**: Eliminated complex cumulative/individual/mixed pattern detection
+- **Artificial Data Extensions**: No longer creates artificial zeros or placeholders
+- **Emoticons**: Removed throughout interface for professional business appearance
+- **Redundant Titles**: Removed "Incremental Note:" title and other redundant headers
+- **Inconsistent Spacing**: Fixed padding and margin inconsistencies across components
+
+#### Technical Implementation
+- **Database Schema Updates**: New columns for cohort tracking and data lineage
+- **ETL Pipeline Redesign**: Simplified state snapshot approach with enhanced validation
+- **Smart Filtering Logic**: Column-level filtering skips empty date columns
+- **Enhanced Error Handling**: Comprehensive validation for edge cases and missing data
+- **Performance Optimization**: Cleaner data processing with reduced computational overhead
+- **Professional UI Standards**: Consistent styling and spacing throughout platform
+
+---
+
 ## [6.10.0] - 2026-02-01
 
 ### 🎨 UI/UX Release - Data Explorer Restructure
@@ -138,6 +188,12 @@ Jan 2026  ███████████████████████�
 Jan 2026  ████████████████████████████  v6.5 - UI/UX Polish & Mobile Optimization
           │
 Feb 2026  ████████████████████████████  v6.8 - Marketing Analytics Enhancement
+          │
+Feb 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v6.9 - Database Optimization
+          │
+Feb 2026  ████████████████████████████  v6.10 - Data Explorer Restructure
+          │
+Feb 2026  ████████████████████████████  v7.0 - State Snapshot ETL & Dashboard Enhancement
 ```
 
 ---
@@ -146,6 +202,7 @@ Feb 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **7.0** | Major | State Snapshot ETL & Dashboard Enhancement | 8 | +650 |
 | **6.10** | Major | Data Explorer Restructure | 4 | +150 |
 | **6.9** | Minor | Database Optimization | 6 | +25 |
 | **6.8** | Major | Marketing Analytics Enhancement | 3 | +450 |

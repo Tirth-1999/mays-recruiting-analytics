@@ -269,7 +269,11 @@ def render_forecasting_section(preprocessor: DataPreprocessor, conn):
     
     with col1:
         # Get available programs
-        programs_df = pd.read_sql("SELECT DISTINCT program FROM admissions_metrics ORDER BY program", conn)
+        programs_df = pd.read_sql("""
+            SELECT DISTINCT program FROM admissions_metrics 
+            WHERE cohort_season = 'fall' 
+            ORDER BY program
+        """, conn)
         program_options = programs_df['program'].tolist()
         selected_program = st.selectbox(
             "🎓 Program",
@@ -279,11 +283,11 @@ def render_forecasting_section(preprocessor: DataPreprocessor, conn):
     
     with col2:
         # Get available cohorts for selected program
-        cohorts_df = pd.read_sql(
-            "SELECT DISTINCT cohort_year FROM admissions_metrics WHERE program = ? ORDER BY cohort_year DESC",
-            conn,
-            params=[selected_program]
-        )
+        cohorts_df = pd.read_sql("""
+            SELECT DISTINCT cohort_year FROM admissions_metrics 
+            WHERE program = ? AND cohort_season = 'fall' 
+            ORDER BY cohort_year DESC
+        """, conn, params=[selected_program])
         cohort_options = cohorts_df['cohort_year'].tolist()
         selected_cohort = st.selectbox(
             "📅 Cohort Year",
@@ -566,7 +570,11 @@ def render_channel_optimization_section(preprocessor: DataPreprocessor, conn):
     
     with col1:
         # Get available programs
-        programs_df = pd.read_sql("SELECT DISTINCT program FROM admissions_metrics ORDER BY program", conn)
+        programs_df = pd.read_sql("""
+            SELECT DISTINCT program FROM admissions_metrics 
+            WHERE cohort_season = 'fall' 
+            ORDER BY program
+        """, conn)
         program_options = programs_df['program'].tolist()
         selected_program = st.selectbox(
             "🎓 Program",
@@ -828,7 +836,11 @@ def render_timing_analysis_section(preprocessor: DataPreprocessor, conn):
     
     with col1:
         # Get available programs
-        programs_df = pd.read_sql("SELECT DISTINCT program FROM admissions_metrics ORDER BY program", conn)
+        programs_df = pd.read_sql("""
+            SELECT DISTINCT program FROM admissions_metrics 
+            WHERE cohort_season = 'fall' 
+            ORDER BY program
+        """, conn)
         program_options = programs_df['program'].tolist()
         selected_program = st.selectbox(
             "🎓 Program",
@@ -1062,7 +1074,11 @@ def render_budget_allocation_section(preprocessor: DataPreprocessor, conn):
     
     with col2:
         # Get available programs
-        programs_df = pd.read_sql("SELECT DISTINCT program FROM admissions_metrics ORDER BY program", conn)
+        programs_df = pd.read_sql("""
+            SELECT DISTINCT program FROM admissions_metrics 
+            WHERE cohort_season = 'fall' 
+            ORDER BY program
+        """, conn)
         program_options = programs_df['program'].tolist()
         
         selected_programs = st.multiselect(
