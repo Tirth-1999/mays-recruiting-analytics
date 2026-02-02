@@ -1,3 +1,5 @@
+<div align="center">
+
 # Mays Analytics Platform
 
 [![Version](https://img.shields.io/badge/version-7.0-blue.svg)](https://github.com/Tirth-1999/mays-recruiting-analytics)
@@ -7,13 +9,19 @@
 
 **Version 7.0** | **Last Updated: February 2, 2026**
 
-A comprehensive analytics platform for Texas A&M University's Mays Business School Flex Online Programs, providing real-time admissions tracking, marketing ROI analysis, and AI-powered insights.
+*A comprehensive analytics platform for Texas A&M University's Mays Business School Flex Online Programs, providing real-time admissions tracking, marketing ROI analysis, and AI-powered insights.*
+
+</div>
 
 ---
+
+<div align="center">
 
 ## What's New in Version 7.0
 
 **State Snapshot ETL & Dashboard Enhancement** - Released February 2, 2026
+
+</div>
 
 ### 🔄 Enhanced ETL Pipeline with State Snapshot Processing
 - **State Snapshot Approach**: All data now treated as point-in-time snapshots rather than cumulative totals
@@ -51,7 +59,11 @@ A comprehensive analytics platform for Texas A&M University's Mays Business Scho
 
 ---
 
+<div align="center">
+
 ## Platform Overview
+
+</div>
 
 ### 🎯 Key Features
 - **Real-time Admissions Analytics**: Track inquiries, applications, and enrollments across all programs
@@ -268,6 +280,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Streamlit Community** - Framework and support
 - **Google Cloud** - AI and authentication services
 
+<div align="center">
+
 ---
 
 **Mays Analytics Platform** | Version 7.0 | © 2024-2026 Texas A&M University
+
+</div>
