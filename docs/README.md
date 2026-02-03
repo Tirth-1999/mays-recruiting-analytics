@@ -4,6 +4,38 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 7.5
+
+**Professional UI Enhancement** - Released February 3, 2026
+
+### 🎨 Professional Interface Improvements
+- **Enhanced Model Cards**: Redesigned accuracy and performance rating cards in Predictive Analytics with professional styling, gradient backgrounds, elegant shadows, and consistent sizing (2.8em font for perfect alignment)
+- **Improved Tab Structure**: Reorganized Predictive Analytics tabs for better user flow - "Simple Case Study" moved to first position as "Forecast", "Forecasting" renamed to "Advanced Forecasting", removed redundant "Case Study" tab
+- **Consistent Chart Titles**: Fixed capitalization across all model comparison charts - "Inquiries Received" properly formatted, "Cohort-Aware" changed to "Cohort Aware" for consistency
+- **Clean Debug Interface**: Removed all debug messages ("About to run with prediction_months = 11"), unnecessary emoticons from error messages, and technical clutter for professional user experience
+
+### 🧹 Code Quality & Performance
+- **Massive Project Cleanup**: Removed 27+ unnecessary files including all test files (`test_*.py`), temporary markdown files, and cache directories for clean production codebase
+- **Streamlined File Structure**: Eliminated duplicate functions, unused code, and redundant implementations while maintaining full functionality
+- **Professional Error Messaging**: Cleaned up "challenging issue" messages by removing emoticons and making text more business-appropriate
+- **Optimized Tab Navigation**: Reduced from 7 to 6 tabs with logical flow - basic forecasting first, then advanced features
+
+### 🔧 Technical Enhancements
+- **Card Styling Consistency**: Both model accuracy and performance rating cards now use identical font sizes and dimensions for perfect visual alignment
+- **Helper Functions**: Added `get_metric_display_name()` and `get_model_display_name()` functions for consistent naming across all charts and interfaces
+- **Syntax Error Resolution**: Fixed all parentheses mismatches, duplicate function definitions, and code structure issues
+- **Enhanced Chart Formatting**: Improved chart titles in Compare All Models section with proper capitalization and consistent styling
+
+### 🎯 User Experience Impact
+- **Professional Appearance**: Cards now look modern and consistent with proper shadows, gradients, and color-coded performance indicators
+- **Intuitive Navigation**: Forecast functionality prominently placed as first tab for immediate access to core features
+- **Clean Interface**: Removed technical debug information that was confusing to end users
+- **Consistent Branding**: All chart titles and model names follow consistent capitalization and formatting standards
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 7.1
 
 **Marketing Analysis ROI Fix** - Released February 2, 2026

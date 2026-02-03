@@ -192,54 +192,63 @@ def render():
     try:
         conn = get_connection()
         
-        # Get available tables
-        tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-        tables_df = pd.read_sql(tables_query, conn)
-        all_tables = tables_df['name'].tolist()
-        
-        # Filter out excluded tables
-        available_tables = [table for table in all_tables if table not in EXCLUDED_TABLES]
-        
-        # Filter tables based on search if provided
-        if keyword_search:
-            filtered_tables = []
-            search_lower = keyword_search.lower()
+        try:
+            # Get available tables
+            tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+            tables_df = pd.read_sql(tables_query, conn)
+            all_tables = tables_df['name'].tolist()
             
-            for table in available_tables:
-                if table in table_search_content:
-                    content = table_search_content[table]
-                    keyword_match = any(search_lower in keyword.lower() for keyword in content['keywords'])
-                    question_match = any(search_lower in question.lower() for question in content['questions'])
-                    table_match = search_lower in table.lower()
-                    
-                    if keyword_match or question_match or table_match:
+            # Filter out excluded tables
+            available_tables = [table for table in all_tables if table not in EXCLUDED_TABLES]
+            
+            # Filter tables based on search if provided
+            if keyword_search:
+                filtered_tables = []
+                search_lower = keyword_search.lower()
+                
+                for table in available_tables:
+                    if table in table_search_content:
+                        content = table_search_content[table]
+                        keyword_match = any(search_lower in keyword.lower() for keyword in content['keywords'])
+                        question_match = any(search_lower in question.lower() for question in content['questions'])
+                        table_match = search_lower in table.lower()
+                        
+                        if keyword_match or question_match or table_match:
+                            filtered_tables.append(table)
+                    elif search_lower in table.lower():
                         filtered_tables.append(table)
-                elif search_lower in table.lower():
-                    filtered_tables.append(table)
-            
-            if filtered_tables:
-                available_tables = filtered_tables
-                st.success(f"✓ Found {len(filtered_tables)} table(s) matching '{keyword_search}'")
-            else:
-                st.warning(f"No tables match '{keyword_search}'. Showing all tables.")
+                
+                if filtered_tables:
+                    available_tables = filtered_tables
+                    st.success(f"✓ Found {len(filtered_tables)} table(s) matching '{keyword_search}'")
+                else:
+                    st.warning(f"No tables match '{keyword_search}'. Showing all tables.")
         
-        if not available_tables:
-            st.warning("No tables found in the database.")
-            st.info("Please ensure the ETL pipeline has been run to populate the database.")
-        else:
-            # Enhanced Chrome-style CSS for grouped tabs - centered and clean
-            st.markdown("""
-            <style>
-            /* Main category tabs styling - centered */
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 2px !important;
-                justify-content: center !important;
-                background-color: #f8f9fa !important;
-                padding: 8px 20px !important;
-                border-radius: 12px !important;
-                border-bottom: none !important;
-                margin-bottom: 20px !important;
-                margin-top: 20px !important;
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        st.error(f"Error accessing database: {e}")
+        available_tables = []
+    
+    # Check if we have tables to display
+    if not available_tables:
+        st.warning("No tables found in the database.")
+        st.info("Please ensure the ETL pipeline has been run to populate the database.")
+    else:
+        # Enhanced Chrome-style CSS for grouped tabs - centered and clean
+        st.markdown("""
+        <style>
+        /* Main category tabs styling - centered */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2px !important;
+            justify-content: center !important;
+            background-color: #f8f9fa !important;
+            padding: 8px 20px !important;
+            border-radius: 12px !important;
+            border-bottom: none !important;
+            margin-bottom: 20px !important;
+            margin-top: 20px !important;
                 display: flex !important;
                 flex-wrap: wrap !important;
                 overflow: visible !important;
@@ -360,114 +369,114 @@ def render():
                     height: 32px !important;
                 }
             }
-            </style>
-            """, unsafe_allow_html=True)
-            
-            # Group tables by category for better organization
-            table_groups = {
-                'Marketing Tables': {
-                    'tables': ['marketing_spend', 'marketing_spend_totals', 'incremental_notes', 'marketing_data'],
-                    'description': 'Marketing spend data, totals, notes, and ETL tracking'
-                },
-                'Core Data Tables': {
-                    'tables': ['admissions_metrics', 'programs', 'metadata'],
-                    'description': 'Admissions funnel data, program definitions, and system metadata'
-                },
-                'AI Chat Tables': {
-                    'tables': ['chat_history', 'chat_feedback', 'chat_metrics'],
-                    'description': 'AI assistant conversations, feedback, and performance metrics'
-                },
-                'System Tables': {
-                    'tables': ['users', 'model_predictions'],
-                    'description': 'User management and ML prediction results'
-                }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Group tables by category for better organization
+        table_groups = {
+            'Marketing Tables': {
+                'tables': ['marketing_spend', 'marketing_spend_totals', 'incremental_notes', 'marketing_data'],
+                'description': 'Marketing spend data, totals, notes, and ETL tracking'
+            },
+            'Core Data Tables': {
+                'tables': ['admissions_metrics', 'programs', 'metadata'],
+                'description': 'Admissions funnel data, program definitions, and system metadata'
+            },
+            'AI Chat Tables': {
+                'tables': ['chat_history', 'chat_feedback', 'chat_metrics'],
+                'description': 'AI assistant conversations, feedback, and performance metrics'
+            },
+            'System Tables': {
+                'tables': ['users', 'model_predictions'],
+                'description': 'User management and ML prediction results'
             }
+        }
+        
+        # Filter available tables by groups and user permissions
+        filtered_groups = {}
+        for group_name, group_info in table_groups.items():
+            group_tables = [table for table in group_info['tables'] 
+                          if table in available_tables]
+            if group_tables:  # Only show groups that have available tables
+                filtered_groups[group_name] = {
+                    'tables': group_tables,
+                    'description': group_info['description']
+                }
+        
+        # Create main category tabs
+        if filtered_groups:
+            main_tabs = st.tabs(list(filtered_groups.keys()))
             
-            # Filter available tables by groups and user permissions
-            filtered_groups = {}
-            for group_name, group_info in table_groups.items():
-                group_tables = [table for table in group_info['tables'] 
-                              if table in available_tables]
-                if group_tables:  # Only show groups that have available tables
-                    filtered_groups[group_name] = {
-                        'tables': group_tables,
-                        'description': group_info['description']
-                    }
-            
-            # Create main category tabs
-            if filtered_groups:
-                main_tabs = st.tabs(list(filtered_groups.keys()))
-                
-                for i, (group_name, group_info) in enumerate(filtered_groups.items()):
-                    with main_tabs[i]:
-                        st.markdown(f"""
-                        <div style="background: #f8f9fa;
-                                    padding: 15px 20px;
-                                    border-radius: 10px;
-                                    margin-bottom: 20px;
-                                    text-align: center;">
-                            <h4 style="margin: 0; color: #500000;">{group_name}</h4>
-                            <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">{group_info['description']}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        # Create sub-tabs for tables within this group
-                        group_tables = group_info['tables']
-                        
-                        # Create display names for sub-tabs
-                        sub_tab_labels = []
-                        for table in group_tables:
-                            display_name = table.replace('_', ' ').title()
-                            name_mapping = {
-                                'Marketing Spend': 'Spend',
-                                'Marketing Spend Totals': 'Totals',
-                                'Incremental Notes': 'Notes',
-                                'Marketing Data': 'Processing Logs',
-                                'Admissions Metrics': 'Admissions',
-                                'Programs': 'Programs',
-                                'Metadata': 'Metadata',
-                                'Chat History': 'History',
-                                'Chat Feedback': 'Feedback',
-                                'Chat Metrics': 'Metrics',
-                                'Users': 'Users',
-                                'Model Predictions': 'Predictions'
-                            }
-                            display_name = name_mapping.get(display_name, display_name)
-                            sub_tab_labels.append(display_name)
-                        
-                        # Create sub-tabs
-                        sub_tabs = st.tabs(sub_tab_labels)
-                        
-                        for j, table in enumerate(group_tables):
-                            with sub_tabs[j]:
-                                # Add table-specific info
-                                st.markdown(f"""
-                                <div style="background: white;
-                                            padding: 10px 15px;
-                                            border-radius: 8px;
-                                            margin-bottom: 15px;
-                                            border: 1px solid #dee2e6;
-                                            text-align: center;">
-                                    <strong>Table:</strong> <code>{table}</code>
-                                </div>
-                                """, unsafe_allow_html=True)
-                                
-                                # Handle chat tables with user filtering
+            for i, (group_name, group_info) in enumerate(filtered_groups.items()):
+                with main_tabs[i]:
+                    st.markdown(f"""
+                    <div style="background: #f8f9fa;
+                                padding: 15px 20px;
+                                border-radius: 10px;
+                                margin-bottom: 20px;
+                                text-align: center;">
+                        <h4 style="margin: 0; color: #500000;">{group_name}</h4>
+                        <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">{group_info['description']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Create sub-tabs for tables within this group
+                    group_tables = group_info['tables']
+                    
+                    # Create display names for sub-tabs
+                    sub_tab_labels = []
+                    for table in group_tables:
+                        display_name = table.replace('_', ' ').title()
+                        name_mapping = {
+                            'Marketing Spend': 'Spend',
+                            'Marketing Spend Totals': 'Totals',
+                            'Incremental Notes': 'Notes',
+                            'Marketing Data': 'Processing Logs',
+                            'Admissions Metrics': 'Admissions',
+                            'Programs': 'Programs',
+                            'Metadata': 'Metadata',
+                            'Chat History': 'History',
+                            'Chat Feedback': 'Feedback',
+                            'Chat Metrics': 'Metrics',
+                            'Users': 'Users',
+                            'Model Predictions': 'Predictions'
+                        }
+                        display_name = name_mapping.get(display_name, display_name)
+                        sub_tab_labels.append(display_name)
+                    
+                    # Create sub-tabs
+                    sub_tabs = st.tabs(sub_tab_labels)
+                    
+                    for j, table in enumerate(group_tables):
+                        with sub_tabs[j]:
+                            # Add table-specific info
+                            st.markdown(f"""
+                            <div style="background: white;
+                                        padding: 10px 15px;
+                                        border-radius: 8px;
+                                        margin-bottom: 15px;
+                                        border: 1px solid #dee2e6;
+                                        text-align: center;">
+                                <strong>Table:</strong> <code>{table}</code>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # Handle chat tables with user filtering
+                            conn_display = get_connection()
+                            try:
                                 if table in ['chat_history', 'chat_feedback', 'chat_metrics']:
                                     if not auth.is_admin():
                                         st.info(f"Showing your personal {table.replace('_', ' ')} data")
-                                        process_table_display(conn, table, user_filter={'user_id': user['user_id']})
+                                        process_table_display(conn_display, table, user_filter={'user_id': user['user_id']})
                                     else:
                                         st.info(f"Admin view: Showing all {table.replace('_', ' ')} data")
-                                        process_table_display(conn, table)
+                                        process_table_display(conn_display, table)
                                 else:
                                     # Other tables show all data
-                                    process_table_display(conn, table)
-            else:
-                st.warning("No tables available for your user role.")
-    
-    except Exception as e:
-        st.error(f"Database connection error: {str(e)}")
-        st.info("Please check if the database file exists and is accessible.")
+                                    process_table_display(conn_display, table)
+                            finally:
+                                conn_display.close()
+        else:
+            st.warning("No tables available for your user role.")
 
 

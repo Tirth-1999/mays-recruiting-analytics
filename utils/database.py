@@ -7,9 +7,19 @@ import pandas as pd
 import sqlite3
 
 
-@st.cache_resource
 def get_connection():
-    """Get database connection with caching"""
+    """Get a fresh database connection - no caching to prevent 'closed database' errors"""
+    return sqlite3.connect('edulytix.db', check_same_thread=False)
+
+
+def get_cached_connection():
+    """Get a cached database connection for read-only operations"""
+    return _get_cached_connection()
+
+
+@st.cache_resource
+def _get_cached_connection():
+    """Internal cached connection - use sparingly and never close"""
     return sqlite3.connect('edulytix.db', check_same_thread=False)
 
 
@@ -67,99 +77,83 @@ def normalize_program_name(program_name):
 def load_programs():
     """Load active programs from database"""
     conn = get_connection()
-    df = pd.read_sql('SELECT * FROM programs WHERE is_active = 1', conn)
-    return df
+    try:
+        df = pd.read_sql('SELECT * FROM programs WHERE is_active = 1', conn)
+        return df
+    finally:
+        conn.close()
 
 
 @st.cache_data(ttl=600)
 def load_cohort_data(cohort_year):
     """Load all data for a specific cohort - only actual reported values (no zeros for missing data)"""
     conn = get_connection()
-    query = '''
-        SELECT 
-            report_date,
-            program,
-            cohort_year,
-            cohort_season,
-            metric_name,
-            metric_value
-        FROM admissions_metrics
-        WHERE cohort_year = ? AND cohort_season = 'fall'
-        ORDER BY report_date, program
-    '''
-    df = pd.read_sql(query, conn, params=[cohort_year])
-    if not df.empty:
-        df['report_date'] = pd.to_datetime(df['report_date'])
-    return df
+    try:
+        query = '''
+            SELECT 
+                report_date,
+                program,
+                cohort_year,
+                cohort_season,
+                metric_name,
+                metric_value
+            FROM admissions_metrics
+            WHERE cohort_year = ? AND cohort_season = 'fall'
+            ORDER BY report_date, program
+        '''
+        df = pd.read_sql(query, conn, params=[cohort_year])
+        if not df.empty:
+            df['report_date'] = pd.to_datetime(df['report_date'])
+        return df
+    finally:
+        conn.close()
 
 
 @st.cache_data(ttl=600)
 def load_yoy_comparison_data(current_cohort, comparison_cohort):
     """Load data for year-over-year comparison with smart backfilling"""
     conn = get_connection()
-    query = '''
-        SELECT 
-            report_date,
-            program,
-            cohort_year,
-            cohort_season,
-            metric_name,
-            metric_value
-        FROM admissions_metrics
-        WHERE cohort_year IN (?, ?) AND cohort_season = 'fall'
-        ORDER BY report_date, program, cohort_year, metric_name
-    '''
-    df = pd.read_sql(query, conn, params=[current_cohort, comparison_cohort])
-    if df.empty:
-        return df
-    
-    df['report_date'] = pd.to_datetime(df['report_date'])
-    
-    # Apply smart backfilling logic for each cohort-program-metric combination
-    backfilled_data = []
-    
-    for (cohort, program, metric), group in df.groupby(['cohort_year', 'program', 'metric_name']):
-        group = group.sort_values('report_date')
+    try:
+        query = '''
+            SELECT 
+                report_date,
+                program,
+                cohort_year,
+                cohort_season,
+                metric_name,
+                metric_value
+            FROM admissions_metrics
+            WHERE cohort_year IN (?, ?) AND cohort_season = 'fall'
+            ORDER BY report_date, program, cohort_year, metric_name
+        '''
+        df = pd.read_sql(query, conn, params=[current_cohort, comparison_cohort])
+        if df.empty:
+            return df
         
-        # Get all dates for this cohort (to ensure consistent timeline)
-        all_dates = df[df['cohort_year'] == cohort]['report_date'].unique()
-        all_dates = sorted(all_dates)
+        df['report_date'] = pd.to_datetime(df['report_date'])
         
-        # Create a complete timeline for this metric
-        last_valid_value = None
+        # Apply smart backfilling logic for each cohort-program-metric combination
+        backfilled_data = []
         
-        for date in all_dates:
-            # Check if we have data for this date
-            date_data = group[group['report_date'] == date]
+        for (cohort, program, metric), group in df.groupby(['cohort_year', 'program', 'metric_name']):
+            group = group.sort_values('report_date')
             
-            if not date_data.empty:
-                # We have actual data for this date
-                current_value = date_data['metric_value'].iloc[0]
+            # Get all dates for this cohort (to ensure consistent timeline)
+            all_dates = df[df['cohort_year'] == cohort]['report_date'].unique()
+            all_dates = sorted(all_dates)
+            
+            # Create a complete timeline for this metric
+            last_valid_value = None
+            
+            for date in all_dates:
+                # Check if we have data for this date
+                date_data = group[group['report_date'] == date]
                 
-                # For cumulative metrics, ensure non-decreasing values
-                cumulative_metrics = [
-                    'inquiries_received', 
-                    'total_applications', 
-                    'total_applications',
-                    'applications_complete', 
-                    'applications_in_progress',
-                    'applications_manual',
-                    'applications_verified',
-                    'applications_on_hold',
-                    'applications_deferral',
-                    'applications_undelivered',
-                    'admissions_offered'
-                ]
-                
-                if metric in cumulative_metrics and last_valid_value is not None:
-                    # Ensure cumulative metrics don't decrease (use max of current and previous)
-                    current_value = max(current_value, last_valid_value)
-                
-                last_valid_value = current_value
-            else:
-                # No data for this date - use backfilling logic
-                if last_valid_value is not None:
-                    # Backfill with last valid value for cumulative metrics
+                if not date_data.empty:
+                    # We have actual data for this date
+                    current_value = date_data['metric_value'].iloc[0]
+                    
+                    # For cumulative metrics, ensure non-decreasing values
                     cumulative_metrics = [
                         'inquiries_received', 
                         'total_applications', 
@@ -174,30 +168,55 @@ def load_yoy_comparison_data(current_cohort, comparison_cohort):
                         'admissions_offered'
                     ]
                     
-                    if metric in cumulative_metrics:
-                        current_value = last_valid_value  # Backfill cumulative metrics
-                    else:
-                        current_value = None  # Don't backfill non-cumulative metrics
+                    if metric in cumulative_metrics and last_valid_value is not None:
+                        # Ensure cumulative metrics don't decrease (use max of current and previous)
+                        current_value = max(current_value, last_valid_value)
+                    
+                    last_valid_value = current_value
                 else:
-                    current_value = None  # No previous value to backfill with
-            
-            # Add to backfilled data if we have a value
-            if current_value is not None:
-                backfilled_data.append({
-                    'report_date': date,
-                    'program': program,
-                    'cohort_year': cohort,
-                    'cohort_season': 'fall',
-                    'metric_name': metric,
-                    'metric_value': current_value
-                })
-    
-    # Convert back to DataFrame
-    if backfilled_data:
-        backfilled_df = pd.DataFrame(backfilled_data)
-        backfilled_df['report_date'] = pd.to_datetime(backfilled_df['report_date'])
-        return backfilled_df
-    else:
-        return df
+                    # No data for this date - use backfilling logic
+                    if last_valid_value is not None:
+                        # Backfill with last valid value for cumulative metrics
+                        cumulative_metrics = [
+                            'inquiries_received', 
+                            'total_applications', 
+                            'total_applications',
+                            'applications_complete', 
+                            'applications_in_progress',
+                            'applications_manual',
+                            'applications_verified',
+                            'applications_on_hold',
+                            'applications_deferral',
+                            'applications_undelivered',
+                            'admissions_offered'
+                        ]
+                        
+                        if metric in cumulative_metrics:
+                            current_value = last_valid_value  # Backfill cumulative metrics
+                        else:
+                            current_value = None  # Don't backfill non-cumulative metrics
+                    else:
+                        current_value = None  # No previous value to backfill with
+                
+                # Add to backfilled data if we have a value
+                if current_value is not None:
+                    backfilled_data.append({
+                        'report_date': date,
+                        'program': program,
+                        'cohort_year': cohort,
+                        'cohort_season': 'fall',
+                        'metric_name': metric,
+                        'metric_value': current_value
+                    })
+        
+        # Convert back to DataFrame
+        if backfilled_data:
+            backfilled_df = pd.DataFrame(backfilled_data)
+            backfilled_df['report_date'] = pd.to_datetime(backfilled_df['report_date'])
+            return backfilled_df
+        else:
+            return df
+    finally:
+        conn.close()
 
 

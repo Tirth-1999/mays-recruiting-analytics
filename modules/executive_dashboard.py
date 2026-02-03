@@ -112,13 +112,21 @@ def render():
     
     # Load data for selected cohort
     conn = get_connection()
-    query = 'SELECT * FROM admissions_metrics WHERE cohort_year = ? ORDER BY report_date, program'
-    df = pd.read_sql(query, conn, params=[selected_cohort])
-    df['report_date'] = pd.to_datetime(df['report_date'])
     
-    # Filter by program if specific program is selected
-    if selected_program != 'All Programs':
-        df = df[df['program'] == selected_program]
+    try:
+        query = 'SELECT * FROM admissions_metrics WHERE cohort_year = ? ORDER BY report_date, program'
+        df = pd.read_sql(query, conn, params=[selected_cohort])
+        df['report_date'] = pd.to_datetime(df['report_date'])
+        
+        # Filter by program if specific program is selected
+        if selected_program != 'All Programs':
+            df = df[df['program'] == selected_program]
+    
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        df = pd.DataFrame()
+    finally:
+        conn.close()
 
     # Check if we have data to display
     if df.empty:
@@ -623,8 +631,12 @@ def render():
         
         # Load all cohort data (not just selected_cohort)
         all_cohorts_query = 'SELECT * FROM admissions_metrics ORDER BY report_date, program'
-        all_cohorts_df = pd.read_sql(all_cohorts_query, conn)
-        all_cohorts_df['report_date'] = pd.to_datetime(all_cohorts_df['report_date'])
+        conn_prog_comp = get_connection()
+        try:
+            all_cohorts_df = pd.read_sql(all_cohorts_query, conn_prog_comp)
+            all_cohorts_df['report_date'] = pd.to_datetime(all_cohorts_df['report_date'])
+        finally:
+            conn_prog_comp.close()
         
         # Initialize reset counters for Program Comparison filters
         if 'prog_comp_cohort_reset' not in st.session_state:
@@ -1019,28 +1031,34 @@ def render():
     
     # Check if marketing data exists
     marketing_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend';"
-    cursor = conn.cursor()
-    cursor.execute(marketing_query)
-    has_marketing = cursor.fetchone() is not None
-    
-    if has_marketing:
-        # Load marketing data - filter by selected program if specific program is chosen
-        if selected_program != 'All Programs':
-            marketing_df = pd.read_sql("""
-                SELECT program, channel, spend_amount, fiscal_year, month_date
-                FROM marketing_spend
-                WHERE program = ?
-                ORDER BY month_date DESC
-            """, conn, params=[selected_program])
-        else:
-            # Include all programs including General Awareness
-            marketing_df = pd.read_sql("""
-                SELECT program, channel, spend_amount, fiscal_year, month_date
-                FROM marketing_spend
-                ORDER BY month_date DESC
-            """, conn)
+    conn_marketing = get_connection()
+    try:
+        cursor = conn_marketing.cursor()
+        cursor.execute(marketing_query)
+        has_marketing = cursor.fetchone() is not None
         
-        if not marketing_df.empty:
+        if has_marketing:
+            # Load marketing data - filter by selected program if specific program is chosen
+            if selected_program != 'All Programs':
+                marketing_df = pd.read_sql("""
+                    SELECT program, channel, spend_amount, fiscal_year, month_date
+                    FROM marketing_spend
+                    WHERE program = ?
+                    ORDER BY month_date DESC
+                """, conn_marketing, params=[selected_program])
+            else:
+                # Include all programs including General Awareness
+                marketing_df = pd.read_sql("""
+                    SELECT program, channel, spend_amount, fiscal_year, month_date
+                    FROM marketing_spend
+                    ORDER BY month_date DESC
+                """, conn_marketing)
+        else:
+            marketing_df = pd.DataFrame()
+    finally:
+        conn_marketing.close()
+    
+    if has_marketing and not marketing_df.empty:
             # Independent filters for Marketing Insights section
             st.markdown("**Filters for Marketing Insights**")
             
@@ -1415,10 +1433,11 @@ def render():
                 
                 # Link to full marketing analysis
                 st.info("💡 **Tip**: Visit the **Marketing Analysis** page for detailed ROI metrics, channel performance, and budget allocation insights.")
-        else:
-            st.info("📊 Marketing data is being collected. Check back soon for insights.")
     else:
-        st.info("📊 Marketing data not yet available. Run the marketing ETL pipeline to load data.")
+        if has_marketing:
+            st.info("📊 Marketing data is being collected. Check back soon for insights.")
+        else:
+            st.info("📊 Marketing data not yet available. Run the marketing ETL pipeline to load data.")
     
     # Footer for Executive Dashboard page
     st.divider()

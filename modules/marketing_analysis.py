@@ -37,18 +37,26 @@ def get_short_program_name(full_name):
 def render():
     """Render the Marketing Analysis page"""
     
-    # Check if marketing data is available
+    # Check if marketing data is available using fresh connection
     conn = get_connection()
     
-    # Test if marketing tables exist
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend';")
-    has_marketing_spend = cursor.fetchone() is not None
-    
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend_totals';")
-    has_marketing_totals = cursor.fetchone() is not None
-    
-    has_data = has_marketing_spend and has_marketing_totals
+    try:
+        # Test if marketing tables exist
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend';")
+        has_marketing_spend = cursor.fetchone() is not None
+        
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_spend_totals';")
+        has_marketing_totals = cursor.fetchone() is not None
+        
+        has_data = has_marketing_spend and has_marketing_totals
+        
+    except Exception as e:
+        st.error(f"Error checking marketing data availability: {e}")
+        has_data = False
+    finally:
+        # Always close the connection
+        conn.close()
     
     if not has_data:
         st.warning("⚠️ Marketing data not yet available")
@@ -65,20 +73,25 @@ def render():
         - 📝 Incremental spend notes
         """)
     else:
-        # Load data from new tables (remove extra_notes column)
-        spend_df = pd.read_sql("""
-            SELECT 
-                program,
-                channel,
-                fiscal_year,
-                month_date,
-                spend_amount
-            FROM marketing_spend
-            ORDER BY month_date DESC, program, channel
-        """, conn)
-        
-        # Convert dates
-        spend_df['month_date'] = pd.to_datetime(spend_df['month_date'])
+        # Create fresh connection for data loading
+        conn_data = get_connection()
+        try:
+            # Load data from new tables (remove extra_notes column)
+            spend_df = pd.read_sql("""
+                SELECT 
+                    program,
+                    channel,
+                    fiscal_year,
+                    month_date,
+                    spend_amount
+                FROM marketing_spend
+                ORDER BY month_date DESC, program, channel
+            """, conn_data)
+            
+            # Convert dates
+            spend_df['month_date'] = pd.to_datetime(spend_df['month_date'])
+        finally:
+            conn_data.close()
         
         # Add normalized program names for matching
         spend_df['program_normalized'] = spend_df['program'].apply(normalize_program_name)
@@ -718,6 +731,7 @@ def render():
                 st.warning("⚠️ No data matches the selected filters")
             else:
                 # Try to load admissions data for ROI metrics
+                conn_admissions = get_connection()
                 try:
                     admissions_df = pd.read_sql("""
                         SELECT 
@@ -728,7 +742,7 @@ def render():
                         FROM admissions_metrics
                         WHERE metric_name IN ('inquiries_received', 'total_applications', 'admissions_accepted')
                         AND cohort_season = 'fall'
-                    """, conn)
+                    """, conn_admissions)
                     
                     # Normalize admissions program names
                     admissions_df['program_normalized'] = admissions_df['program'].apply(normalize_program_name)
@@ -797,6 +811,8 @@ def render():
                     with st.expander("⚠️ Debug: Error loading admissions data", expanded=False):
                         st.error(f"Error: {str(e)}")
                         st.info("This usually means the admissions_metrics table is empty or doesn't exist. Run the ETL pipeline to populate it.")
+                finally:
+                    conn_admissions.close()
                 
                 # KEY METRICS SECTION
                 st.markdown("""
@@ -1227,17 +1243,21 @@ def render():
                             for start, end in fiscal_year_dates
                         ])
                         
-                        admissions_df = pd.read_sql(f"""
-                            SELECT 
-                                report_date,
-                                program,
-                                metric_name,
-                                metric_value
-                            FROM admissions_metrics
-                            WHERE metric_name IN ('inquiries_received', 'total_applications', 'admissions_accepted')
-                            AND cohort_season = 'fall'
-                            AND ({date_conditions})
-                        """, conn)
+                        conn_admissions2 = get_connection()
+                        try:
+                            admissions_df = pd.read_sql(f"""
+                                SELECT 
+                                    report_date,
+                                    program,
+                                    metric_name,
+                                    metric_value
+                                FROM admissions_metrics
+                                WHERE metric_name IN ('inquiries_received', 'total_applications', 'admissions_accepted')
+                                AND cohort_season = 'fall'
+                                AND ({date_conditions})
+                            """, conn_admissions2)
+                        finally:
+                            conn_admissions2.close()
                     else:
                         # No fiscal years selected, return empty dataframe
                         admissions_df = pd.DataFrame(columns=['report_date', 'program', 'metric_name', 'metric_value'])
@@ -2208,8 +2228,10 @@ def render():
             
             notes_query += " ORDER BY n.fiscal_year DESC, n.program, n.channel"
             
+            # Create fresh connection for notes query
+            conn_notes = get_connection()
             try:
-                notes_df = pd.read_sql(notes_query, conn, params=query_params)
+                notes_df = pd.read_sql(notes_query, conn_notes, params=query_params)
                 
                 if not notes_df.empty:
                     st.markdown(f"**Found {len(notes_df)} incremental notes**")
@@ -2254,6 +2276,8 @@ def render():
             except Exception as e:
                 st.error(f"Error loading incremental notes: {e}")
                 st.info("The incremental notes table may not exist yet. Run `python3 marketing_etl.py` to load the data.")
+            finally:
+                conn_notes.close()
     
     # Footer for Marketing Analysis page
     st.divider()
