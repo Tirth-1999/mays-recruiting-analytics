@@ -319,6 +319,41 @@ def load_all_data():
             ON admissions_metrics(metric_name)
         ''')
         
+        # Create model_predictions table for forecasting results
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS model_predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                model_type TEXT NOT NULL,
+                program TEXT NOT NULL,
+                cohort TEXT NOT NULL,
+                prediction_date TEXT NOT NULL,
+                forecast_date TEXT NOT NULL,
+                metric TEXT NOT NULL,
+                predicted_value REAL NOT NULL,
+                lower_bound REAL,
+                upper_bound REAL,
+                actual_value REAL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(model_type, program, cohort, forecast_date, metric)
+            )
+        ''')
+        
+        # Create indexes for model_predictions table
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_model_predictions_model_metric 
+            ON model_predictions(model_type, metric)
+        ''')
+        
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_model_predictions_program 
+            ON model_predictions(program, forecast_date)
+        ''')
+        
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_model_predictions_dates 
+            ON model_predictions(prediction_date, forecast_date)
+        ''')
+        
         # Insert program data using official mapping
         programs = [(code, name) for code, name in PROGRAM_CODE_TO_NAME.items()]
         conn.executemany(
