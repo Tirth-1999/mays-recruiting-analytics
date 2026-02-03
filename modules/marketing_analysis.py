@@ -54,9 +54,11 @@ def render():
     except Exception as e:
         st.error(f"Error checking marketing data availability: {e}")
         has_data = False
+        return
     finally:
-        # Always close the connection
-        conn.close()
+        # Close the initial connection
+        if conn:
+            conn.close()
     
     if not has_data:
         st.warning("⚠️ Marketing data not yet available")
@@ -72,26 +74,26 @@ def render():
         - 🎯 Fiscal year breakdown
         - 📝 Incremental spend notes
         """)
-    else:
-        # Create fresh connection for data loading
-        conn_data = get_connection()
-        try:
-            # Load data from new tables (remove extra_notes column)
-            spend_df = pd.read_sql("""
-                SELECT 
-                    program,
-                    channel,
-                    fiscal_year,
-                    month_date,
-                    spend_amount
-                FROM marketing_spend
-                ORDER BY month_date DESC, program, channel
-            """, conn_data)
-            
-            # Convert dates
-            spend_df['month_date'] = pd.to_datetime(spend_df['month_date'])
-        finally:
-            conn_data.close()
+        return
+    
+    # Create fresh connection for data loading - keep it open for the entire function
+    conn_data = get_connection()
+    
+    try:
+        # Load data from new tables (remove extra_notes column)
+        spend_df = pd.read_sql("""
+            SELECT 
+                program,
+                channel,
+                fiscal_year,
+                month_date,
+                spend_amount
+            FROM marketing_spend
+            ORDER BY month_date DESC, program, channel
+        """, conn_data)
+        
+        # Convert dates
+        spend_df['month_date'] = pd.to_datetime(spend_df['month_date'])
         
         # Add normalized program names for matching
         spend_df['program_normalized'] = spend_df['program'].apply(normalize_program_name)
@@ -2278,26 +2280,33 @@ def render():
                 st.info("The incremental notes table may not exist yet. Run `python3 marketing_etl.py` to load the data.")
             finally:
                 conn_notes.close()
+        
+        # Footer for Marketing Analysis page
+        st.divider()
+        footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
+        with footer_col1:
+            st.markdown(f"""
+            <div class="footer-left footer-content" style="text-align: left;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with footer_col2:
+            st.markdown("""
+            <div class="footer-center footer-content" style="text-align: center;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0;"></p>
+            </div>
+            """, unsafe_allow_html=True)
+        with footer_col3:
+            st.markdown("""
+            <div class="footer-right footer-content" style="text-align: right;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # Footer for Marketing Analysis page
-    st.divider()
-    footer_col1, footer_col2, footer_col3 = st.columns([1, 1, 1])
-    with footer_col1:
-        st.markdown(f"""
-        <div class="footer-left footer-content" style="text-align: left;">
-            <p style="color: #6b7280; font-size: 14px; margin: 0;">📊 Last updated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with footer_col2:
-        st.markdown("""
-        <div class="footer-center footer-content" style="text-align: center;">
-            <p style="color: #6b7280; font-size: 14px; margin: 0;"></p>
-        </div>
-        """, unsafe_allow_html=True)
-    with footer_col3:
-        st.markdown("""
-        <div class="footer-right footer-content" style="text-align: right;">
-            <p style="color: #6b7280; font-size: 14px; margin: 0;">💡 Use buttons above to switch views</p>
-        </div>
-        """, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"Error in marketing analysis: {e}")
+    finally:
+        # Always close the connection at the very end
+        if 'conn_data' in locals() and conn_data:
+            conn_data.close()
 
