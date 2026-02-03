@@ -64,17 +64,32 @@ class CohortAwareForecaster:
             # Calculate cohort-relative months (0 = start, 1 = month 1, etc.)
             cohort_data['cohort_month'] = range(len(cohort_data))
             
-            # Calculate month-to-month growth rates
-            cohort_data['growth_rate'] = cohort_data['metric_value'].pct_change()
+            # Calculate month-to-month growth rates with robust handling of zero values
+            cohort_data['growth_rate'] = self._calculate_robust_growth_rates(cohort_data['metric_value'])
             
             # Calculate cumulative growth from start
             start_value = cohort_data['metric_value'].iloc[0]
-            cohort_data['cumulative_growth'] = (cohort_data['metric_value'] / start_value) - 1
+            
+            # Handle zero start value case
+            if start_value == 0:
+                # Find first non-zero value to use as baseline
+                non_zero_values = cohort_data[cohort_data['metric_value'] > 0]
+                if not non_zero_values.empty:
+                    baseline_value = non_zero_values['metric_value'].iloc[0]
+                    cohort_data['cumulative_growth'] = (cohort_data['metric_value'] / baseline_value) - 1
+                    total_growth = (cohort_data['metric_value'].iloc[-1] / baseline_value) - 1
+                else:
+                    # All values are zero - use absolute change
+                    cohort_data['cumulative_growth'] = cohort_data['metric_value'] - start_value
+                    total_growth = cohort_data['metric_value'].iloc[-1] - start_value
+            else:
+                cohort_data['cumulative_growth'] = (cohort_data['metric_value'] / start_value) - 1
+                total_growth = (cohort_data['metric_value'].iloc[-1] / start_value) - 1
             
             cohort_analysis[cohort_year] = {
                 'start_value': start_value,
                 'end_value': cohort_data['metric_value'].iloc[-1],
-                'total_growth': (cohort_data['metric_value'].iloc[-1] / start_value) - 1,
+                'total_growth': total_growth,
                 'monthly_data': cohort_data[['cohort_month', 'metric_value', 'growth_rate', 'cumulative_growth']].to_dict('records'),
                 'avg_monthly_growth': cohort_data['growth_rate'].mean(),
                 'lifecycle_months': len(cohort_data)
@@ -111,7 +126,8 @@ class CohortAwareForecaster:
                 if month < len(monthly_data):
                     if not pd.isna(monthly_data[month]['growth_rate']):
                         growth_rates.append(monthly_data[month]['growth_rate'])
-                    cumulative_growths.append(monthly_data[month]['cumulative_growth'])
+                    if not pd.isna(monthly_data[month]['cumulative_growth']):
+                        cumulative_growths.append(monthly_data[month]['cumulative_growth'])
             
             if growth_rates:
                 monthly_growth_rates[month] = np.mean(growth_rates)
@@ -121,14 +137,14 @@ class CohortAwareForecaster:
         
         # Calculate average starting values and total growth
         start_values = [info['start_value'] for info in cohort_analysis.values()]
-        total_growths = [info['total_growth'] for info in cohort_analysis.values()]
+        total_growths = [info['total_growth'] for info in cohort_analysis.values() if not pd.isna(info['total_growth'])]
         
         # Analyze fluctuation patterns
         fluctuation_analysis = self._analyze_fluctuation_patterns(cohort_analysis)
         
         return {
             'avg_start_value': np.mean(start_values),
-            'avg_total_growth': np.mean(total_growths),
+            'avg_total_growth': np.mean(total_growths) if total_growths else 0.5,  # Default 50% growth
             'monthly_growth_rates': monthly_growth_rates,
             'monthly_cumulative_growth': monthly_cumulative_growth,
             'monthly_volatility': monthly_volatility,
@@ -233,6 +249,34 @@ class CohortAwareForecaster:
         # CRITICAL FIX: Determine the correct timeline for the target cohort
         prediction_start_date = self._get_cohort_start_date(target_cohort, cohort_analysis)
         
+        # Check if we already have data for this cohort and adjust prediction timeline
+        existing_data_query = pd.read_sql("""
+            SELECT MAX(report_date) as last_date, COUNT(*) as existing_months, 
+                   (SELECT metric_value FROM admissions_metrics 
+                    WHERE program = ? AND metric_name = ? AND cohort_year = ? AND cohort_season = 'fall'
+                    ORDER BY report_date DESC LIMIT 1) as last_value
+            FROM admissions_metrics
+            WHERE program = ? AND metric_name = ? AND cohort_year = ? AND cohort_season = 'fall'
+        """, self.conn, params=[program, metric, target_cohort, program, metric, target_cohort])
+        
+        if not existing_data_query.empty and existing_data_query['last_date'].iloc[0] is not None:
+            last_existing_date = pd.to_datetime(existing_data_query['last_date'].iloc[0])
+            existing_months = existing_data_query['existing_months'].iloc[0]
+            last_existing_value = existing_data_query['last_value'].iloc[0]
+            
+            # Start predictions from the month after the last existing data
+            prediction_start_date = last_existing_date + pd.DateOffset(months=1)
+            
+            # Use the last existing value as the starting point for predictions
+            predicted_start_value = last_existing_value
+            
+            logger.info(f"Found {existing_months} months of existing data for {program} Class {target_cohort}")
+            logger.info(f"Last existing data: {last_existing_date.strftime('%B %Y')} = {last_existing_value}")
+            logger.info(f"Starting predictions from: {prediction_start_date.strftime('%B %Y')} with value {predicted_start_value}")
+        else:
+            logger.info(f"No existing data found for {program} Class {target_cohort}")
+            logger.info(f"Starting predictions from cohort start: {prediction_start_date.strftime('%B %Y')}")
+        
         # Generate month-by-month predictions
         predictions = self._generate_cohort_predictions(
             predicted_start_value,
@@ -240,6 +284,16 @@ class CohortAwareForecaster:
             prediction_months,
             confidence_level
         )
+        
+        # Check if predictions contain NaN values and use fallback if needed
+        if any(pd.isna(predictions['values'])):
+            logger.warning("Baseline pattern contains NaN values, using fallback linear growth model")
+            predictions = self._generate_fallback_predictions(
+                predicted_start_value,
+                baseline_pattern,
+                prediction_months,
+                confidence_level
+            )
         
         # Create prediction dates starting from the cohort's actual lifecycle start
         prediction_dates = [prediction_start_date + pd.DateOffset(months=i) for i in range(prediction_months)]
@@ -446,15 +500,30 @@ class CohortAwareForecaster:
             if not cohort_data.empty:
                 cohort_data = cohort_data.sort_values('report_date')
                 cohort_data['cohort_month'] = range(len(cohort_data))
-                cohort_data['growth_rate'] = cohort_data['metric_value'].pct_change()
+                cohort_data['growth_rate'] = self._calculate_robust_growth_rates(cohort_data['metric_value'])
                 
                 start_value = cohort_data['metric_value'].iloc[0]
-                cohort_data['cumulative_growth'] = (cohort_data['metric_value'] / start_value) - 1
+                
+                # Handle zero start value case
+                if start_value == 0:
+                    # Find first non-zero value to use as baseline
+                    non_zero_values = cohort_data[cohort_data['metric_value'] > 0]
+                    if not non_zero_values.empty:
+                        baseline_value = non_zero_values['metric_value'].iloc[0]
+                        cohort_data['cumulative_growth'] = (cohort_data['metric_value'] / baseline_value) - 1
+                        total_growth = (cohort_data['metric_value'].iloc[-1] / baseline_value) - 1
+                    else:
+                        # All values are zero - use absolute change
+                        cohort_data['cumulative_growth'] = cohort_data['metric_value'] - start_value
+                        total_growth = cohort_data['metric_value'].iloc[-1] - start_value
+                else:
+                    cohort_data['cumulative_growth'] = (cohort_data['metric_value'] / start_value) - 1
+                    total_growth = (cohort_data['metric_value'].iloc[-1] / start_value) - 1
                 
                 training_analysis[cohort] = {
                     'start_value': start_value,
                     'end_value': cohort_data['metric_value'].iloc[-1],
-                    'total_growth': (cohort_data['metric_value'].iloc[-1] / start_value) - 1,
+                    'total_growth': total_growth,
                     'monthly_data': cohort_data[['cohort_month', 'metric_value', 'growth_rate', 'cumulative_growth']].to_dict('records'),
                     'avg_monthly_growth': cohort_data['growth_rate'].mean(),
                     'lifecycle_months': len(cohort_data)
@@ -485,6 +554,16 @@ class CohortAwareForecaster:
             actual_prediction_months,  # Use requested prediction period
             confidence_level
         )
+        
+        # Check if predictions contain NaN values and use fallback if needed
+        if any(pd.isna(predictions['values'])):
+            logger.warning("Baseline pattern contains NaN values, using fallback linear growth model")
+            predictions = self._generate_fallback_predictions(
+                predicted_start_value,
+                baseline_pattern,
+                actual_prediction_months,
+                confidence_level
+            )
         
         # Create prediction dates for the full requested period
         prediction_dates = [target_start_date + pd.DateOffset(months=i) for i in range(actual_prediction_months)]
@@ -580,13 +659,14 @@ class CohortAwareForecaster:
         confidence_level: float
     ) -> Dict[str, List[float]]:
         """
-        Generate month-by-month predictions for a cohort lifecycle with realistic fluctuations.
+        Generate month-by-month predictions with enhanced seasonality and ARIMA components.
         
-        This enhanced version includes:
-        - Natural ups and downs based on academic marketing cycles
-        - Seasonal effects (holiday dips, application rushes)
-        - Campaign-driven variations
-        - Market volatility patterns
+        This robust version combines:
+        - ARIMA-style trend, seasonal, and error components
+        - Prophet-style seasonal decomposition
+        - Academic calendar seasonality (vacation dips, campaign surges)
+        - Linear trend with realistic constraints
+        - Historical pattern learning
         """
         predictions = []
         lower_bounds = []
@@ -594,80 +674,200 @@ class CohortAwareForecaster:
         
         current_value = start_value
         
-        # Define realistic fluctuation patterns for academic marketing
-        # Start with default patterns, then override with historical data if available
-        monthly_volatility_factors = {
-            0: 1.0,    # January - Starting point
-            1: 1.15,   # February - Post-holiday campaign boost
-            2: 0.95,   # March - Mid-semester dip
-            3: 1.25,   # April - Spring campaign push
-            4: 1.10,   # May - Steady growth
-            5: 0.90,   # June - Summer slowdown
-            6: 1.05,   # July - Final push before deadline
-            7: 0.85,   # August - Post-deadline drop (if extending)
+        # Enhanced seasonal patterns based on academic calendar and historical data
+        academic_seasonal_factors = {
+            # Academic year patterns (cohort-relative months) - realistic seasonality
+            0: 1.0,    # Starting month - baseline
+            1: 1.10,   # Month 1 - Modest New Year surge
+            2: 0.95,   # Month 2 - February dip (historical pattern)
+            3: 1.15,   # Month 3 - Spring campaign peak (Mar-Apr)
+            4: 1.25,   # Month 4 - Pre-summer push (Apr-May)
+            5: 0.90,   # Month 5 - May slowdown (end of spring semester)
+            6: 1.10,   # Month 6 - June recovery
+            7: 0.80,   # Month 7 - Summer decline (Jun-Jul vacation effect) - DECLINE
+            8: 0.70,   # Month 8 - Deep summer lull - DEEPER DECLINE
+            9: 1.05,   # Month 9 - Fall recovery
+            10: 0.90,  # Month 10 - Mid-fall slowdown
+            11: 0.75,  # Month 11 - Holiday slowdown - DECLINE
         }
         
-        # Override with historical patterns if available
+        # Override with historical patterns if available (blend historical with academic calendar)
         if 'fluctuation_patterns' in baseline_pattern:
             fluctuation_data = baseline_pattern['fluctuation_patterns']
             monthly_patterns = fluctuation_data.get('monthly_patterns', {})
             
             for month, pattern in monthly_patterns.items():
                 if month < prediction_months:
-                    # Use historical volatility but ensure some variation
-                    base_factor = 1.0 + (pattern['avg_change'] / 100)  # Convert percentage to factor
-                    volatility = pattern['volatility'] / 100
+                    # Blend historical pattern with academic seasonality
+                    historical_factor = 1.0 + (pattern['avg_change'] / 100)
+                    academic_factor = academic_seasonal_factors.get(month, 1.0)
                     
-                    # Add some controlled randomness based on historical volatility
-                    random_adjustment = np.random.normal(0, volatility)
-                    monthly_volatility_factors[month] = max(0.8, min(1.3, base_factor + random_adjustment))
+                    # Weighted blend: 70% historical, 30% academic calendar
+                    blended_factor = 0.7 * historical_factor + 0.3 * academic_factor
+                    # Cap extreme seasonal factors
+                    academic_seasonal_factors[month] = max(0.7, min(1.6, blended_factor))
         
-        # Add some randomness to make it more realistic
+        # ARIMA-style components
+        trend_component = []
+        seasonal_component = []
+        error_component = []
+        
+        # Calculate base trend (extremely conservative for realistic predictions)
+        total_growth = baseline_pattern.get('avg_total_growth', 0.5)
+        # Extremely conservative cap for total growth
+        capped_total_growth = min(total_growth, 0.3)  # Max 30% growth over lifecycle
+        
+        # Very slow, realistic growth
+        base_growth_rate = capped_total_growth / (prediction_months * 4)  # Very slow growth
+        
+        # Add controlled randomness for realistic variation
         np.random.seed(42)  # For reproducible results
-        base_volatility = baseline_pattern.get('fluctuation_patterns', {}).get('monthly_volatility_pct', 5.0) / 100
-        random_factors = np.random.normal(1.0, base_volatility, prediction_months)  # Historical volatility
+        base_volatility = baseline_pattern.get('fluctuation_patterns', {}).get('monthly_volatility_pct', 8.0) / 100
+        
+        for month in range(prediction_months):
+            # 1. TREND COMPONENT (Linear with strong deceleration)
+            if month == 0:
+                trend_value = start_value
+            else:
+                # Strong deceleration factor (more realistic for academic programs)
+                deceleration_factor = 1.0 - (month * 0.05)  # Stronger slowdown over time
+                adjusted_growth_rate = base_growth_rate * max(0.3, deceleration_factor)
+                trend_value = current_value * (1 + adjusted_growth_rate)
+            
+            trend_component.append(trend_value)
+            
+            # 2. SEASONAL COMPONENT (Academic calendar effects with stronger impact)
+            seasonal_factor = academic_seasonal_factors.get(month, 1.0)
+            seasonal_adjustment = (seasonal_factor - 1.0) * trend_value * 0.6  # 60% seasonal impact
+            seasonal_component.append(seasonal_adjustment)
+            
+            # 3. ERROR COMPONENT (ARIMA-style random walk with mean reversion)
+            if month == 0:
+                error_value = 0
+            else:
+                # Mean-reverting random walk
+                previous_error = error_component[-1] if error_component else 0
+                mean_reversion = -0.3 * previous_error  # Pull back to trend
+                random_shock = np.random.normal(0, base_volatility * trend_value)
+                error_value = mean_reversion + random_shock
+            
+            error_component.append(error_value)
+            
+            # 4. COMBINE COMPONENTS (Modified to allow seasonal declines)
+            # Instead of pure addition, use multiplicative seasonal effects
+            base_predicted_value = trend_value + error_value
+            
+            # Apply seasonal factor multiplicatively for stronger effect
+            seasonal_multiplier = seasonal_factor
+            predicted_value = base_predicted_value * seasonal_multiplier
+            
+            # 5. APPLY REALISTIC CONSTRAINTS (allow seasonal declines to show through)
+            # Check if this is a seasonal decline month
+            seasonal_factor = academic_seasonal_factors.get(month, 1.0)
+            
+            if month > 0:
+                if seasonal_factor < 0.95:  # This is a seasonal decline month
+                    # Allow the seasonal decline to show through
+                    # Only prevent extreme drops (more than 40%)
+                    min_allowed = current_value * 0.6
+                else:
+                    # Normal months - prevent drops more than 15%
+                    min_allowed = current_value * 0.85
+                
+                # Apply the minimum constraint
+                predicted_value = max(predicted_value, min_allowed)
+            
+            # Don't allow negative values
+            predicted_value = max(0, predicted_value)
+            
+            # Don't allow unrealistic spikes (more than 40% growth in one month)
+            if month > 0:
+                max_allowed = current_value * 1.4
+                predicted_value = min(predicted_value, max_allowed)
+            
+            # 6. CALCULATE CONFIDENCE INTERVALS with seasonal uncertainty
+            # Academic marketing has higher uncertainty than other domains
+            cv = 0.25  # 25% coefficient of variation
+            std_error = predicted_value * cv
+            
+            # Add seasonal uncertainty (higher during transition months)
+            seasonal_uncertainty = abs(seasonal_factor - 1.0) * 0.15
+            total_std_error = std_error * (1 + seasonal_uncertainty)
+            
+            # Calculate bounds using normal distribution approximation
+            z_score = 1.96 if confidence_level == 0.95 else 2.58
+            margin_error = z_score * total_std_error
+            
+            lower_bound = max(0, predicted_value - margin_error)
+            upper_bound = predicted_value + margin_error
+            
+            predictions.append(predicted_value)
+            lower_bounds.append(lower_bound)
+            upper_bounds.append(upper_bound)
+            
+            current_value = predicted_value
+        
+        return {
+            'values': predictions,
+            'lower_bounds': lower_bounds,
+            'upper_bounds': upper_bounds,
+            'components': {
+                'trend': trend_component,
+                'seasonal': seasonal_component,
+                'error': error_component
+            }
+        }
+    
+    def _generate_fallback_predictions(
+        self,
+        start_value: float,
+        baseline_pattern: Dict,
+        prediction_months: int,
+        confidence_level: float
+    ) -> Dict[str, List[float]]:
+        """
+        Generate simple linear predictions when baseline pattern has issues.
+        Uses a conservative growth approach based on available data.
+        """
+        predictions = []
+        lower_bounds = []
+        upper_bounds = []
+        
+        # Handle zero start value case
+        if start_value == 0:
+            # Use average start value from baseline pattern if available
+            avg_start = baseline_pattern.get('avg_start_value', 20.0)  # Default to 20 if no data
+            if avg_start > 0:
+                start_value = avg_start
+            else:
+                start_value = 20.0  # Reasonable default for applications
+        
+        # Use a conservative monthly growth rate
+        monthly_growth_rate = baseline_pattern.get('avg_total_growth', 0.5) / 8  # Spread over 8 months
+        if pd.isna(monthly_growth_rate) or monthly_growth_rate <= 0:
+            monthly_growth_rate = 0.05  # Default 5% monthly growth
+        
+        # Cap the monthly growth rate to prevent unrealistic predictions
+        # Academic programs rarely sustain more than 15% monthly growth
+        monthly_growth_rate = min(monthly_growth_rate, 0.15)
+        
+        current_value = start_value
         
         for month in range(prediction_months):
             if month == 0:
-                # First month is the starting value
                 predicted_value = start_value
             else:
-                # Base growth from historical patterns
-                if month in baseline_pattern['monthly_cumulative_growth']:
-                    # Use learned cumulative growth pattern
-                    base_cumulative_growth = baseline_pattern['monthly_cumulative_growth'][month]
-                    base_predicted_value = start_value * (1 + base_cumulative_growth)
-                else:
-                    # Extrapolate using average growth rate
-                    avg_monthly_growth = baseline_pattern.get('avg_total_growth', 0.5) / 8  # Spread over 8 months
-                    base_predicted_value = current_value * (1 + avg_monthly_growth)
-                
-                # Apply volatility factor for realistic fluctuations
-                volatility_factor = monthly_volatility_factors.get(month, 1.0)
-                random_factor = random_factors[month]
-                
-                # Combine base growth with volatility
-                predicted_value = base_predicted_value * volatility_factor * random_factor
-                
-                # Ensure we don't go below previous month by more than 15% (realistic constraint)
-                min_allowed = current_value * 0.85
-                predicted_value = max(predicted_value, min_allowed)
-                
-                # Also ensure overall upward trend (cohorts generally grow over time)
-                if month > 2:  # After first few months, enforce minimum growth
-                    min_growth_value = start_value * (1 + (month * 0.05))  # Minimum 5% growth per month
-                    predicted_value = max(predicted_value, min_growth_value)
+                # Simple linear growth with some variation
+                growth_factor = 1 + monthly_growth_rate
+                predicted_value = current_value * growth_factor
             
-            # Calculate confidence intervals with realistic uncertainty
-            # Academic marketing has higher uncertainty than other domains
-            cv = 0.20  # 20% coefficient of variation (higher than before for realism)
+            # Calculate confidence intervals
+            cv = 0.25  # 25% coefficient of variation for uncertainty
             std_error = predicted_value * cv
-            
-            # Calculate bounds using normal distribution approximation
-            z_score = 1.96 if confidence_level == 0.95 else 2.58  # 95% or 99%
+            z_score = 1.96 if confidence_level == 0.95 else 2.58
             margin_error = z_score * std_error
             
-            lower_bound = max(0, predicted_value - margin_error)  # Don't go below 0
+            lower_bound = max(0, predicted_value - margin_error)
             upper_bound = predicted_value + margin_error
             
             predictions.append(predicted_value)
@@ -783,3 +983,46 @@ class CohortAwareForecaster:
             return "Cohort-aware recommended: Growth pattern more aligned with academic cycles"
         else:
             return "Both methods viable: Consider using cohort-aware for new cohorts, traditional for trend analysis"
+    
+    def _calculate_robust_growth_rates(self, values: pd.Series) -> pd.Series:
+        """
+        Calculate growth rates with robust handling of zero and small values.
+        
+        Instead of using simple percentage change which gives infinity for zero values,
+        this method uses a more stable approach:
+        1. For zero to non-zero: use absolute change capped at reasonable maximum
+        2. For normal cases: use standard percentage change but cap extreme values
+        3. Replace infinite values with reasonable estimates
+        """
+        growth_rates = []
+        
+        for i in range(len(values)):
+            if i == 0:
+                # First value has no growth rate
+                growth_rates.append(np.nan)
+            else:
+                current = values.iloc[i]
+                previous = values.iloc[i-1]
+                
+                if previous == 0:
+                    if current == 0:
+                        # 0 to 0: no growth
+                        growth_rate = 0.0
+                    else:
+                        # 0 to positive: use a reasonable maximum growth rate
+                        # Cap at 200% (3x growth) to avoid unrealistic predictions
+                        growth_rate = min(2.0, current / 10.0)  # Scale by 10 to get reasonable rate
+                elif current == 0:
+                    # Positive to 0: -100% decline
+                    growth_rate = -1.0
+                else:
+                    # Normal case: standard percentage change
+                    growth_rate = (current - previous) / previous
+                    
+                    # Cap extreme growth rates to prevent unrealistic predictions
+                    # Academic programs rarely grow more than 100% month-to-month
+                    growth_rate = max(-0.9, min(1.0, growth_rate))
+                
+                growth_rates.append(growth_rate)
+        
+        return pd.Series(growth_rates, index=values.index)

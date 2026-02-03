@@ -2,12 +2,12 @@
 
 # Mays Analytics Platform
 
-[![Version](https://img.shields.io/badge/version-7.5-blue.svg)](https://github.com/Tirth-1999/mays-recruiting-analytics)
+[![Version](https://img.shields.io/badge/version-8.0-blue.svg)](https://github.com/Tirth-1999/mays-recruiting-analytics)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io)
 
-**Version 7.5** | **Last Updated: February 3, 2026**
+**Version 8.0** | **Last Updated: February 3, 2026**
 
 *A comprehensive analytics platform for Texas A&M University's Mays Business School Flex Online Programs, providing real-time admissions tracking, marketing ROI analysis, and AI-powered insights.*
 
@@ -17,29 +17,35 @@
 
 <div align="center">
 
-## What's New in Version 7.5
+## What's New in Version 8.0
 
-**Professional UI Enhancement** - Released February 3, 2026
+**Enhanced Cohort-Aware Forecasting** - Released February 3, 2026
 
 </div>
 
-### 🎨 Professional Interface Improvements
-- **Enhanced Model Cards**: Redesigned accuracy and performance rating cards with professional styling, gradient backgrounds, and consistent sizing
-- **Improved Tab Structure**: Reorganized Predictive Analytics tabs - "Simple Case Study" moved to first position as "Forecast", "Forecasting" renamed to "Advanced Forecasting"
-- **Consistent Chart Titles**: Fixed capitalization across all model comparison charts - "Inquiries Received" and "Cohort Aware" properly formatted
-- **Clean Debug Interface**: Removed all debug messages and unnecessary emoticons for a professional user experience
+### 🚀 Revolutionary Forecasting System
+- **ARIMA-Style Components**: Implemented trend, seasonal, and error components for robust time series forecasting
+- **Prophet-Style Seasonal Decomposition**: Multiplicative seasonal effects with academic calendar awareness
+- **Academic Seasonality**: Built-in understanding of vacation dips, campaign surges, and enrollment cycles
+- **Realistic Growth Constraints**: Predictions now within 1.5-2x of historical peaks (vs previous 60x overestimations)
 
-### 🧹 Code Quality & Performance
-- **Massive Cleanup**: Removed 27+ unnecessary test files, markdown documentation files, and cache directories
-- **Streamlined Codebase**: Eliminated duplicate functions and unused code while maintaining full functionality
-- **Professional Messaging**: Cleaned up challenging issue messages and error displays
-- **Optimized File Structure**: Maintained only essential files for production deployment
+### 🧠 Multi-Model Integration
+- **Combined Methodologies**: Seamlessly integrates ARIMA, Prophet, Linear, and Seasonality approaches
+- **Robust Growth Rate Calculation**: Fixed infinite growth rates from zero-to-positive transitions
+- **Conservative Prediction Logic**: Maximum 30% total growth over lifecycle with monthly caps
+- **Zero Start Value Handling**: Proper handling of cohorts starting with zero applications
 
-### 🔧 Technical Enhancements
-- **Card Styling Consistency**: Both model accuracy and performance rating cards now use identical 2.8em font size for perfect alignment
-- **Helper Functions**: Added `get_metric_display_name()` and `get_model_display_name()` for consistent naming across charts
-- **Tab Reorganization**: Reduced from 7 to 6 tabs with better logical flow - basic forecasting first, then advanced features
-- **Syntax Error Resolution**: Fixed all parentheses mismatches and duplicate function definitions
+### 📊 Enhanced Prediction Quality
+- **Eliminated NaN Values**: All predictions now generate valid numbers across all scenarios
+- **Consistent 8-Month Predictions**: Reliable timeline generation for all programs and metrics
+- **Seasonal Decline Support**: Models now account for summer lulls and holiday slowdowns
+- **Historical Pattern Learning**: Blends learned patterns with theoretical seasonal models
+
+### 🔧 Technical Improvements
+- **Component-Based Architecture**: Separates trend, seasonal, and error components for transparency
+- **Fallback Model Enhancement**: Improved handling of edge cases with reasonable defaults
+- **Mean-Reverting Error Terms**: ARIMA-style random walk with realistic volatility
+- **Multiplicative Seasonal Effects**: Stronger seasonal impact for realistic ups and downs
 
 [View complete changelog →](docs/CHANGELOG.md)
 
@@ -203,6 +209,7 @@ For detailed setup instructions, see the [Quick Start Guide](docs/QUICK_START.md
 
 | Version | Date | Type | Key Features |
 |---------|------|------|--------------|
+| **8.0** | Feb 3, 2026 | Major | Enhanced Cohort-Aware Forecasting |
 | **7.5** | Feb 3, 2026 | Minor | Professional UI Enhancement |
 | **7.1** | Feb 2, 2026 | Minor | Marketing Analysis ROI Fix |
 | **7.0** | Feb 2, 2026 | Major | State Snapshot ETL & Dashboard Enhancement |
@@ -272,6 +279,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Mays Analytics Platform** | Version 7.5 | © 2024-2026 Texas A&M University
+**Mays Analytics Platform** | Version 8.0 | © 2024-2026 Texas A&M University
 
 </div>

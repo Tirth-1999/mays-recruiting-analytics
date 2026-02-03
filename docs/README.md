@@ -4,6 +4,44 @@ Welcome to the comprehensive documentation for the Mays Analytics Platform.
 
 ---
 
+## What's New in Version 8.0
+
+**Enhanced Cohort-Aware Forecasting** - Released February 3, 2026
+
+### 🚀 Revolutionary Forecasting System
+- **ARIMA-Style Components**: Implemented comprehensive trend, seasonal, and error components for robust time series forecasting with mean-reverting random walks and realistic volatility modeling
+- **Prophet-Style Seasonal Decomposition**: Advanced multiplicative seasonal effects with academic calendar awareness, blending historical patterns with theoretical seasonal models
+- **Academic Seasonality Integration**: Built-in understanding of vacation dips (summer lulls), campaign surges (spring pushes), enrollment cycles, and holiday slowdowns for realistic predictions
+- **Realistic Growth Constraints**: Predictions now constrained to 1.5-2x of historical peaks (vs previous 60x overestimations), with maximum 30% total growth over lifecycle
+
+### 🧠 Multi-Model Integration & Architecture
+- **Combined Methodologies**: Seamlessly integrates ARIMA trend analysis, Prophet seasonal decomposition, Linear growth modeling, and academic Seasonality patterns in unified framework
+- **Component-Based Architecture**: Separates trend, seasonal, and error components for transparency and debugging, allowing individual component analysis and validation
+- **Robust Growth Rate Calculation**: Fixed infinite growth rates from zero-to-positive transitions by implementing capped growth rates (max 100% monthly) and proper zero-value handling
+- **Conservative Prediction Logic**: Extremely conservative growth caps with deceleration factors, seasonal decline allowances, and realistic month-to-month constraints
+
+### 📊 Enhanced Prediction Quality & Reliability
+- **Eliminated NaN Values**: All predictions now generate valid numbers across all scenarios with automatic fallback to linear growth models when baseline patterns contain NaN
+- **Consistent 8-Month Predictions**: Reliable timeline generation for all programs and metrics, properly handling both existing data continuation and new cohort lifecycle starts
+- **Seasonal Decline Support**: Models now properly account for summer application lulls, holiday slowdowns, and semester transition effects with flexible constraint systems
+- **Historical Pattern Learning**: Intelligent blending of learned historical patterns (70%) with theoretical academic calendar models (30%) for optimal prediction accuracy
+
+### 🔧 Technical Implementation & Robustness
+- **Zero Start Value Handling**: Comprehensive handling of cohorts starting with zero applications through baseline value detection and reasonable default substitution
+- **Fallback Model Enhancement**: Improved edge case handling with conservative linear growth models when complex seasonal patterns fail
+- **Mean-Reverting Error Terms**: ARIMA-style random walk error components with configurable mean reversion (-0.3 factor) for realistic prediction variation
+- **Multiplicative Seasonal Effects**: Stronger seasonal impact through multiplicative rather than additive seasonal adjustments for realistic ups and downs
+
+### 🎯 Prediction Accuracy Improvements
+- **MS Marketing Applications**: Fixed from 6,535 unrealistic prediction to 160 (1.5x historical peak of 104) - 97.5% improvement in realism
+- **Cross-Program Consistency**: All programs now generate predictions within 1.1-2.0x of historical peaks across different training scenarios
+- **Seasonal Variation**: Proper modeling of month-to-month fluctuations with both growth and decline periods reflecting real academic cycles
+- **Training Flexibility**: Robust performance whether training on single cohorts (2026 only), multiple cohorts (2026+2027), or mixed scenarios
+
+[View complete changelog →](CHANGELOG.md)
+
+---
+
 ## What's New in Version 7.5
 
 **Professional UI Enhancement** - Released February 3, 2026

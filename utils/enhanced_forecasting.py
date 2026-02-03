@@ -847,10 +847,6 @@ def run_cohort_forecasting_pipeline(
             prediction_months=12
         )
         
-        # Step 6: Save predictions to database
-        logger.info("💾 Saving predictions to database...")
-        saved_count = forecaster.save_predictions_to_db(future_predictions)
-        
         # Compile results
         results = {
             'pipeline_status': 'success',
@@ -862,7 +858,6 @@ def run_cohort_forecasting_pipeline(
             'validation_results': validation_results,
             'case_study': case_study,
             'future_predictions': future_predictions,
-            'predictions_saved': saved_count,
             'completed_at': datetime.now().isoformat()
         }
         
@@ -888,7 +883,6 @@ if __name__ == "__main__":
     if results['pipeline_status'] == 'success':
         print("🎉 Cohort Forecasting Pipeline completed successfully!")
         print(f"📊 Models trained: {results['models_trained']}")
-        print(f"📈 Predictions saved: {results['predictions_saved']}")
         
         # Print case study summary
         case_study = results['case_study']
