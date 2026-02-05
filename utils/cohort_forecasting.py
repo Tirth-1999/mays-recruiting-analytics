@@ -29,6 +29,41 @@ class CohortAwareForecaster:
         self.cohort_patterns = {}
         self.baseline_growth_rates = {}
         
+    def _calculate_baseline_pattern_from_selection(self, cohort_analysis: Dict) -> Dict[str, any]:
+        """Calculate baseline growth pattern from selected training cohorts only."""
+        all_growth_rates = []
+        start_values = []
+        
+        for cohort_year, analysis in cohort_analysis.items():
+            if analysis['growth_rates']:
+                all_growth_rates.extend(analysis['growth_rates'])
+            start_values.append(analysis['start_value'])
+        
+        if not all_growth_rates:
+            # Fallback: use simple linear growth
+            return {
+                'monthly_growth_rates': [0.1] * 12,  # 10% monthly growth
+                'average_start_value': np.mean(start_values) if start_values else 100,
+                'pattern_type': 'fallback_linear'
+            }
+        
+        # Calculate average monthly growth pattern
+        # Pad or truncate to standard 12-month pattern
+        if len(all_growth_rates) >= 12:
+            monthly_pattern = all_growth_rates[:12]
+        else:
+            # Repeat pattern to fill 12 months
+            monthly_pattern = (all_growth_rates * (12 // len(all_growth_rates) + 1))[:12]
+        
+        # Clean up NaN values
+        monthly_pattern = [rate if not pd.isna(rate) else 0.1 for rate in monthly_pattern]
+        
+        return {
+            'monthly_growth_rates': monthly_pattern,
+            'average_start_value': np.mean(start_values) if start_values else 100,
+            'pattern_type': 'training_cohorts_based'
+        }
+
     def analyze_cohort_patterns(self, program: str, metric: str) -> Dict[str, any]:
         """
         Analyze historical cohort patterns to understand:
@@ -209,6 +244,258 @@ class CohortAwareForecaster:
             'total_data_points': len(all_changes)
         }
     
+    def predict_entire_cohort_lifecycle(
+        self, 
+        program: str, 
+        metric: str, 
+        target_cohort: int,
+        training_cohorts: List[int] = None,
+        prediction_months: int = 8,
+        confidence_level: float = 0.95
+    ) -> Dict[str, any]:
+        """
+        Predict the ENTIRE cohort lifecycle from the beginning.
+        
+        This method:
+        1. Uses ONLY the specified training cohorts for pattern analysis
+        2. Estimates a realistic starting value based on selected training data
+        3. Predicts the ENTIRE cohort lifecycle from the cohort start date
+        4. This is prediction, not forecasting continuation
+        """
+        logger.info(f"Predicting ENTIRE cohort lifecycle for {target_cohort} using training cohorts: {training_cohorts}")
+        
+        # If no training cohorts specified, use all available (fallback to original behavior)
+        if not training_cohorts:
+            return self.predict_new_cohort(program, metric, target_cohort, prediction_months, confidence_level)
+        
+        # Analyze patterns using ONLY the specified training cohorts
+        pattern_analysis = self.analyze_cohort_patterns_with_selection(program, metric, training_cohorts)
+        
+        if 'error' in pattern_analysis:
+            return pattern_analysis
+        
+        cohort_analysis = pattern_analysis['cohort_analysis']
+        baseline_pattern = pattern_analysis['baseline_pattern']
+        
+        if not cohort_analysis:
+            return {'error': f'No cohort patterns found for training cohorts: {training_cohorts}'}
+        
+        # Estimate starting value for new cohort based on selected training cohorts
+        predicted_start_value = self._estimate_cohort_start_value(
+            cohort_analysis, target_cohort, baseline_pattern
+        )
+        
+        # ALWAYS predict from the cohort's initial start date (e.g., January)
+        prediction_start_date = self._get_cohort_start_date(target_cohort, cohort_analysis)
+        
+        logger.info(f"Predicting ENTIRE cohort lifecycle for {program} Class {target_cohort}")
+        logger.info(f"Starting predictions from cohort start: {prediction_start_date.strftime('%B %Y')}")
+        logger.info(f"Using predicted starting value: {predicted_start_value}")
+        
+        # Generate month-by-month predictions for the entire cohort lifecycle
+        predictions = self._generate_cohort_predictions(
+            predicted_start_value,
+            baseline_pattern,
+            prediction_months,
+            confidence_level
+        )
+        
+        # Check if predictions contain NaN values and use fallback if needed
+        if any(pd.isna(predictions['values'])):
+            logger.warning("Baseline pattern contains NaN values, using fallback linear growth model")
+            predictions = self._generate_fallback_predictions(
+                predicted_start_value,
+                baseline_pattern,
+                prediction_months,
+                confidence_level
+            )
+        
+        # Create prediction dates starting from the cohort's actual lifecycle start
+        prediction_dates = [prediction_start_date + pd.DateOffset(months=i) for i in range(prediction_months)]
+        
+        # Create results DataFrame
+        results_df = pd.DataFrame({
+            'date': prediction_dates,
+            'predicted_value': predictions['values'],
+            'lower_bound': predictions['lower_bounds'],
+            'upper_bound': predictions['upper_bounds']
+        })
+        
+        return {
+            'success': True,
+            'predictions': results_df,
+            'starting_value': predicted_start_value,
+            'training_cohorts_used': training_cohorts,
+            'pattern_analysis': pattern_analysis
+        }
+
+    def predict_new_cohort_with_training_selection(
+        self, 
+        program: str, 
+        metric: str, 
+        target_cohort: int,
+        training_cohorts: List[int] = None,
+        prediction_months: int = 8,
+        confidence_level: float = 0.95
+    ) -> Dict[str, any]:
+        """
+        Predict values for a new cohort based on SPECIFIC training cohorts.
+        
+        This method:
+        1. Uses ONLY the specified training cohorts for pattern analysis
+        2. Estimates a realistic starting value based on selected training data
+        3. Applies learned growth patterns to predict progression
+        4. Accounts for trend changes between cohorts
+        """
+        logger.info(f"Predicting new cohort {target_cohort} for {program} - {metric} using training cohorts: {training_cohorts}")
+        
+        # If no training cohorts specified, use all available (fallback to original behavior)
+        if not training_cohorts:
+            return self.predict_new_cohort(program, metric, target_cohort, prediction_months, confidence_level)
+        
+        # Analyze patterns using ONLY the specified training cohorts
+        pattern_analysis = self.analyze_cohort_patterns_with_selection(program, metric, training_cohorts)
+        
+        if 'error' in pattern_analysis:
+            return pattern_analysis
+        
+        cohort_analysis = pattern_analysis['cohort_analysis']
+        baseline_pattern = pattern_analysis['baseline_pattern']
+        
+        if not cohort_analysis:
+            return {'error': f'No cohort patterns found for training cohorts: {training_cohorts}'}
+        
+        # Estimate starting value for new cohort based on selected training cohorts
+        predicted_start_value = self._estimate_cohort_start_value(
+            cohort_analysis, target_cohort, baseline_pattern
+        )
+        
+        # CRITICAL FIX: Determine the correct timeline for the target cohort
+        prediction_start_date = self._get_cohort_start_date(target_cohort, cohort_analysis)
+        
+        # Check if we already have data for this cohort and adjust prediction timeline
+        existing_data_query = pd.read_sql("""
+            SELECT MAX(report_date) as last_date, COUNT(*) as existing_months, 
+                   (SELECT metric_value FROM admissions_metrics 
+                    WHERE program = ? AND metric_name = ? AND cohort_year = ? AND cohort_season = 'fall'
+                    ORDER BY report_date DESC LIMIT 1) as last_value
+            FROM admissions_metrics
+            WHERE program = ? AND metric_name = ? AND cohort_year = ? AND cohort_season = 'fall'
+        """, self.conn, params=[program, metric, target_cohort, program, metric, target_cohort])
+        
+        if not existing_data_query.empty and existing_data_query['last_date'].iloc[0] is not None:
+            last_existing_date = pd.to_datetime(existing_data_query['last_date'].iloc[0])
+            existing_months = existing_data_query['existing_months'].iloc[0]
+            last_existing_value = existing_data_query['last_value'].iloc[0]
+            
+            # Start predictions from the month after the last existing data
+            prediction_start_date = last_existing_date + pd.DateOffset(months=1)
+            
+            # Use the last existing value as the starting point for predictions
+            predicted_start_value = last_existing_value
+            
+            logger.info(f"Found {existing_months} months of existing data for {program} Class {target_cohort}")
+            logger.info(f"Last existing data: {last_existing_date.strftime('%B %Y')} = {last_existing_value}")
+            logger.info(f"Starting predictions from: {prediction_start_date.strftime('%B %Y')} with value {predicted_start_value}")
+        else:
+            logger.info(f"No existing data found for {program} Class {target_cohort}")
+            logger.info(f"Starting predictions from cohort start: {prediction_start_date.strftime('%B %Y')}")
+        
+        # Generate month-by-month predictions
+        predictions = self._generate_cohort_predictions(
+            predicted_start_value,
+            baseline_pattern,
+            prediction_months,
+            confidence_level
+        )
+        
+        # Check if predictions contain NaN values and use fallback if needed
+        if any(pd.isna(predictions['values'])):
+            logger.warning("Baseline pattern contains NaN values, using fallback linear growth model")
+            predictions = self._generate_fallback_predictions(
+                predicted_start_value,
+                baseline_pattern,
+                prediction_months,
+                confidence_level
+            )
+        
+        # Create prediction dates starting from the cohort's actual lifecycle start
+        prediction_dates = [prediction_start_date + pd.DateOffset(months=i) for i in range(prediction_months)]
+        
+        # Create results DataFrame
+        results_df = pd.DataFrame({
+            'date': prediction_dates,
+            'predicted_value': predictions['values'],
+            'lower_bound': predictions['lower_bounds'],
+            'upper_bound': predictions['upper_bounds']
+        })
+        
+        return {
+            'success': True,
+            'predictions': results_df,
+            'starting_value': predicted_start_value,
+            'training_cohorts_used': training_cohorts,
+            'pattern_analysis': pattern_analysis
+        }
+    
+    def analyze_cohort_patterns_with_selection(self, program: str, metric: str, training_cohorts: List[int]) -> Dict[str, any]:
+        """
+        Analyze historical cohort patterns using ONLY specified training cohorts.
+        """
+        logger.info(f"Analyzing cohort patterns for {program} - {metric} using training cohorts: {training_cohorts}")
+        
+        # Get historical cohort data for ONLY the specified training cohorts
+        cohort_placeholders = ','.join(['?'] * len(training_cohorts))
+        data = pd.read_sql(f"""
+            SELECT cohort_year, report_date, metric_value
+            FROM admissions_metrics
+            WHERE program = ? AND metric_name = ? AND cohort_season = 'fall'
+            AND cohort_year IN ({cohort_placeholders})
+            ORDER BY cohort_year, report_date
+        """, self.conn, params=[program, metric] + training_cohorts)
+        
+        if data.empty:
+            return {'error': f'No data available for training cohorts {training_cohorts}'}
+        
+        data['report_date'] = pd.to_datetime(data['report_date'])
+        
+        # Analyze each training cohort
+        cohort_analysis = {}
+        for cohort_year in training_cohorts:
+            cohort_data = data[data['cohort_year'] == cohort_year].copy()
+            
+            if cohort_data.empty:
+                logger.warning(f"No data found for training cohort {cohort_year}")
+                continue
+            
+            cohort_data = cohort_data.sort_values('report_date')
+            
+            # Calculate month-to-month growth rates
+            cohort_data['growth_rate'] = cohort_data['metric_value'].pct_change()
+            cohort_data['month_index'] = range(len(cohort_data))
+            
+            # Store cohort analysis
+            cohort_analysis[cohort_year] = {
+                'data': cohort_data,
+                'start_value': cohort_data['metric_value'].iloc[0],
+                'end_value': cohort_data['metric_value'].iloc[-1],
+                'total_growth': cohort_data['metric_value'].iloc[-1] / cohort_data['metric_value'].iloc[0] if cohort_data['metric_value'].iloc[0] > 0 else 1.0,
+                'growth_rates': cohort_data['growth_rate'].dropna().tolist(),
+                'months_of_data': len(cohort_data)
+            }
+        
+        if not cohort_analysis:
+            return {'error': f'No valid data found for any training cohorts: {training_cohorts}'}
+        
+        # Calculate baseline growth pattern from selected training cohorts
+        baseline_pattern = self._calculate_baseline_pattern_from_selection(cohort_analysis)
+        
+        return {
+            'cohort_analysis': cohort_analysis,
+            'baseline_pattern': baseline_pattern,
+            'training_cohorts_used': training_cohorts
+        }
+
     def predict_new_cohort(
         self, 
         program: str, 

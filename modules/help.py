@@ -551,54 +551,107 @@ def render():
     
     with tab4:
         st.markdown("""
-        **Purpose**: AI-powered forecasting and optimization for enrollment planning and marketing strategy
+        **Purpose**: Intelligent marketing insights with three focused analysis tools for data-driven decision making
         
         **Best For**:
-        - Predicting future inquiries, applications, and enrollments
-        - Optimizing marketing channel allocation
-        - Identifying best months for marketing campaigns
-        - Data-driven budget planning
-        - Tracking model accuracy over time
+        - Identifying top-performing marketing channels with ROI forecasting
+        - Discovering optimal timing for channel investments with seasonal intelligence
+        - Getting data-driven budget distribution recommendations
+        - Making strategic marketing decisions based on effectiveness data
         
-        **Five Analysis Tabs**:
+        **Three Analysis Sub-Tabs**:
         
-        **1. Forecasting**
-        - Time Series Predictions: Forecast inquiries, applications, and enrollments
-        - Confidence Intervals: 95% confidence ranges for all predictions
-        - Model Selection: Automatic selection of best model (Prophet, ARIMA, Linear Regression)
-        - Forecast Horizons: 3, 6, 9, 12, 18, or 24 months ahead
-        - Interactive Charts: Visualize historical data and future predictions
+        **1. Channel Performance**
+        - **Investment Filters**: Set monthly investment amount ($1,000-$50,000) and duration (1-12 months)
+        - **Top 3 Channel Forecasts**: Clean white cards showing:
+          - Channel ranking by effectiveness (#1, #2, #3)
+          - Monthly forecast, total forecast, ROI, and confidence percentage
+          - Color-coded recommendations (Recommended/Consider/Caution)
+        - **Channel Comparison Table**: Complete performance breakdown with efficiency, effectiveness scores, and ratings
+        - **Professional Layout**: Everything contained within clean white tiles with subtle shadows
         
-        **2. Channel Optimization**
-        - ROI Analysis: Identify most effective marketing channels
-        - Effectiveness Scores: Composite metrics combining ROI, conversion rate, consistency
-        - Performance History: Track channel performance over time
-        - Recommendations: Top channels ranked by effectiveness
-        - Data-Driven Decisions: Allocate budget to highest-performing channels
+        **2. Timing Intelligence**
+        - **Channel-Timing Matrix**: Interactive heatmap showing effectiveness by channel and month
+        - **Investment Filters**: Monthly investment amount ($1,000-$25,000) and forecast period (3-12 months)
+        - **Top 5 Opportunities**: Clean white cards displaying:
+          - Channel and month combinations ranked by effectiveness
+          - Seasonal badges (Peak Season, High Season) for optimal timing
+          - Expected outcomes prominently displayed
+          - Investment recommendations with forecasted results
+        - **Seasonal Analysis**: Identifies peak periods (Jan-Mar: 1.2x, Sep-Oct: 1.1x multipliers)
         
-        **3. Timing Analysis**
-        - Seasonal Patterns: Identify optimal months for marketing investments
-        - Conversion Heatmap: Visualize patterns across years and months
-        - Timing Recommendations: Ranked months by effectiveness
-        - Consistency Scores: Reliability of seasonal patterns
-        - Campaign Planning: Schedule marketing in high-conversion months
+        **3. Budget Allocation**
+        - **Budget Filters**: Total budget ($5,000-$500,000) and planning period (3-12 months)
+        - **Single Generate Button**: "Generate Budget Allocation" creates optimized recommendations
+        - **Results Display**: After generation shows:
+          - Summary metrics (Total Allocated, Expected Outcomes, Average ROI)
+          - Detailed allocation table by channel and best month
+          - Key recommendations with strategic insights
+        - **Optimization Logic**: Budget distributed proportionally based on effectiveness scores
         
-        **4. Budget Allocation**
-        - Optimization: Data-driven budget distribution across programs
-        - Expected Outcomes: Predicted inquiries, applications, enrollments
-        - Sensitivity Analysis: Impact of budget changes on outcomes
-        - Constraint Management: Set minimum/maximum allocations per program
-        - What-If Scenarios: Test different budget distributions
+        **Key Features**:
+        - **Clean Interface**: Streamlined design with direct access to filters and functionality
+        - **Professional Cards**: White tiles with subtle shadows, no borders, everything contained within
+        - **Effectiveness Scoring**: Composite metrics combining efficiency, consistency, and attribution
+        - **Real-time Analysis**: Recommendations update instantly when filters change
+        - **Seasonal Intelligence**: Automatic detection of peak performance periods
+        - **ROI Forecasting**: Expected return calculations with confidence levels
         
-        **5. Model Performance**
-        - Accuracy Tracking: Monitor prediction accuracy over time
-        - Model Health: Status indicators (Healthy, Warning, Needs Retraining)
-        - Trend Analysis: Identify performance degradation
-        - Multiple Models: Compare Prophet, ARIMA, and Linear Regression
-        - Metrics: MAPE (Mean Absolute Percentage Error), RMSE, MAE
+        **How to Use Each Sub-Tab**:
         
-        **Pro Tip**: Use at least 12 months of historical data for reliable forecasts and review model performance monthly!
+        **Channel Performance Workflow**:
+        1. Set your monthly investment amount and duration
+        2. Review the top 3 channels in clean white cards
+        3. Compare metrics: forecast, ROI, confidence, and recommendations
+        4. Analyze the comprehensive comparison table
+        5. Focus budget on "Recommended" channels with high effectiveness scores
+        
+        **Timing Intelligence Workflow**:
+        1. Analyze the heatmap to identify green cells (high effectiveness periods)
+        2. Set investment parameters for timing analysis
+        3. Review top 5 month-channel opportunities in white cards
+        4. Note seasonal indicators and expected outcomes
+        5. Schedule campaigns during peak effectiveness periods
+        
+        **Budget Allocation Workflow**:
+        1. Enter total marketing budget and planning timeframe
+        2. Click "Generate Budget Allocation" for optimization
+        3. Review summary metrics and allocation breakdown
+        4. Read key recommendations for strategic insights
+        5. Implement data-driven budget distribution
+        
+        **Understanding the Metrics**:
+        - **Effectiveness Score**: Composite metric (0-1 scale) combining efficiency and consistency
+        - **ROI**: Expected return multiplier (>2.0x excellent, 1.5-2.0x good, <1.0x below breakeven)
+        - **Confidence**: Prediction reliability (70-100% high, 50-70% moderate, <50% lower)
+        - **Seasonal Multipliers**: Peak Season (1.2x), High Season (1.1x), Standard (1.0x)
+        
+        **Data Requirements**:
+        - **Minimum**: 6+ months of admissions and marketing data with overlapping periods
+        - **Optimal**: 12+ months for better seasonal pattern detection
+        - **Quality**: Complete records across all channels and months for reliable insights
+        
+        **Best Practices**:
+        - **Channel Performance**: Focus on channels with high consistency scores, test different investment scenarios
+        - **Timing Intelligence**: Plan campaigns 2-3 months in advance, allocate extra budget to peak seasons
+        - **Budget Allocation**: Run multiple scenarios, align with strategic priorities, update quarterly
+        - **General**: Combine insights from all three tools for comprehensive marketing strategy
+        
+        **Professional Interface Design**:
+        - **No Unnecessary Titles**: Direct access to functionality without space-wasting headers
+        - **Clean White Cards**: All information contained within professional tiles
+        - **Subtle Shadows**: Modern design with depth but no borders
+        - **Consistent Styling**: Maroon color scheme (#500000) throughout
+        - **Responsive Layout**: Works seamlessly across desktop and mobile devices
+        
+        **Pro Tips**:
+        - Use Channel Performance to identify your best channels, then use Timing Intelligence to optimize when to invest in them
+        - Combine seasonal insights with channel effectiveness for maximum impact
+        - Test Budget Allocation scenarios with different total budgets to understand sensitivity
+        - Track actual vs. predicted outcomes to validate model accuracy
+        - Review and update recommendations monthly as new data becomes available
         """)
+    
     
     with tab5:
         st.markdown("""
@@ -712,14 +765,14 @@ def render():
             </ol>
         </div>
         <div style="background: #f8f0ff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
-            <h4 style="color: #500000; margin: 0 0 15px 0;">Enrollment Forecasting</h4>
+            <h4 style="color: #500000; margin: 0 0 15px 0;">Marketing Intelligence</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Open <strong>Predictive Analytics</strong></li>
-                <li>Select program and metric</li>
-                <li>Choose forecast horizon</li>
-                <li>Generate predictions</li>
-                <li>Review confidence intervals</li>
-                <li>Export forecast data</li>
+                <li>Review Channel Performance cards</li>
+                <li>Analyze Timing Intelligence matrix</li>
+                <li>Generate Budget Allocation</li>
+                <li>Review ROI forecasts</li>
+                <li>Export recommendations</li>
             </ol>
         </div>
         <div style="background: #f0fff0; padding: 20px; border-radius: 8px; display: flex; flex-direction: column;">
@@ -748,9 +801,9 @@ def render():
             <h4 style="color: #500000; margin: 0 0 15px 0;">Marketing Optimization</h4>
             <ol style="font-size: 14px; line-height: 1.8; color: #495057; flex: 1;">
                 <li>Open <strong>Predictive Analytics</strong></li>
-                <li>Go to Channel Optimization</li>
-                <li>Review effectiveness scores</li>
-                <li>Check Timing Analysis</li>
+                <li>Go to Channel Performance</li>
+                <li>Review top 3 channel forecasts</li>
+                <li>Check Timing Intelligence heatmap</li>
                 <li>Use Budget Allocation tool</li>
                 <li>Implement recommendations</li>
             </ol>
