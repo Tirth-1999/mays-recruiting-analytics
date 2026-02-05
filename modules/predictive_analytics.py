@@ -250,7 +250,7 @@ def render_forecasting_section(preprocessor: DataPreprocessor, conn):
     with st.expander("About Advanced Multi-Metric Forecasting", expanded=False):
         st.markdown("""
         **Enhanced Forecasting System:**
-        - **Same Engine**: Uses our enhanced v8.0 cohort aware forecasting system
+        - **Same Engine**: Uses our enhanced cohort aware forecasting system
         - **ARIMA Components**: Trend, seasonal, and error decomposition
         - **Academic Seasonality**: Built-in understanding of enrollment cycles
         - **Realistic Constraints**: Predictions within 1.5-2x of historical patterns

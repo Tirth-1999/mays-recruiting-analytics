@@ -710,4 +710,4 @@ See the [Technical Guide](TECHNICAL_GUIDE.md) for common issues and solutions.
 
 ---
 
-**Mays Analytics Documentation** | Version 6.8 | Last Updated: February 1, 2026
+**Mays Analytics Documentation** | Version 9.0 | Last Updated: February 4, 2026
