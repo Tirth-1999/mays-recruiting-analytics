@@ -2193,6 +2193,15 @@ def render_channel_performance_subtab(effectiveness_data, results, target_metric
 
 def render_timing_intelligence_subtab(effectiveness_data, results, target_metrics, selected_metric, selected_program):
     """Render the Timing Intelligence sub-tab with professional styling"""
+    # Add month_name column if it doesn't exist (for backward compatibility)
+    if 'month_name' not in effectiveness_data.columns and 'month' in effectiveness_data.columns:
+        month_names = {
+            1: 'January', 2: 'February', 3: 'March', 4: 'April',
+            5: 'May', 6: 'June', 7: 'July', 8: 'August',
+            9: 'September', 10: 'October', 11: 'November', 12: 'December'
+        }
+        effectiveness_data['month_name'] = effectiveness_data['month'].map(month_names)
+    
     # Channel-Timing Effectiveness Matrix - CENTERED with custom background
     st.markdown("""
     <div style='text-align: center; padding: 12px; background: #f8f9fa; 
@@ -2202,7 +2211,13 @@ def render_timing_intelligence_subtab(effectiveness_data, results, target_metric
     """, unsafe_allow_html=True)
     
     # Create heatmap for channel-timing effectiveness (FIX NaN VALUES)
-    pivot_data = effectiveness_data.pivot(index='channel', columns='month_name', values='effectiveness_score')
+    # Use pivot_table with mean aggregation to handle duplicate channel-month combinations
+    pivot_data = effectiveness_data.pivot_table(
+        index='channel', 
+        columns='month_name', 
+        values='effectiveness_score',
+        aggfunc='mean'
+    )
     
     # Reorder months chronologically
     month_order = ['January', 'February', 'March', 'April', 'May', 'June',
