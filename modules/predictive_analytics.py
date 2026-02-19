@@ -2212,6 +2212,7 @@ def render_timing_intelligence_subtab(effectiveness_data, results, target_metric
     
     # Create heatmap for channel-timing effectiveness (FIX NaN VALUES)
     # Use pivot_table with mean aggregation to handle duplicate channel-month combinations
+    # This prevents "Index contains duplicate entries" error
     pivot_data = effectiveness_data.pivot_table(
         index='channel', 
         columns='month_name', 
