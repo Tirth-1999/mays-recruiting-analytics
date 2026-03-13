@@ -484,10 +484,107 @@ Use this checklist when adding a new snapshot:
 - [ ] Validated latest snapshot date in database
 - [ ] Spot-checked key metrics against Excel file
 - [ ] Removed old snapshot file (moved to archive)
-- [ ] Tested dashboard (all pages load correctly)
+- [ ] Tested dashboard locally (all pages load correctly)
 - [ ] Updated README.md data coverage section
 - [ ] Updated CHANGELOG.md with data refresh entry
 - [ ] Documented changes in backup log
+- [ ] **DEPLOYED TO STREAMLIT CLOUD:**
+  - [ ] Force added database: `git add -f edulytix.db`
+  - [ ] Committed database with descriptive message
+  - [ ] Pushed to GitHub: `git push origin main`
+  - [ ] Rebooted Streamlit Cloud app
+  - [ ] Verified production app shows new data
+
+---
+
+## Deploying to Streamlit Cloud
+
+**CRITICAL:** After updating the database locally, you MUST push it to GitHub and reboot the Streamlit Cloud app for changes to appear in production.
+
+### Why This is Necessary
+
+The database file (`edulytix.db`) is in `.gitignore` by default, which means it won't be pushed to GitHub automatically. Your Streamlit Cloud deployment will continue using the OLD database until you explicitly update it.
+
+### Step-by-Step Deployment Process
+
+**Step 1: Force Add the Database to Git**
+```bash
+# Force add the database (overrides .gitignore)
+git add -f edulytix.db
+```
+
+**Step 2: Commit the Database**
+```bash
+git commit -m "data: Update database with [Month Year] snapshot for Class [YYYY]
+
+- Added [Month Year] data for all programs
+- Class [YYYY] now has data through [Date]
+- Total: [X] admissions records across [Y] programs and [Z] cohorts"
+```
+
+**Example:**
+```bash
+git commit -m "data: Update database with Feb 2026 snapshot for Class 2028
+
+- Added Feb 2026 data for all programs
+- Class 2028 now has data through Feb 28, 2026
+- Total: 2,059 admissions records across 6 programs and 3 cohorts"
+```
+
+**Step 3: Push to GitHub**
+```bash
+git push origin main
+```
+
+**Step 4: Reboot Streamlit Cloud App**
+1. Go to https://share.streamlit.io/
+2. Find your app (mays-recruiting-analytics)
+3. Click the **⋮** (three dots menu)
+4. Click **"Reboot app"**
+5. Wait 2-3 minutes for the reboot to complete
+
+**Step 5: Verify Deployment**
+1. Open your Streamlit Cloud app URL
+2. Navigate to Executive Dashboard
+3. Check that Class 2028 shows the latest data
+4. Verify the date range matches your new snapshot
+
+### Troubleshooting Deployment Issues
+
+**Issue: App still shows old data after reboot**
+- Clear your browser cache (Ctrl+Shift+R or Cmd+Shift+R)
+- Check GitHub to confirm the database file was pushed (check file size and commit date)
+- Try rebooting the app again
+
+**Issue: App fails to start after database update**
+- Check Streamlit Cloud logs for errors
+- Verify the database file is not corrupted (test locally first)
+- Ensure the database schema matches what the app expects
+
+**Issue: Database file too large for GitHub**
+- GitHub has a 100MB file size limit
+- If your database exceeds this, consider:
+  - Using Git LFS (Large File Storage)
+  - Hosting the database elsewhere (AWS S3, Google Cloud Storage)
+  - Archiving old data and keeping only recent snapshots
+
+### Important Notes
+
+⚠️ **Always test locally before deploying to production**
+- Run the ETL pipeline locally
+- Test the dashboard thoroughly
+- Verify all data looks correct
+- Only then push to GitHub and reboot Streamlit Cloud
+
+⚠️ **Database updates are NOT automatic**
+- Unlike code changes, database updates require manual deployment
+- Remember to force add (`git add -f`) the database file
+- Don't forget to reboot the Streamlit Cloud app
+
+⚠️ **Keep track of deployments**
+- Document when you deployed database updates
+- Note which snapshot version is in production
+- Keep a log of deployment dates for reference
 
 ---
 
