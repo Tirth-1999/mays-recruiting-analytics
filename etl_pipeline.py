@@ -55,17 +55,19 @@ def parse_filename_cohort(file_path: str):
         'MBS-Flex-Online-Admissions-2024-07-31_fall.xlsx': 2026,  # Class 2026 (completed)
         'MBS-Flex-Online-Admissions-2025-07-31_fall.xlsx': 2027,  # Class 2027 (in progress)
         'MBS-Flex-Online-Admissions-2025-12-31_fall.xlsx': 2028,  # Class 2028 (early stage - OLD)
-        'MBS-Flex-Online-Admissions-2026-01-31_fall.xlsx': 2028   # Class 2028 (updated Jan 2026)
+        'MBS-Flex-Online-Admissions-2026-01-31_fall.xlsx': 2028,  # Class 2028 (updated Jan 2026 - OLD)
+        'MBS-Flex-Online-Admissions-2026-02-28.xlsx': 2028        # Class 2028 (updated Feb 2026 - CURRENT)
     }
     
     if filename in file_cohort_map:
         cohort_year = file_cohort_map[filename]
         
         # Extract year and season from filename for consistency
-        match = re.search(r'(\d{4})-(\d{2})-(\d{2})_(fall|spring)\.xlsx', filename)
+        # Handle both formats: YYYY-MM-DD_fall.xlsx and YYYY-MM-DD.xlsx
+        match = re.search(r'(\d{4})-(\d{2})-(\d{2})(?:_(fall|spring))?\.xlsx', filename)
         if match:
             start_year = int(match.group(1))
-            season = match.group(4)
+            season = match.group(4) if match.group(4) else 'fall'  # Default to fall if not specified
             logger.info(f"Parsed {filename}: Start {start_year}, Season {season}, Cohort {cohort_year}")
             return start_year, season, cohort_year
     
@@ -366,7 +368,7 @@ def load_all_data():
         dataset_files = [
             'Dataset/MBS-Flex-Online-Admissions-2024-07-31_fall.xlsx',  # Class 2026
             'Dataset/MBS-Flex-Online-Admissions-2025-07-31_fall.xlsx',  # Class 2027
-            'Dataset/MBS-Flex-Online-Admissions-2026-01-31_fall.xlsx'   # Class 2028 (updated Jan 2026)
+            'Dataset/MBS-Flex-Online-Admissions-2026-02-28.xlsx'        # Class 2028 (updated Feb 2026)
         ]
         
         all_records = []
