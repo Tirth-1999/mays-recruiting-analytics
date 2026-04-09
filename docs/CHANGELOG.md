@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.1.0] - 2026-04-09
+
+### 🔧 Minor Release - March 2026 Data Snapshot Update & Marketing Intelligence Fixes
+
+#### Added
+- **`enhanced_marketing_intelligence.py`**: Recreated missing module containing `MarketingIntelligenceEngine` class with:
+  - `load_data()` - loads marketing and admissions data aligned to actual DB schema
+  - `analyze_channel_timing_effectiveness()` - 60-day attribution window analysis
+  - `forecast_channel_roi()` - ROI forecasting with confidence levels
+  - `optimize_budget_allocation()` - proportional budget distribution by effectiveness
+  - `get_timing_recommendations()` - top 5 seasonal timing opportunities
+
+#### Changed
+- **ETL Pipeline**: Updated `dataset_files` list to use `MBS-Flex-Online-Admissions-2026-03-31.xlsx` for Class 2028
+- **ETL Filename Map**: Added `2026-03-31` entry and marked `2026-02-28` as OLD in `file_cohort_map`
+- **Class 2028 Data**: 570 February snapshot records removed, 684 March snapshot records loaded
+- **Data Coverage**: Class 2028 now current through March 31, 2026 (was February 28, 2026)
+
+#### Fixed
+- **Module Import Error**: `No module named 'enhanced_marketing_intelligence'` resolved by recreating the file
+- **Schema Mismatch**: Fixed column references from `month`/`total_spend` to `month_date`/`spend_amount`
+- **KeyError `month_name`**: Added `month_name` column generation in `analyze_channel_timing_effectiveness()`
+- **Cached Session State**: Added backward-compatible `month_name` fallback in `render_timing_intelligence_subtab()`
+- **Long format admissions data**: Fixed query to pivot `metric_name`/`metric_value` to wide format correctly
+
+#### Technical Implementation
+- **Zero duplicates**: Verified with `HAVING COUNT(*) > 1` query - clean dataset confirmed
+- **Data integrity**: 2,173 total records across 3 cohorts (535 / 954 / 684), 6 programs
+- **ETL validation**: All 6 programs show clean Oct 2025 → Mar 2026 progression for Class 2028
+
+---
+
 ## [9.0.0] - 2026-02-04
 
 ### 🎨 Major Release - Professional Marketing Intelligence Platform
@@ -474,6 +506,8 @@ Feb 2026  ░░░░░░░░░░░░░░░░░░░░░░░�
 Feb 2026  ████████████████████████████  v8.0 - Enhanced Cohort-Aware Forecasting
           │
 Feb 2026  ████████████████████████████  v9.0 - Professional Marketing Intelligence Platform
+          │
+Apr 2026  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  v9.1 - March 2026 Data Snapshot Update
 ```
 
 ---
@@ -482,6 +516,7 @@ Feb 2026  ███████████████████████�
 
 | Version | Type | Key Achievement | Files Changed | Lines Added |
 |---------|------|----------------|---------------|-------------|
+| **9.1** | Minor | March 2026 Data Snapshot Update & Marketing Intelligence Fixes | 5 | +250 |
 | **9.0** | Major | Professional Marketing Intelligence Platform | 8 | +2,697 |
 | **8.0** | Major | Enhanced Cohort-Aware Forecasting | 5 | +850 |
 | **7.5** | Minor | Professional UI Enhancement | 3 | +75 |
