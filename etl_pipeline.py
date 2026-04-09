@@ -56,7 +56,8 @@ def parse_filename_cohort(file_path: str):
         'MBS-Flex-Online-Admissions-2025-07-31_fall.xlsx': 2027,  # Class 2027 (in progress)
         'MBS-Flex-Online-Admissions-2025-12-31_fall.xlsx': 2028,  # Class 2028 (early stage - OLD)
         'MBS-Flex-Online-Admissions-2026-01-31_fall.xlsx': 2028,  # Class 2028 (updated Jan 2026 - OLD)
-        'MBS-Flex-Online-Admissions-2026-02-28.xlsx': 2028        # Class 2028 (updated Feb 2026 - CURRENT)
+        'MBS-Flex-Online-Admissions-2026-02-28.xlsx': 2028,       # Class 2028 (updated Feb 2026 - OLD)
+        'MBS-Flex-Online-Admissions-2026-03-31.xlsx': 2028        # Class 2028 (updated Mar 2026 - CURRENT)
     }
     
     if filename in file_cohort_map:
@@ -368,7 +369,7 @@ def load_all_data():
         dataset_files = [
             'Dataset/MBS-Flex-Online-Admissions-2024-07-31_fall.xlsx',  # Class 2026
             'Dataset/MBS-Flex-Online-Admissions-2025-07-31_fall.xlsx',  # Class 2027
-            'Dataset/MBS-Flex-Online-Admissions-2026-02-28.xlsx'        # Class 2028 (updated Feb 2026)
+            'Dataset/MBS-Flex-Online-Admissions-2026-03-31.xlsx'        # Class 2028 (updated Mar 2026)
         ]
         
         all_records = []
